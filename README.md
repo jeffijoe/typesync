@@ -11,7 +11,7 @@ Install missing TypeScript typings for dependencies in your `package.json`.
 [![npm](https://img.shields.io/npm/l/typesync.svg?maxAge=1000)](https://github.com/jeffijoe/typesync/blob/master/LICENSE.md)
 [![node](https://img.shields.io/node/v/typesync.svg?maxAge=1000)](https://www.npmjs.com/package/typesync)
 
-[TypeSync](/typesync.gif)
+![TypeSync](/typesync.gif)
 
 # Install
 
