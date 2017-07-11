@@ -44,3 +44,11 @@ export function filterMap <T, R>(
 export function mergeObjects<T> (source: Array<T>): T {
   return source.reduce((accum: any, next: any) => ({ ...accum, ...next }), {})
 }
+
+/**
+ * Returns the assumed types package name.
+ * @param name Package name
+ */
+export function typed (name: string, urlEncode = false): string {
+  return `@types${urlEncode ? '%2F' : '/'}${name}`
+}

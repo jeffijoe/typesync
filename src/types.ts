@@ -2,7 +2,17 @@
  * The guts of the program.
  */
 export interface ITypeSyncer {
-  sync (filePath: string): Promise<ISyncResult>
+  sync (filePath: string, opts?: ISyncOptions): Promise<ISyncResult>
+}
+
+/**
+ * Sync options.
+ */
+export interface ISyncOptions {
+  /**
+   * If set, will not write to package.json.
+   */
+  dry?: boolean
 }
 
 /**
@@ -55,7 +65,6 @@ export interface IDependenciesSection {
  */
 export interface ITypeDefinition {
   typingsName: string
-  packageName: string
 }
 
 /**
@@ -66,4 +75,12 @@ export interface ISyncResult {
    * How many new typings were added.
    */
   newTypings: Array<ITypeDefinition>
+}
+
+/**
+ * CLI arguments.
+ */
+export interface ICLIArguments {
+  flags: { [key: string]: boolean | undefined }
+  args: Array<string>
 }

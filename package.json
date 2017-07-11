@@ -36,6 +36,7 @@
   "homepage": "https://github.com/jeffijoe/typesync#readme",
   "devDependencies": {
     "@types/chalk": "^0.4.31",
+    "@types/detect-indent": "^0.1.30",
     "@types/jest": "^20.0.2",
     "@types/node": "^8.0.7",
     "coveralls": "^2.13.1",
@@ -50,6 +51,13 @@
   "jest": {
     "testEnvironment": "node",
     "mapCoverage": true,
+    "collectCoverageFrom": [
+      "src/**",
+      "!src/cli-util.ts",
+      "!src/cli.ts",
+      "!src/fakes.ts",
+      "!src/types.ts"
+    ],
     "coveragePathIgnorePatterns": [
       "/node_modules/"
     ],
@@ -67,7 +75,9 @@
     "awilix": "^2.5.0",
     "axios": "^0.16.2",
     "chalk": "^2.0.1",
+    "detect-indent": "^5.0.0",
     "ora": "^1.3.0",
-    "tslib": "^1.7.1"
+    "tslib": "^1.7.1",
+    "lodash": "4.17.4"
   }
 }

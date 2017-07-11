@@ -8,19 +8,14 @@ import {
 import { createTypeSyncer } from '../type-syncer'
 
 const typedefs: ITypeDefinition[] = [{
-  packageName: 'package1',
   typingsName: 'package1'
 }, {
-  packageName: 'package2',
   typingsName: 'package2'
 }, {
-  packageName: 'package3',
-  typingsName: 'packagethree'
+  typingsName: 'package3'
 }, {
-  packageName: 'package4',
   typingsName: 'package4'
 }, {
-  packageName: 'package5',
   typingsName: 'package5'
 }]
 
@@ -64,12 +59,18 @@ describe('type syncer', () => {
     const writtenPackage = (packageService.writePackageFile as jest.Mock<any>).mock.calls[0][1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package1': '^1.0.0',
-      '@types/packagethree': '^1.0.0',
+      '@types/package3': '^1.0.0',
       '@types/package4': '^1.0.0',
       '@types/package5': '^1.0.0',
       package4: '^1.0.0',
       package5: '^1.0.0'
     })
-    expect(result.newTypings.map(x => x.packageName).sort()).toEqual(['package1', 'package3', 'package5'])
+    expect(result.newTypings.map(x => x.typingsName).sort()).toEqual(['package1', 'package3', 'package5'])
+  })
+
+  it('does not write packages if options.dry is specified', async () => {
+    const { syncer, packageService, typedefSource } = buildSyncer()
+    const result = await syncer.sync('package.json', { dry: true })
+    expect((packageService.writePackageFile as jest.Mock<any>)).not.toBeCalled()
   })
 })

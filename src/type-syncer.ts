@@ -3,9 +3,11 @@ import {
   ISyncResult,
   IPackageJSONService,
   ITypeDefinitionSource,
-  ITypeDefinition
+  ITypeDefinition,
+  IPackageFile,
+  ISyncOptions
 } from './types'
-import { uniq, filterMap, mergeObjects } from './util'
+import { uniq, filterMap, mergeObjects, typed } from './util'
 
 /**
  * Creates a type syncer.
@@ -14,26 +16,25 @@ import { uniq, filterMap, mergeObjects } from './util'
  * @param typeDefinitionSource
  */
 export function createTypeSyncer (
-  packageJSONservice: IPackageJSONService,
+  packageJSONService: IPackageJSONService,
   typeDefinitionSource: ITypeDefinitionSource
 ): ITypeSyncer {
   return {
     /**
      * Syncs typings in the specified package.json.
      */
-    sync: async (filePath) => {
+    sync: async (filePath, opts: ISyncOptions = { dry: false }) => {
       const [file, allTypings] = await Promise.all([
-        packageJSONservice.readPackageFile(filePath),
+        packageJSONService.readPackageFile(filePath),
         typeDefinitionSource.fetch()
       ])
 
       const allPackageNames = uniq([
-        ...file.dependencies && Object.keys(file.dependencies) || [],
-        ...file.devDependencies && Object.keys(file.devDependencies) || []
+        ...file.dependencies && Object.keys(file.dependencies) /* istanbul ignore next*/ || [],
+        ...file.devDependencies && Object.keys(file.devDependencies) /* istanbul ignore next*/ || []
       ])
 
       const newTypings = filterNewTypings(allPackageNames, allTypings)
-
       const devDepsToAdd = await Promise.all(
         newTypings.map(async t => {
           const latestVersion = await typeDefinitionSource.getLatestTypingsVersion(t.typingsName)
@@ -42,13 +43,15 @@ export function createTypeSyncer (
       )
         .then(mergeObjects)
 
-      await packageJSONservice.writePackageFile(filePath, {
-        ...file,
-        devDependencies: {
-          ...file.devDependencies,
-          ...devDepsToAdd
-        }
-      })
+      if (!opts.dry) {
+        await packageJSONService.writePackageFile(filePath, {
+          ...file,
+          devDependencies: {
+            ...file.devDependencies,
+            ...devDepsToAdd
+          }
+        } as IPackageFile)
+      }
 
       return {
         newTypings
@@ -69,7 +72,7 @@ function filterNewTypings (
 ): Array<ITypeDefinition> {
   const existingTypings = allPackageNames.filter(x => x.startsWith('@types/'))
   return filterMap(allPackageNames, p => {
-    const typingsForPackage = allTypings.find(x => x.packageName === p)
+    const typingsForPackage = allTypings.find(x => x.typingsName === p)
     if (!typingsForPackage) {
       // No typings available.
       return false
@@ -83,12 +86,4 @@ function filterNewTypings (
 
     return typingsForPackage
   })
-}
-
-/**
- * Returns the assumed types package name.
- * @param name Package name
- */
-function typed (name: string): string {
-  return `@types/${name}`
 }
