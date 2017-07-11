@@ -21,7 +21,7 @@ export function uniq<T> (source: Array<T>): Array<T> {
  * @param source The source to filter and map
  * @param iteratee The iteratee.
  */
-export function filterMap <T, R>(
+export function filterMap <T, R> (
   source: Array<T>,
   iteratee: (item: T, index: number) => R | false
 ): Array<R> {

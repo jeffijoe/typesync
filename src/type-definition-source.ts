@@ -9,8 +9,14 @@ const npmClient = axios.create({
   baseURL: 'https://registry.npmjs.org'
 })
 
-export function createTypeDefinitionSource(): ITypeDefinitionSource {
+/**
+ * Used to pull definitions.
+ */
+export function createTypeDefinitionSource (): ITypeDefinitionSource {
   return {
+    /**
+     * Fetches available type defs.
+     */
     fetch: () => {
       return axios
         .get(typedefsUrl, {
@@ -23,6 +29,9 @@ export function createTypeDefinitionSource(): ITypeDefinitionSource {
           }))
         )
     },
+    /**
+     * Gets the latest version of a typings package.
+     */
     getLatestTypingsVersion: (typingsPackageName: string) => {
       return npmClient
         .get(`${typed(typingsPackageName, true)}`)
@@ -31,7 +40,11 @@ export function createTypeDefinitionSource(): ITypeDefinitionSource {
   }
 }
 
-function unzipResponse(response: AxiosResponse) {
+/**
+ * Unzips a gzip-encoded response.
+ * @param response
+ */
+function unzipResponse (response: AxiosResponse) {
   return new Promise<Array<any>>(resolve => {
     const unzip = zlip.createGunzip()
     let json = ''

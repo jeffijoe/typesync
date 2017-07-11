@@ -12,7 +12,7 @@ import { createPackageJSONFileService } from './package-json-file-service'
 /**
  * Starts the TypeSync CLI.
  */
-export async function startCli() {
+export async function startCli () {
   try {
     // Awilix is a dependency injection container.
     const container = createContainer({
