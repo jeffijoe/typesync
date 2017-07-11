@@ -29,6 +29,8 @@ Path is relative to the current working directory. If omitted, defaults to `pack
 
 If `--dry` is specified, will not actually write to the file, it only prints added typings,
 
+**Note**: `typesync` only modifies your `package.json` - you still need to run `npm install`, or — if drinking the k00laid — `yarn`.
+
 # Why?
 
 Installing typings manually sucks. Flow has `flow-typed` which installs type definitions by looking at a `package.json`, which would be cool to have for TypeScript. Now we do!
