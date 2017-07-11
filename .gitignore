@@ -3,6 +3,7 @@
 # Logs
 logs
 *.log
+.DS_Store
 
 # Coverage directory used by tools like istanbul
 coverage
