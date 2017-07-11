@@ -1,0 +1,70 @@
+{
+  "name": "typesync",
+  "version": "0.0.0",
+  "description": "Install missing TypeScript typings for your dependencies.",
+  "files": [
+    "lib",
+    "bin"
+  ],
+  "bin": {
+    "typesync": "./bin/typesync"
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "clean": "rimraf lib",
+    "test": "jest",
+    "lint": "tslint 'src/**/*.ts'",
+    "lint:watch": "nodemon --exec npm run lint -e ts,js",
+    "cover": "jest --coverage",
+    "build": "rimraf lib && tsc -p tsconfig.build.json --sourceMap --declaration",
+    "run-cli": "npm run build && node bin/typesync",
+    "do:publish": "npm run lint && npm run cover && npm run build && npm publish",
+    "release:patch": "npm version patch && npm run do:publish && git push --follow-tags",
+    "release:minor": "npm version minor && npm run do:publish && git push --follow-tags",
+    "release:prerelease": "npm version prerelease && npm run do:publish && git push --follow-tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeffijoe/typesync.git"
+  },
+  "author": "Jeff Hansen <jeff@jeffijoe.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jeffijoe/typesync/issues"
+  },
+  "homepage": "https://github.com/jeffijoe/typesync#readme",
+  "devDependencies": {
+    "@types/chalk": "^0.4.31",
+    "@types/jest": "^20.0.2",
+    "@types/node": "^8.0.7",
+    "jest": "^20.0.4",
+    "nodemon": "^1.11.0",
+    "rimraf": "^2.6.1",
+    "ts-jest": "^20.0.6",
+    "tslint": "^5.4.3",
+    "tslint-config-standard": "^6.0.1",
+    "typescript": "^2.4.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "mapCoverage": true,
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
+  },
+  "dependencies": {
+    "awilix": "^2.5.0",
+    "chalk": "^2.0.1",
+    "ora": "^1.3.0",
+    "tslib": "^1.7.1"
+  }
+}

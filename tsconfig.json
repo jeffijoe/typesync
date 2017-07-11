@@ -1,0 +1,17 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es5",
+    "outDir": "lib",
+    "strictNullChecks": true,
+    "noEmitHelpers": true,
+    "importHelpers": true,
+    "noImplicitAny": true,
+    "lib": [
+      "es2015",
+      "es2016"
+    ]
+  }
+}
