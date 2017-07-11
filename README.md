@@ -11,6 +11,8 @@ Install missing TypeScript typings for dependencies in your `package.json`.
 [![npm](https://img.shields.io/npm/l/typesync.svg?maxAge=1000)](https://github.com/jeffijoe/typesync/blob/master/LICENSE.md)
 [![node](https://img.shields.io/node/v/typesync.svg?maxAge=1000)](https://www.npmjs.com/package/typesync)
 
+[TypeSync](/typesync.gif)
+
 # Install
 
 ```
@@ -20,14 +22,16 @@ npm install -g typesync
 # Usage
 
 ```
-typesync [path/to/package.json]
+typesync [path/to/package.json] [--dry]
 ```
 
 Path is relative to the current working directory. If omitted, defaults to `package.json`.
 
+If `--dry` is specified, will not actually write to the file, it only prints added typings,
+
 # Why?
 
-Installing typings manually sucks. Flow has `flow-typed` which installs type definitions by looking at a `package.json`, which would be cool to have for TypeScript.
+Installing typings manually sucks. Flow has `flow-typed` which installs type definitions by looking at a `package.json`, which would be cool to have for TypeScript. Now we do!
 
 # Author
 
