@@ -1,4 +1,4 @@
-import { uniq, filterMap, mergeObjects } from '../util'
+import { uniq, filterMap, mergeObjects, orderObject } from '../util'
 
 describe('util', () => {
   describe('uniq', () => {
@@ -21,6 +21,16 @@ describe('util', () => {
       expect(mergeObjects(
         [{ a: 1 }, { b: 2 }, { a: 3 }, { c: 4 }]
       )).toEqual({ a: 3, b: 2, c: 4 })
+    })
+  })
+
+  describe('orderObject', () => {
+    it('orders the object', () => {
+      const source = { b: true, a: true, d: true, c: true }
+      const sourceKeys = Object.keys(source)
+      const result = orderObject(source)
+      const resultKeys = Object.keys(result)
+      expect(resultKeys).toEqual(['a', 'b', 'c', 'd'])
     })
   })
 })

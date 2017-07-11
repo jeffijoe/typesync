@@ -7,7 +7,7 @@ import {
   IPackageFile,
   ISyncOptions
 } from './types'
-import { uniq, filterMap, mergeObjects, typed } from './util'
+import { uniq, filterMap, mergeObjects, typed, orderObject } from './util'
 
 /**
  * Creates a type syncer.
@@ -46,10 +46,10 @@ export function createTypeSyncer (
       if (!opts.dry) {
         await packageJSONService.writePackageFile(filePath, {
           ...file,
-          devDependencies: {
-            ...file.devDependencies,
-            ...devDepsToAdd
-          }
+          devDependencies: orderObject({
+            ...devDepsToAdd,
+            ...file.devDependencies
+          })
         } as IPackageFile)
       }
 

@@ -52,3 +52,17 @@ export function mergeObjects<T> (source: Array<T>): T {
 export function typed (name: string, urlEncode = false): string {
   return `@types${urlEncode ? '%2F' : '/'}${name}`
 }
+
+/**
+ * Orders an object.
+ * @param source
+ */
+export function orderObject<T> (source: T): T {
+  const keys = Object.keys(source).sort()
+  const result: any = {}
+  for (const key of keys) {
+    result[key] = (source as any)[key]
+  }
+
+  return result as T
+}
