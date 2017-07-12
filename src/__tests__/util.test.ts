@@ -1,4 +1,4 @@
-import { uniq, filterMap, mergeObjects, orderObject } from '../util'
+import { uniq, filterMap, mergeObjects, orderObject, promisify } from '../util'
 
 describe('util', () => {
   describe('uniq', () => {
@@ -31,6 +31,36 @@ describe('util', () => {
       const result = orderObject(source)
       const resultKeys = Object.keys(result)
       expect(resultKeys).toEqual(['a', 'b', 'c', 'd'])
+    })
+  })
+
+  describe('promisify', () => {
+    it('resolves when the callback is successful', async () => {
+      const original = (arg1: any, arg2: any, cb: Function) => cb(null, arg1 + arg2)
+      const promisified = promisify(original)
+      const result = await promisified(2, 2)
+      expect(result).toBe(4)
+    })
+
+    it('resolves when the callback is invoked with a single bool argument', async () => {
+      const original = (arg1: any, cb: Function) => cb(arg1)
+      const promisified = promisify(original)
+      const result = await promisified(true)
+      expect(result).toBe(true)
+    })
+
+    it('rejects when the callback is not successful', async () => {
+      const original = (arg1: any, arg2: any, cb: Function) => cb(new Error('oh shit'), null)
+      const promisified = promisify(original)
+      const err = await promisified(2, 2).catch(err => err)
+      expect(err.message).toBe('oh shit')
+    })
+
+    it('rejects when the callback is not successful even if only passed 1 param', async () => {
+      const original = (arg1: any, arg2: any, cb: Function) => cb(new Error('oh shit'))
+      const promisified = promisify(original)
+      const err = await promisified(2, 2).catch(err => err)
+      expect(err.message).toBe('oh shit')
     })
   })
 })

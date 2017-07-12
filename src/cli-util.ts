@@ -24,7 +24,9 @@ export function success (text: string) {
  * @param err
  */
 export function error (err: Error | string) {
-  console.log(`${chalk.red('✖')} ${chalk.bgRed(chalk.white(err instanceof Error ? err.message : err))}`)
+  const msg = err instanceof Error ? err.message : err
+  const stack = err instanceof Error ? `\nStack:\n${err.stack}` : ''
+  console.log(`${chalk.red('✖')} ${chalk.bgRed(chalk.white(msg))}${stack}`)
 }
 
 /**

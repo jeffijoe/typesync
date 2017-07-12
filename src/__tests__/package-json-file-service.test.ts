@@ -2,9 +2,9 @@ import { createPackageJSONFileService } from '../package-json-file-service'
 import * as os from 'os'
 import * as path from 'path'
 import * as fs from 'fs'
-import * as util from 'util'
+import { promisify } from '../util'
 
-const writeFileAsync = util.promisify(fs.writeFile)
+const writeFileAsync = promisify(fs.writeFile)
 
 describe('package json file service', () => {
   const subject = createPackageJSONFileService()

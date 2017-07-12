@@ -1,11 +1,11 @@
 import { IPackageJSONService, IPackageFile } from './types'
 import * as fs from 'fs'
-import * as util from 'util'
+import { promisify } from './util'
 
 const detectIndent = require('detect-indent')
-const existsAsync = util.promisify(fs.exists)
-const readFileAsync = util.promisify(fs.readFile)
-const writeFileAsync = util.promisify(fs.writeFile)
+const existsAsync = promisify(fs.exists)
+const readFileAsync = promisify(fs.readFile)
+const writeFileAsync = promisify(fs.writeFile)
 
 export function createPackageJSONFileService (): IPackageJSONService {
   return {

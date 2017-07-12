@@ -66,3 +66,22 @@ export function orderObject<T> (source: T): T {
 
   return result as T
 }
+
+/**
+ * Promisifies the specified function.
+ *
+ * @param fn
+ */
+export function promisify (fn: Function) {
+  return function promisified (...args: any[]) {
+    return new Promise<any>((resolve, reject) => {
+      fn(...args, function callback (err: any, result: any) {
+        // Edge case with `fs.exists`.
+        if (arguments.length === 1 && typeof err === 'boolean') {
+          return resolve(err)
+        }
+        return !err ? resolve(result) : reject(err)
+      })
+    })
+  }
+}
