@@ -48,7 +48,9 @@ async function _runCli (syncer: ITypeSyncer) {
 
   const formattedTypings = result.newTypings.map(formatPackageName).join('\n')
   C.success(
-    `${result.newTypings.length} typings added:\n` + formattedTypings
+    result.newTypings.length === 0
+      ? `No new typings added, looks like you're all synced up!`
+      : `${result.newTypings.length} typings added:\n` + formattedTypings
   )
 }
 
