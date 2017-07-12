@@ -16,8 +16,11 @@ export function createPackageJSONFileService (): IPackageJSONService {
     writePackageFile: async (filePath, fileContent) => {
       const contents = await readFileContents(filePath)
       const { indent } = detectIndent(contents)
+      const trailingNewline = contents.length
+        ? contents[contents.length - 1] === '\n'
+        : false
       const data = JSON.stringify(fileContent, null, indent /* istanbul ignore next */ || '  ')
-      await writeFileAsync(filePath, data)
+      await writeFileAsync(filePath, data + (trailingNewline ? '\n' : ''))
     }
   }
 }
