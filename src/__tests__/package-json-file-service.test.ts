@@ -67,6 +67,12 @@ describe('package json file service', () => {
       expect(withNewlineContent[withNewlineContent.length - 1]).toBe('\n')
       await cleanup(noNewline, withNewline)
     })
+
+    it('does not fail when writing to an empty file', async () => {
+      const file = path.join(os.tmpdir(), `package-${Math.random()}.json`)
+      await writeFileAsync(file, '')
+      await subject.writePackageFile(file, { name: 'test' })
+    })
   })
 })
 
