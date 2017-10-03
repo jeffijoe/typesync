@@ -55,7 +55,7 @@ async function _runCli (syncer: ITypeSyncer) {
 }
 
 function formatPackageName (t: ITypeDefinition) {
-  return `${chalk.bold.green('+')} ${chalk.gray('@typings/')}${chalk.bold.blue(t.typingsName)}`
+  return `${chalk.bold.green('+')} ${chalk.gray('@types/')}${chalk.bold.blue(t.typingsName)}`
 }
 
 function printHelp () {
