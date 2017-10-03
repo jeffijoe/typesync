@@ -2,6 +2,9 @@
   "name": "typesync",
   "version": "0.2.2",
   "description": "Install missing TypeScript typings for your dependencies.",
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "files": [
     "lib",
     "bin"
