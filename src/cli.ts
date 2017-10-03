@@ -50,12 +50,12 @@ async function _runCli (syncer: ITypeSyncer) {
   C.success(
     result.newTypings.length === 0
       ? `No new typings added, looks like you're all synced up!`
-      : `${result.newTypings.length} typings added:\n` + formattedTypings
+      : (chalk as any)`${result.newTypings.length} typings added:\n${formattedTypings}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
   )
 }
 
 function formatPackageName (t: ITypeDefinition) {
-  return `${chalk.bold.green('+')} ${chalk.gray('@types/')}${chalk.bold.blue(t.typingsName)}`
+  return `${chalk.bold.green('+')}  ${chalk.gray('@types/')}${chalk.bold.blue(t.typingsName)}`
 }
 
 function printHelp () {
