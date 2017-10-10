@@ -12,7 +12,7 @@ import { createPackageJSONFileService } from './package-json-file-service'
 /**
  * Starts the TypeSync CLI.
  */
-export async function startCli () {
+export async function startCli() {
   try {
     // Awilix is a dependency injection container.
     const container = createContainer({
@@ -29,7 +29,7 @@ export async function startCli () {
   }
 }
 
-async function _runCli (syncer: ITypeSyncer) {
+async function _runCli(syncer: ITypeSyncer) {
   const { args, flags } = parseArguments(process.argv.slice(2))
   const [filePath = 'package.json'] = args
   if (flags.help) {
@@ -50,20 +50,25 @@ async function _runCli (syncer: ITypeSyncer) {
   C.success(
     result.newTypings.length === 0
       ? `No new typings added, looks like you're all synced up!`
-      : (chalk as any)`${result.newTypings.length} typings added:\n${formattedTypings}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
+      : (chalk as any)`${result.newTypings
+          .length} typings added:\n${formattedTypings}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
   )
 }
 
-function formatPackageName (t: ITypeDefinition) {
-  return `${chalk.bold.green('+')}  ${chalk.gray('@types/')}${chalk.bold.blue(t.typingsName)}`
+function formatPackageName(t: ITypeDefinition) {
+  return `${chalk.bold.green('+')}  ${chalk.gray('@types/')}${chalk.bold.blue(
+    t.typingsName
+  )}`
 }
 
-function printHelp () {
-  console.log((chalk as any)`
+function printHelp() {
+  console.log(
+    (chalk as any)`
 {blue.bold typesync} - adds missing TypeScript definitions to package.json
 
 Options
   {magenta.bold --dry}      dry run, won't save the package.json
   {magenta.bold --help}     shows this help menu
-  `.trim())
+  `.trim()
+  )
 }

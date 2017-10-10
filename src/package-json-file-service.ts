@@ -7,9 +7,9 @@ const existsAsync = promisify(fs.exists)
 const readFileAsync = promisify(fs.readFile)
 const writeFileAsync = promisify(fs.writeFile)
 
-export function createPackageJSONFileService (): IPackageJSONService {
+export function createPackageJSONFileService(): IPackageJSONService {
   return {
-    readPackageFile: async (filePath) => {
+    readPackageFile: async filePath => {
       const contents = await readFileContents(filePath)
       return JSON.parse(contents) as IPackageFile
     },
@@ -19,18 +19,22 @@ export function createPackageJSONFileService (): IPackageJSONService {
       const trailingNewline = contents.length
         ? contents[contents.length - 1] === '\n'
         : false
-      const data = JSON.stringify(fileContent, null, indent /* istanbul ignore next */ || '  ')
+      const data = JSON.stringify(
+        fileContent,
+        null,
+        indent /* istanbul ignore next */ || '  '
+      )
       await writeFileAsync(filePath, data + (trailingNewline ? '\n' : ''))
     }
   }
 }
 
-async function readFileContents (filePath: string) {
+async function readFileContents(filePath: string) {
   await assertFile(filePath)
   return readFileAsync(filePath, 'utf-8').then((x: Buffer) => x.toString())
 }
 
-async function assertFile (filePath: string) {
+async function assertFile(filePath: string) {
   if (!await existsAsync(filePath)) {
     throw new Error(`${filePath} does not exist.`)
   }

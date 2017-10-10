@@ -2,7 +2,7 @@
  * The guts of the program.
  */
 export interface ITypeSyncer {
-  sync (filePath: string, opts?: ISyncOptions): Promise<ISyncResult>
+  sync(filePath: string, opts?: ISyncOptions): Promise<ISyncResult>
 }
 
 /**
@@ -22,11 +22,11 @@ export interface ITypeDefinitionSource {
   /**
    * Fetches available type definitions.
    */
-  fetch (): Promise<Array<ITypeDefinition>>
+  fetch(): Promise<Array<ITypeDefinition>>
   /**
    * Gets the latest version of the typings for the specified typings package.
    */
-  getLatestTypingsVersion (typingsPackageName: string): Promise<string>
+  getLatestTypingsVersion(typingsPackageName: string): Promise<string>
 }
 
 /**
@@ -36,11 +36,11 @@ export interface IPackageJSONService {
   /**
    * Reads and parses JSON from the specified file. Path is relative to the current working directory.
    */
-  readPackageFile (filePath: string): Promise<IPackageFile>
+  readPackageFile(filePath: string): Promise<IPackageFile>
   /**
    * Writes the JSON to the specified file.
    */
-  writePackageFile (filePath: string, fileContents: IPackageFile): Promise<void>
+  writePackageFile(filePath: string, fileContents: IPackageFile): Promise<void>
 }
 
 /**
@@ -50,6 +50,8 @@ export interface IPackageFile {
   name: string
   dependencies?: IDependenciesSection
   devDependencies?: IDependenciesSection
+  peerDependencies?: IDependenciesSection
+  optionalDependencies?: IDependenciesSection
   [key: string]: any
 }
 

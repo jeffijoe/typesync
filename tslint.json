@@ -1,6 +1,7 @@
 {
   "extends": [
-    "tslint-config-standard"
+    "tslint-config-standard",
+    "tslint-config-prettier"
   ],
   "rules": {
     "semicolon": [
@@ -8,7 +9,7 @@
       "never"
     ],
     "quotemark": [
-      "single"
+      true, "single"
     ],
     "no-var-requires": false,
     "trailing-comma": [false],

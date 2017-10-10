@@ -3,7 +3,7 @@
  *
  * @param source The source to filter
  */
-export function uniq<T> (source: Array<T>): Array<T> {
+export function uniq<T>(source: Array<T>): Array<T> {
   const seen: T[] = []
   for (const s of source) {
     if (seen.includes(s)) {
@@ -21,7 +21,7 @@ export function uniq<T> (source: Array<T>): Array<T> {
  * @param source The source to filter and map
  * @param iteratee The iteratee.
  */
-export function filterMap <T, R> (
+export function filterMap<T, R>(
   source: Array<T>,
   iteratee: (item: T, index: number) => R | false
 ): Array<R> {
@@ -41,7 +41,7 @@ export function filterMap <T, R> (
  *
  * @param source An array of objects to merge.
  */
-export function mergeObjects<T> (source: Array<T>): T {
+export function mergeObjects<T>(source: Array<T>): T {
   return source.reduce((accum: any, next: any) => ({ ...accum, ...next }), {})
 }
 
@@ -49,7 +49,7 @@ export function mergeObjects<T> (source: Array<T>): T {
  * Returns the assumed types package name.
  * @param name Package name
  */
-export function typed (name: string, urlEncode = false): string {
+export function typed(name: string, urlEncode = false): string {
   return `@types${urlEncode ? '%2F' : '/'}${name}`
 }
 
@@ -57,7 +57,7 @@ export function typed (name: string, urlEncode = false): string {
  * Orders an object.
  * @param source
  */
-export function orderObject<T> (source: T): T {
+export function orderObject<T>(source: T): T {
   const keys = Object.keys(source).sort()
   const result: any = {}
   for (const key of keys) {
@@ -72,10 +72,10 @@ export function orderObject<T> (source: T): T {
  *
  * @param fn
  */
-export function promisify (fn: Function) {
-  return function promisified (...args: any[]) {
+export function promisify(fn: Function) {
+  return function promisified(...args: any[]) {
     return new Promise<any>((resolve, reject) => {
-      fn(...args, function callback (err: any, result: any) {
+      fn(...args, function callback(err: any, result: any) {
         // Edge case with `fs.exists`.
         if (arguments.length === 1 && typeof err === 'boolean') {
           return resolve(err)

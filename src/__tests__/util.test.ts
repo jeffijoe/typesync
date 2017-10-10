@@ -9,18 +9,19 @@ describe('util', () => {
 
   describe('filterMap', () => {
     it('filters out false values', () => {
-      expect(filterMap(
-        [1, 2, 3, 4],
-        (item) => item % 2 === 0 ? false : item + 1
-      )).toEqual([2, 4])
+      expect(
+        filterMap([1, 2, 3, 4], item => (item % 2 === 0 ? false : item + 1))
+      ).toEqual([2, 4])
     })
   })
 
   describe('mergeObjects', () => {
     it('merges an array of objects', () => {
-      expect(mergeObjects(
-        [{ a: 1 }, { b: 2 }, { a: 3 }, { c: 4 }]
-      )).toEqual({ a: 3, b: 2, c: 4 })
+      expect(mergeObjects([{ a: 1 }, { b: 2 }, { a: 3 }, { c: 4 }])).toEqual({
+        a: 3,
+        b: 2,
+        c: 4
+      })
     })
   })
 
@@ -36,7 +37,8 @@ describe('util', () => {
 
   describe('promisify', () => {
     it('resolves when the callback is successful', async () => {
-      const original = (arg1: any, arg2: any, cb: Function) => cb(null, arg1 + arg2)
+      const original = (arg1: any, arg2: any, cb: Function) =>
+        cb(null, arg1 + arg2)
       const promisified = promisify(original)
       const result = await promisified(2, 2)
       expect(result).toBe(4)
@@ -50,14 +52,16 @@ describe('util', () => {
     })
 
     it('rejects when the callback is not successful', async () => {
-      const original = (arg1: any, arg2: any, cb: Function) => cb(new Error('oh shit'), null)
+      const original = (arg1: any, arg2: any, cb: Function) =>
+        cb(new Error('oh shit'), null)
       const promisified = promisify(original)
       const err = await promisified(2, 2).catch(err => err)
       expect(err.message).toBe('oh shit')
     })
 
     it('rejects when the callback is not successful even if only passed 1 param', async () => {
-      const original = (arg1: any, arg2: any, cb: Function) => cb(new Error('oh shit'))
+      const original = (arg1: any, arg2: any, cb: Function) =>
+        cb(new Error('oh shit'))
       const promisified = promisify(original)
       const err = await promisified(2, 2).catch(err => err)
       expect(err.message).toBe('oh shit')
