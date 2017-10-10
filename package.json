@@ -1,11 +1,14 @@
 {
   "name": "typesync",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Install missing TypeScript typings for your dependencies.",
   "engines": {
     "node": ">=6.0.0"
   },
-  "files": ["lib", "bin"],
+  "files": [
+    "lib",
+    "bin"
+  ],
   "bin": {
     "typesync": "./bin/typesync"
   },
@@ -18,17 +21,12 @@
     "lint:watch": "nodemon --exec npm run lint -e ts,js",
     "cover": "jest --coverage",
     "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
-    "build":
-      "rimraf lib && tsc -p tsconfig.build.json --sourceMap --declaration",
+    "build": "rimraf lib && tsc -p tsconfig.build.json --sourceMap --declaration",
     "run-cli": "npm run build && node bin/typesync",
-    "do:publish":
-      "npm run lint && npm run cover && npm run build && npm publish",
-    "release:patch":
-      "npm version patch && npm run do:publish && git push --follow-tags",
-    "release:minor":
-      "npm version minor && npm run do:publish && git push --follow-tags",
-    "release:prerelease":
-      "npm version prerelease && npm run do:publish && git push --follow-tags"
+    "do:publish": "npm run lint && npm run cover && npm run build && npm publish",
+    "release:patch": "npm version patch && npm run do:publish && git push --follow-tags",
+    "release:minor": "npm version minor && npm run do:publish && git push --follow-tags",
+    "release:prerelease": "npm version prerelease && npm run do:publish && git push --follow-tags"
   },
   "repository": {
     "type": "git",
@@ -69,13 +67,21 @@
       "!src/fakes.ts",
       "!src/types.ts"
     ],
-    "coveragePathIgnorePatterns": ["/node_modules/"],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
     "transform": {
       ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
-    "testPathIgnorePatterns": ["/lib/"],
-    "moduleFileExtensions": ["ts", "tsx", "js"]
+    "testPathIgnorePatterns": [
+      "/lib/"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
   },
   "dependencies": {
     "awilix": "^2.8.1",
