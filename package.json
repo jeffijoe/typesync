@@ -5,10 +5,7 @@
   "engines": {
     "node": ">=6.0.0"
   },
-  "files": [
-    "lib",
-    "bin"
-  ],
+  "files": ["lib", "bin"],
   "bin": {
     "typesync": "./bin/typesync"
   },
@@ -16,16 +13,22 @@
   "scripts": {
     "clean": "rimraf lib",
     "test": "jest",
-    "lint": "tslint 'src/**/*.ts'",
+    "lint": "tslint --fix 'src/**/*.ts' && yarn format",
+    "format": "prettier --write 'src/**/*.ts'",
     "lint:watch": "nodemon --exec npm run lint -e ts,js",
     "cover": "jest --coverage",
     "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
-    "build": "rimraf lib && tsc -p tsconfig.build.json --sourceMap --declaration",
+    "build":
+      "rimraf lib && tsc -p tsconfig.build.json --sourceMap --declaration",
     "run-cli": "npm run build && node bin/typesync",
-    "do:publish": "npm run lint && npm run cover && npm run build && npm publish",
-    "release:patch": "npm version patch && npm run do:publish && git push --follow-tags",
-    "release:minor": "npm version minor && npm run do:publish && git push --follow-tags",
-    "release:prerelease": "npm version prerelease && npm run do:publish && git push --follow-tags"
+    "do:publish":
+      "npm run lint && npm run cover && npm run build && npm publish",
+    "release:patch":
+      "npm version patch && npm run do:publish && git push --follow-tags",
+    "release:minor":
+      "npm version minor && npm run do:publish && git push --follow-tags",
+    "release:prerelease":
+      "npm version prerelease && npm run do:publish && git push --follow-tags"
   },
   "repository": {
     "type": "git",
@@ -40,16 +43,19 @@
   "devDependencies": {
     "@types/chalk": "^0.4.31",
     "@types/detect-indent": "^5.0.0",
-    "@types/lodash": "^4.14.76",
-    "@types/node": "^8.0.31",
+    "@types/jest": "^21.1.2",
+    "@types/lodash": "^4.14.77",
+    "@types/node": "^8.0.33",
     "@types/ora": "^1.3.1",
     "@types/rimraf": "^2.0.2",
     "coveralls": "^3.0.0",
     "jest": "^21.2.1",
     "nodemon": "^1.12.1",
+    "prettier": "^1.7.4",
     "rimraf": "^2.6.2",
-    "ts-jest": "^21.0.1",
+    "ts-jest": "^21.1.1",
     "tslint": "^5.7.0",
+    "tslint-config-prettier": "^1.5.0",
     "tslint-config-standard": "^6.0.1",
     "typescript": "^2.5.3"
   },
@@ -63,21 +69,13 @@
       "!src/fakes.ts",
       "!src/types.ts"
     ],
-    "coveragePathIgnorePatterns": [
-      "/node_modules/"
-    ],
+    "coveragePathIgnorePatterns": ["/node_modules/"],
     "transform": {
       ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
     "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
-    "testPathIgnorePatterns": [
-      "/lib/"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ]
+    "testPathIgnorePatterns": ["/lib/"],
+    "moduleFileExtensions": ["ts", "tsx", "js"]
   },
   "dependencies": {
     "awilix": "^2.8.1",

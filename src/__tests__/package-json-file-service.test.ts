@@ -19,8 +19,9 @@ describe('package json file service', () => {
 
     it('throws when file does not exist', async () => {
       expect.assertions(1)
-      await subject.readPackageFile('nonexistent.json')
-        .catch((err) => expect(err.message).toMatch(/exist/i))
+      await subject
+        .readPackageFile('nonexistent.json')
+        .catch(err => expect(err.message).toMatch(/exist/i))
     })
   })
 
@@ -76,18 +77,23 @@ describe('package json file service', () => {
   })
 })
 
-function _writeFixture (withTrailingNewline = false): Promise<string> {
+function _writeFixture(withTrailingNewline = false): Promise<string> {
   const file = path.join(os.tmpdir(), `package-${Math.random()}.json`)
-  return writeFileAsync(file, JSON.stringify({
-    name: 'fony-package',
-    dependencies: {
-      package1: '^1.0.0'
-    }
-  }, null, 2) + (withTrailingNewline ? '\n' : '')).then(() => file)
+  return writeFileAsync(
+    file,
+    JSON.stringify(
+      {
+        name: 'fony-package',
+        dependencies: {
+          package1: '^1.0.0'
+        }
+      },
+      null,
+      2
+    ) + (withTrailingNewline ? '\n' : '')
+  ).then(() => file)
 }
 
-function cleanup (...files: string[]): Promise<any> {
-  return Promise.all(
-    files.map(f => unlinkAsync(f))
-  )
+function cleanup(...files: string[]): Promise<any> {
+  return Promise.all(files.map(f => unlinkAsync(f)))
 }

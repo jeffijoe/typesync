@@ -3,7 +3,8 @@ import axios, { AxiosResponse } from 'axios'
 import { typed } from './util'
 import * as zlip from 'zlib'
 
-const typedefsUrl = 'https://typespublisher.blob.core.windows.net/typespublisher/data/search-index-min.json'
+const typedefsUrl =
+  'https://typespublisher.blob.core.windows.net/typespublisher/data/search-index-min.json'
 
 const npmClient = axios.create({
   baseURL: 'https://registry.npmjs.org'
@@ -12,7 +13,7 @@ const npmClient = axios.create({
 /**
  * Used to pull definitions.
  */
-export function createTypeDefinitionSource (): ITypeDefinitionSource {
+export function createTypeDefinitionSource(): ITypeDefinitionSource {
   return {
     /**
      * Fetches available type defs.
@@ -44,7 +45,7 @@ export function createTypeDefinitionSource (): ITypeDefinitionSource {
  * Unzips a gzip-encoded response.
  * @param response
  */
-function unzipResponse (response: AxiosResponse) {
+function unzipResponse(response: AxiosResponse) {
   return new Promise<Array<any>>(resolve => {
     const unzip = zlip.createGunzip()
     let json = ''
