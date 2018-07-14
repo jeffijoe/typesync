@@ -1,11 +1,8 @@
-import { createContainer, ResolutionMode, asFunction } from 'awilix'
-import * as fakes from './fakes'
+import { createContainer, InjectionMode, asFunction } from 'awilix'
 import { createTypeSyncer } from './type-syncer'
 import { ITypeSyncer, ITypeDefinition } from './types'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import * as C from './cli-util'
-import { parseArguments } from './cli-util'
-import { typed } from './util'
 import { createTypeDefinitionSource } from './type-definition-source'
 import { createPackageJSONFileService } from './package-json-file-service'
 
@@ -16,7 +13,7 @@ export async function startCli() {
   try {
     // Awilix is a dependency injection container.
     const container = createContainer({
-      resolutionMode: ResolutionMode.CLASSIC
+      injectionMode: InjectionMode.CLASSIC
     }).register({
       typeDefinitionSource: asFunction(createTypeDefinitionSource),
       packageJSONService: asFunction(createPackageJSONFileService),
@@ -30,7 +27,7 @@ export async function startCli() {
 }
 
 async function _runCli(syncer: ITypeSyncer) {
-  const { args, flags } = parseArguments(process.argv.slice(2))
+  const { args, flags } = C.parseArguments(process.argv.slice(2))
   const [filePath = 'package.json'] = args
   if (flags.help) {
     printHelp()
@@ -50,8 +47,9 @@ async function _runCli(syncer: ITypeSyncer) {
   C.success(
     result.newTypings.length === 0
       ? `No new typings added, looks like you're all synced up!`
-      : (chalk as any)`${result.newTypings
-        .length} typings added:\n${formattedTypings}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
+      : (chalk as any)`${
+          result.newTypings.length
+        } typings added:\n${formattedTypings}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
   )
 }
 

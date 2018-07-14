@@ -16,7 +16,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "test": "jest",
-    "lint": "tslint --fix 'src/**/*.ts' && yarn format",
+    "lint": "tslint --project tsconfig.json --fix 'src/**/*.ts' && tsc --noEmit && yarn format",
     "format": "prettier --write 'src/**/*.ts'",
     "lint:watch": "nodemon --exec npm run lint -e ts,js",
     "cover": "jest --coverage",
@@ -39,27 +39,25 @@
   },
   "homepage": "https://github.com/jeffijoe/typesync#readme",
   "devDependencies": {
-    "@types/chalk": "^0.4.31",
     "@types/detect-indent": "^5.0.0",
-    "@types/jest": "^21.1.2",
-    "@types/lodash": "^4.14.77",
-    "@types/node": "^8.0.33",
-    "@types/ora": "^1.3.1",
+    "@types/jest": "^23.1.6",
+    "@types/lodash": "^4.14.112",
+    "@types/ora": "^1.3.4",
+    "@types/prettier": "^1.13.1",
     "@types/rimraf": "^2.0.2",
-    "coveralls": "^3.0.0",
-    "jest": "^21.2.1",
-    "nodemon": "^1.12.1",
-    "prettier": "^1.7.4",
+    "coveralls": "^3.0.2",
+    "jest": "^23.4.1",
+    "nodemon": "^1.18.2",
+    "prettier": "^1.13.7",
     "rimraf": "^2.6.2",
-    "ts-jest": "^21.1.1",
-    "tslint": "^5.7.0",
-    "tslint-config-prettier": "^1.5.0",
-    "tslint-config-standard": "^6.0.1",
-    "typescript": "^2.5.3"
+    "ts-jest": "^23.0.0",
+    "tslint": "^5.10.0",
+    "tslint-config-prettier": "^1.13.0",
+    "tslint-config-standard": "^7.1.0",
+    "typescript": "^2.9.2"
   },
   "jest": {
     "testEnvironment": "node",
-    "mapCoverage": true,
     "collectCoverageFrom": [
       "src/**",
       "!src/cli-util.ts",
@@ -84,12 +82,12 @@
     ]
   },
   "dependencies": {
-    "awilix": "^2.8.1",
-    "axios": "^0.16.2",
-    "chalk": "^2.1.0",
+    "awilix": "^3.0.8",
+    "axios": "^0.18.0",
+    "chalk": "^2.4.1",
     "detect-indent": "^5.0.0",
-    "lodash": "4.17.4",
-    "ora": "^1.3.0",
-    "tslib": "^1.7.1"
+    "lodash": "4.17.10",
+    "ora": "^2.1.0",
+    "tslib": "^1.9.3"
   }
 }
