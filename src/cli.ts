@@ -1,4 +1,4 @@
-import { createContainer, ResolutionMode } from 'awilix'
+import { createContainer, ResolutionMode, asFunction } from 'awilix'
 import * as fakes from './fakes'
 import { createTypeSyncer } from './type-syncer'
 import { ITypeSyncer, ITypeDefinition } from './types'
@@ -17,10 +17,10 @@ export async function startCli() {
     // Awilix is a dependency injection container.
     const container = createContainer({
       resolutionMode: ResolutionMode.CLASSIC
-    }).registerFunction({
-      typeDefinitionSource: createTypeDefinitionSource,
-      packageJSONService: createPackageJSONFileService,
-      typeSyncer: createTypeSyncer
+    }).register({
+      typeDefinitionSource: asFunction(createTypeDefinitionSource),
+      packageJSONService: asFunction(createPackageJSONFileService),
+      typeSyncer: asFunction(createTypeSyncer)
     })
     await _runCli(container.resolve<ITypeSyncer>('typeSyncer'))
   } catch (err) {
@@ -51,7 +51,7 @@ async function _runCli(syncer: ITypeSyncer) {
     result.newTypings.length === 0
       ? `No new typings added, looks like you're all synced up!`
       : (chalk as any)`${result.newTypings
-          .length} typings added:\n${formattedTypings}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
+        .length} typings added:\n${formattedTypings}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
   )
 }
 
