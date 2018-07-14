@@ -1,6 +1,5 @@
 import {
   ITypeSyncer,
-  ISyncResult,
   IPackageJSONService,
   ITypeDefinitionSource,
   ITypeDefinition,

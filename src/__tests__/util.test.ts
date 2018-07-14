@@ -28,7 +28,6 @@ describe('util', () => {
   describe('orderObject', () => {
     it('orders the object', () => {
       const source = { b: true, a: true, d: true, c: true }
-      const sourceKeys = Object.keys(source)
       const result = orderObject(source)
       const resultKeys = Object.keys(result)
       expect(resultKeys).toEqual(['a', 'b', 'c', 'd'])

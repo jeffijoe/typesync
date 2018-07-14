@@ -1,4 +1,4 @@
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { ICLIArguments } from './types'
 
 const ora = require('ora')

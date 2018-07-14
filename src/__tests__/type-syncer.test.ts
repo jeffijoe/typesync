@@ -1,7 +1,6 @@
 import {
   ITypeDefinitionSource,
   IPackageJSONService,
-  ITypeSyncer,
   ITypeDefinition,
   IPackageFile
 } from '../types'
@@ -30,14 +29,6 @@ const typedefs: ITypeDefinition[] = [
 ]
 
 function buildSyncer() {
-  const typedefSource: ITypeDefinitionSource = {
-    fetch: jest.fn(() => Promise.resolve(typedefs)),
-    getLatestTypingsVersion: jest.fn(() => Promise.resolve('1.0.0'))
-  }
-  const packageService: IPackageJSONService = {
-    readPackageFile: jest.fn(() => Promise.resolve(packageFile)),
-    writePackageFile: jest.fn(() => Promise.resolve())
-  }
   const packageFile: IPackageFile = {
     name: 'consumer',
     dependencies: {
@@ -57,6 +48,15 @@ function buildSyncer() {
     }
   }
 
+  const typedefSource: ITypeDefinitionSource = {
+    fetch: jest.fn(() => Promise.resolve(typedefs)),
+    getLatestTypingsVersion: jest.fn(() => Promise.resolve('1.0.0'))
+  }
+  const packageService: IPackageJSONService = {
+    readPackageFile: jest.fn(() => Promise.resolve(packageFile)),
+    writePackageFile: jest.fn(() => Promise.resolve())
+  }
+
   return {
     typedefSource,
     packageService,
@@ -67,7 +67,7 @@ function buildSyncer() {
 
 describe('type syncer', () => {
   it('adds new packages to the package.json', async () => {
-    const { syncer, packageService, typedefSource } = buildSyncer()
+    const { syncer, packageService } = buildSyncer()
     const result = await syncer.sync('package.json')
     const writtenPackage = (packageService.writePackageFile as jest.Mock<any>)
       .mock.calls[0][1] as IPackageFile
@@ -89,8 +89,8 @@ describe('type syncer', () => {
   })
 
   it('does not write packages if options.dry is specified', async () => {
-    const { syncer, packageService, typedefSource } = buildSyncer()
-    const result = await syncer.sync('package.json', { dry: true })
+    const { syncer, packageService } = buildSyncer()
+    await syncer.sync('package.json', { dry: true })
     expect(packageService.writePackageFile as jest.Mock<any>).not.toBeCalled()
   })
 })

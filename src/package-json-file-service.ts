@@ -1,9 +1,9 @@
 import { IPackageJSONService, IPackageFile } from './types'
 import * as fs from 'fs'
 import { promisify } from './util'
+import detectIndent from 'detect-indent'
 
-const detectIndent = require('detect-indent')
-const existsAsync = promisify(fs.exists)
+const statAsync = promisify(fs.stat)
 const readFileAsync = promisify(fs.readFile)
 const writeFileAsync = promisify(fs.writeFile)
 
@@ -35,7 +35,20 @@ async function readFileContents(filePath: string) {
 }
 
 async function assertFile(filePath: string) {
-  if (!await existsAsync(filePath)) {
+  if (!(await existsAsync(filePath))) {
     throw new Error(`${filePath} does not exist.`)
   }
+}
+
+async function existsAsync(filePath: string): Promise<boolean> {
+  return statAsync(filePath)
+    .then(() => true)
+    .catch(err => {
+      /* istanbul ignore else */
+      if (err.code === 'ENOENT') {
+        return false
+      }
+      /* istanbul ignore next */
+      throw err
+    })
 }
