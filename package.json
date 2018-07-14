@@ -1,6 +1,6 @@
 {
   "name": "typesync",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "Install missing TypeScript typings for your dependencies.",
   "engines": {
     "node": ">=6.0.0"
