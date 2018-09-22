@@ -63,6 +63,14 @@ export interface IDependenciesSection {
 }
 
 /**
+ * Package + version.
+ */
+export interface IPackageVersion {
+  name: string
+  version: string
+}
+
+/**
  * Represents a type definition pulled from a source.
  */
 export interface ITypeDefinition {

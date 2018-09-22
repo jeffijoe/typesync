@@ -40,21 +40,20 @@
   "homepage": "https://github.com/jeffijoe/typesync#readme",
   "devDependencies": {
     "@types/detect-indent": "^5.0.0",
-    "@types/jest": "^23.1.6",
-    "@types/lodash": "^4.14.112",
+    "@types/jest": "^23.3.2",
     "@types/ora": "^1.3.4",
     "@types/prettier": "^1.13.1",
     "@types/rimraf": "^2.0.2",
     "coveralls": "^3.0.2",
-    "jest": "^23.4.1",
-    "nodemon": "^1.18.2",
-    "prettier": "^1.13.7",
+    "jest": "^23.6.0",
+    "nodemon": "^1.18.4",
+    "prettier": "^1.14.3",
     "rimraf": "^2.6.2",
-    "ts-jest": "^23.0.0",
-    "tslint": "^5.10.0",
-    "tslint-config-prettier": "^1.13.0",
-    "tslint-config-standard": "^7.1.0",
-    "typescript": "^2.9.2"
+    "ts-jest": "^23.10.1",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-config-standard": "^8.0.1",
+    "typescript": "^3.0.3"
   },
   "jest": {
     "testEnvironment": "node",
@@ -69,7 +68,7 @@
       "/node_modules/"
     ],
     "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      ".(ts|tsx)": "ts-jest"
     },
     "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
     "testPathIgnorePatterns": [
@@ -82,12 +81,11 @@
     ]
   },
   "dependencies": {
-    "awilix": "^3.0.8",
+    "awilix": "^3.0.9",
     "axios": "^0.18.0",
     "chalk": "^2.4.1",
     "detect-indent": "^5.0.0",
-    "lodash": "4.17.10",
-    "ora": "^2.1.0",
+    "ora": "^3.0.0",
     "tslib": "^1.9.3"
   }
 }

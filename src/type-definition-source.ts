@@ -30,6 +30,7 @@ export function createTypeDefinitionSource(): ITypeDefinitionSource {
           }))
         )
     },
+
     /**
      * Gets the latest version of a typings package.
      */
@@ -43,6 +44,7 @@ export function createTypeDefinitionSource(): ITypeDefinitionSource {
 
 /**
  * Unzips a gzip-encoded response.
+ *
  * @param response
  */
 function unzipResponse(response: AxiosResponse) {
