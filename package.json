@@ -23,10 +23,18 @@
     "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
     "build": "rimraf lib && tsc -p tsconfig.build.json --sourceMap --declaration",
     "run-cli": "npm run build && node bin/typesync",
+    "precommit": "lint-staged",
     "do:publish": "npm run lint && npm run cover && npm run build && npm publish",
     "release:patch": "npm version patch && npm run do:publish && git push --follow-tags",
     "release:minor": "npm version minor && npm run do:publish && git push --follow-tags",
     "release:prerelease": "npm version prerelease && npm run do:publish && git push --follow-tags"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "tslint --project tsconfig.json --fix",
+      "prettier --write",
+      "git add"
+    ]
   },
   "repository": {
     "type": "git",
@@ -38,6 +46,14 @@
     "url": "https://github.com/jeffijoe/typesync/issues"
   },
   "homepage": "https://github.com/jeffijoe/typesync#readme",
+  "dependencies": {
+    "awilix": "^3.0.9",
+    "axios": "^0.18.0",
+    "chalk": "^2.4.1",
+    "detect-indent": "^5.0.0",
+    "ora": "^3.0.0",
+    "tslib": "^1.9.3"
+  },
   "devDependencies": {
     "@types/detect-indent": "^5.0.0",
     "@types/jest": "^23.3.2",
@@ -79,13 +95,5 @@
       "tsx",
       "js"
     ]
-  },
-  "dependencies": {
-    "awilix": "^3.0.9",
-    "axios": "^0.18.0",
-    "chalk": "^2.4.1",
-    "detect-indent": "^5.0.0",
-    "ora": "^3.0.0",
-    "tslib": "^1.9.3"
   }
 }
