@@ -31,6 +31,12 @@ If `--dry` is specified, will not actually write to the file, it only prints add
 
 **Note**: `typesync` only modifies your `package.json` - you still need to run `npm install`, or — if drinking the k00laid — `yarn`.
 
+## Typings package version
+
+TypeSync will add the latest available typings package that are missing — this means TypeSync won't touch existing typings packages that are present in `package.json`.
+
+If you use a Semver `^` or `~` for a package, the same prefix will be used for the typings package. If you pin to an exact version (`"some-package": "1.2.3"`), no prefix will be written.
+
 # Why?
 
 Installing typings manually sucks. Flow has `flow-typed` which installs type definitions by looking at a `package.json`, which would be cool to have for TypeScript. Now we do!
