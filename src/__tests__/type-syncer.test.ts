@@ -25,6 +25,12 @@ const typedefs: ITypeDefinition[] = [
   // None for package6
   {
     typingsName: 'myorg__package7'
+  },
+  {
+    typingsName: 'package8'
+  },
+  {
+    typingsName: 'package9'
   }
 ]
 
@@ -44,7 +50,9 @@ function buildSyncer() {
       package6: '^1.0.0'
     },
     peerDependencies: {
-      '@myorg/package7': '^1.0.0'
+      '@myorg/package7': '^1.0.0',
+      package8: '~1.0.0',
+      package9: '1.0.0'
     }
   }
 
@@ -77,6 +85,8 @@ describe('type syncer', () => {
       '@types/package4': '^1.0.0',
       '@types/package5': '^1.0.0',
       '@types/myorg__package7': '^1.0.0',
+      '@types/package8': '~1.0.0',
+      '@types/package9': '1.0.0',
       package4: '^1.0.0',
       package5: '^1.0.0'
     })
@@ -84,7 +94,9 @@ describe('type syncer', () => {
       'myorg__package7',
       'package1',
       'package3',
-      'package5'
+      'package5',
+      'package8',
+      'package9'
     ])
   })
 

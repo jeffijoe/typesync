@@ -4,9 +4,11 @@ import {
   ITypeDefinitionSource,
   ITypeDefinition,
   IPackageFile,
-  ISyncOptions
+  ISyncOptions,
+  IDependenciesSection,
+  IPackageVersion
 } from './types'
-import { uniq, filterMap, mergeObjects, typed, orderObject } from './util'
+import { filterMap, mergeObjects, typed, orderObject, uniq } from './util'
 
 /**
  * Creates a type syncer.
@@ -28,20 +30,13 @@ export function createTypeSyncer(
         typeDefinitionSource.fetch()
       ])
 
-      const allPackageNames = uniq([
-        ...((file.dependencies &&
-          Object.keys(file.dependencies)) /* istanbul ignore next*/ ||
-          []),
-        ...((file.devDependencies &&
-          Object.keys(file.devDependencies)) /* istanbul ignore next*/ ||
-          []),
-        ...((file.optionalDependencies &&
-          Object.keys(file.optionalDependencies)) /* istanbul ignore next*/ ||
-          []),
-        ...((file.peerDependencies &&
-          Object.keys(file.peerDependencies)) /* istanbul ignore next*/ ||
-          [])
-      ])
+      const allPackages = [
+        ...getPackagesFromSection(file.dependencies),
+        ...getPackagesFromSection(file.devDependencies),
+        ...getPackagesFromSection(file.optionalDependencies),
+        ...getPackagesFromSection(file.peerDependencies)
+      ]
+      const allPackageNames = uniq(allPackages.map(p => p.name))
 
       const newTypings = filterNewTypings(allPackageNames, allTypings)
       const devDepsToAdd = await Promise.all(
@@ -49,7 +44,15 @@ export function createTypeSyncer(
           const latestVersion = await typeDefinitionSource.getLatestTypingsVersion(
             t.typingsName
           )
-          return { [typed(t.typingsName)]: `^${latestVersion}` }
+          const codePackage = allPackages.find(
+            p => p.name === t.codePackageName
+          )
+          const semverRangeSpecifier = codePackage
+            ? getSemverRangeSpecifier(codePackage.version)
+            : '^'
+          return {
+            [typed(t.typingsName)]: semverRangeSpecifier + latestVersion
+          }
         })
       ).then(mergeObjects)
 
@@ -71,7 +74,7 @@ export function createTypeSyncer(
 }
 
 /**
- * Returns an array of new typings.
+ * Returns an array of new typings as well as the code package name that was matched to it.
  *
  * @param allPackageNames Used to filter the typings that are new.
  * @param allTypings All typings available
@@ -79,7 +82,7 @@ export function createTypeSyncer(
 function filterNewTypings(
   allPackageNames: Array<string>,
   allTypings: Array<ITypeDefinition>
-): Array<ITypeDefinition> {
+): Array<ITypeDefinition & { codePackageName: string }> {
   const existingTypings = allPackageNames.filter(x => x.startsWith('@types/'))
   return filterMap(allPackageNames, p => {
     const scopeInfo = getPackageScope(p)
@@ -99,7 +102,10 @@ function filterNewTypings(
       return false
     }
 
-    return typingsForPackage
+    return {
+      ...typingsForPackage,
+      codePackageName: p
+    }
   })
 }
 
@@ -116,4 +122,47 @@ function getPackageScope(packageName: string): [string, string] | null {
   }
 
   return [matches[1], matches[2]]
+}
+
+/**
+ * Gets packages from a dependencies section.
+ *
+ * @param section
+ */
+function getPackagesFromSection(
+  section?: IDependenciesSection
+): Array<IPackageVersion> {
+  /* istanbul ignore next */
+  if (!section) {
+    return []
+  }
+
+  const result: Array<IPackageVersion> = []
+  for (const name in section) {
+    result.push({
+      name,
+      version: section[name]
+    })
+  }
+
+  return result
+}
+
+const CARET = '^'.charCodeAt(0)
+const TILDE = '~'.charCodeAt(0)
+
+/**
+ * Gets the semver range specifier (~, ^)
+ * @param version
+ */
+function getSemverRangeSpecifier(version: string): string {
+  if (version.charCodeAt(0) === CARET) {
+    return '^'
+  }
+
+  if (version.charCodeAt(0) === TILDE) {
+    return '~'
+  }
+
+  return ''
 }
