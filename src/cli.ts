@@ -1,10 +1,11 @@
-import { createContainer, InjectionMode, asFunction } from 'awilix'
-import { createTypeSyncer } from './type-syncer'
-import { ITypeSyncer, ITypeDefinition } from './types'
+import { createContainer, InjectionMode, asFunction, asValue } from 'awilix'
 import chalk from 'chalk'
 import * as C from './cli-util'
+import { ITypeSyncer, ITypeDefinition, ISyncedFile } from './types'
+import { createTypeSyncer } from './type-syncer'
 import { createTypeDefinitionSource } from './type-definition-source'
 import { createPackageJSONFileService } from './package-json-file-service'
+import { createGlobber } from './globber'
 
 /**
  * Starts the TypeSync CLI.
@@ -15,18 +16,23 @@ export async function startCli() {
     const container = createContainer({
       injectionMode: InjectionMode.CLASSIC
     }).register({
-      typeDefinitionSource: asFunction(createTypeDefinitionSource),
-      packageJSONService: asFunction(createPackageJSONFileService),
+      typeDefinitionSource: asFunction(createTypeDefinitionSource).singleton(),
+      packageJSONService: asFunction(createPackageJSONFileService).singleton(),
+      globber: asFunction(createGlobber).singleton(),
       typeSyncer: asFunction(createTypeSyncer)
     })
-    await _runCli(container.resolve<ITypeSyncer>('typeSyncer'))
+    await run(container.resolve<ITypeSyncer>('typeSyncer'))
   } catch (err) {
     C.error(err)
-    process.exit(1)
+    process.exitCode = 1
   }
 }
 
-async function _runCli(syncer: ITypeSyncer) {
+/**
+ * Actual CLI runner. Uses the `syncer` instance to sync.
+ * @param syncer
+ */
+async function run(syncer: ITypeSyncer) {
   const { args, flags } = C.parseArguments(process.argv.slice(2))
   const [filePath = 'package.json'] = args
   if (flags.help) {
@@ -34,7 +40,7 @@ async function _runCli(syncer: ITypeSyncer) {
     return
   }
 
-  C.log(`TypeSync v${chalk.white(require('../package.json').version)}`)
+  C.log(chalk`TypeSync v{white ${require('../package.json').version}}`)
   if (flags.dry) {
     C.log('—— DRY RUN — will not modify file ——')
   }
@@ -43,25 +49,60 @@ async function _runCli(syncer: ITypeSyncer) {
     () => syncer.sync(filePath, { dry: flags.dry })
   )
 
-  const formattedTypings = result.newTypings.map(formatPackageName).join('\n')
+  const syncedFilesOutput = result.syncedFiles
+    .map(renderSyncedFile)
+    .join('\n\n')
+  const totalNewTypings = result.syncedFiles
+    .map(f => f.newTypings.length)
+    .reduce((accum, next) => accum + next, 0)
   C.success(
-    result.newTypings.length === 0
+    totalNewTypings === 0
       ? `No new typings added, looks like you're all synced up!`
-      : (chalk as any)`${
-          result.newTypings.length
-        } typings added:\n${formattedTypings}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
+      : chalk`${totalNewTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
   )
 }
 
-function formatPackageName(t: ITypeDefinition) {
-  return `${chalk.bold.green('+')}  ${chalk.gray('@types/')}${chalk.bold.blue(
-    t.typingsName
-  )}`
+/**
+ * Renders a type definition.
+ * @param typeDef
+ * @param isLast
+ */
+function renderTypeDef(typeDef: ITypeDefinition, isLast: boolean) {
+  const treeNode = isLast ? '└─' : '├─'
+  return chalk`${treeNode} {gray @types/}{bold.blue ${typeDef.typingsName}}`
 }
 
+/**
+ * Renders a synced file.
+ *
+ * @param file
+ */
+function renderSyncedFile(file: ISyncedFile) {
+  const badge =
+    file.newTypings.length === 0
+      ? chalk`{blue.bold (no new typings added)}`
+      : chalk`{green.bold (${file.newTypings.length.toString()} new typings added)}`
+  const title = chalk`📦 ${file.package.name} {gray.italic — ${
+    file.filePath
+  }} ${badge}`
+  const nl = '\n'
+  return (
+    title +
+    nl +
+    file.newTypings
+      .map(t =>
+        renderTypeDef(t, file.newTypings[file.newTypings.length - 1] === t)
+      )
+      .join(nl)
+  )
+}
+
+/**
+ * Prints the help text.
+ */
 function printHelp() {
   console.log(
-    (chalk as any)`
+    chalk`
 {blue.bold typesync} - adds missing TypeScript definitions to package.json
 
 Options
