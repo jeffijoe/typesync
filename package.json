@@ -56,7 +56,7 @@
   },
   "devDependencies": {
     "@types/detect-indent": "^5.0.0",
-    "@types/jest": "^23.3.2",
+    "@types/jest": "^23.3.3",
     "@types/ora": "^1.3.4",
     "@types/prettier": "^1.13.1",
     "@types/rimraf": "^2.0.2",
@@ -65,11 +65,11 @@
     "nodemon": "^1.18.4",
     "prettier": "^1.14.3",
     "rimraf": "^2.6.2",
-    "ts-jest": "^23.10.1",
+    "ts-jest": "^23.10.4",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.15.0",
     "tslint-config-standard": "^8.0.1",
-    "typescript": "^3.0.3"
+    "typescript": "^3.1.1"
   },
   "jest": {
     "testEnvironment": "node",
