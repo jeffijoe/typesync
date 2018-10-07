@@ -1,4 +1,11 @@
-import { uniq, filterMap, mergeObjects, orderObject, promisify } from '../util'
+import {
+  uniq,
+  filterMap,
+  mergeObjects,
+  orderObject,
+  promisify,
+  memoizeAsync
+} from '../util'
 
 describe('util', () => {
   describe('uniq', () => {
@@ -64,6 +71,33 @@ describe('util', () => {
       const promisified = promisify(original)
       const err = await promisified(2, 2).catch(err => err)
       expect(err.message).toBe('oh shit')
+    })
+  })
+
+  describe('memoizeAsync', () => {
+    it('memoizes promises', async () => {
+      let i = 0
+
+      const m = memoizeAsync((k: string) =>
+        Promise.resolve(k + (++i).toString())
+      )
+      expect([await m('hello'), await m('hello')]).toEqual(['hello1', 'hello1'])
+      expect([await m('goodbye'), await m('goodbye')]).toEqual([
+        'goodbye2',
+        'goodbye2'
+      ])
+    })
+
+    it('removes entry on fail', async () => {
+      let i = 0
+
+      const m = memoizeAsync((k: string) =>
+        Promise.reject(new Error(k + (++i).toString()))
+      )
+      expect([
+        await m('hello').catch(err => err.message),
+        await m('hello').catch(err => err.message)
+      ]).toEqual(['hello1', 'hello2'])
     })
   })
 })

@@ -6,9 +6,21 @@ import {
   IPackageFile,
   ISyncOptions,
   IDependenciesSection,
-  IPackageVersion
+  IPackageVersion,
+  ISyncResult,
+  ISyncedFile,
+  IWorkspacesSection
 } from './types'
-import { filterMap, mergeObjects, typed, orderObject, uniq } from './util'
+import {
+  filterMap,
+  mergeObjects,
+  typed,
+  orderObject,
+  uniq,
+  flatten,
+  memoizeAsync
+} from './util'
+import { IGlobber } from './globber'
 
 /**
  * Creates a type syncer.
@@ -18,57 +30,98 @@ import { filterMap, mergeObjects, typed, orderObject, uniq } from './util'
  */
 export function createTypeSyncer(
   packageJSONService: IPackageJSONService,
-  typeDefinitionSource: ITypeDefinitionSource
+  typeDefinitionSource: ITypeDefinitionSource,
+  globber: IGlobber
 ): ITypeSyncer {
+  const getLatestTypingsVersion = memoizeAsync(
+    typeDefinitionSource.getLatestTypingsVersion
+  )
   return {
-    /**
-     * Syncs typings in the specified package.json.
-     */
-    sync: async (filePath, opts: ISyncOptions = { dry: false }) => {
-      const [file, allTypings] = await Promise.all([
-        packageJSONService.readPackageFile(filePath),
-        typeDefinitionSource.fetch()
-      ])
+    sync
+  }
 
-      const allPackages = [
-        ...getPackagesFromSection(file.dependencies),
-        ...getPackagesFromSection(file.devDependencies),
-        ...getPackagesFromSection(file.optionalDependencies),
-        ...getPackagesFromSection(file.peerDependencies)
-      ]
-      const allPackageNames = uniq(allPackages.map(p => p.name))
+  /**
+   * Syncs typings in the specified package.json.
+   */
+  async function sync(
+    filePath: string,
+    opts: ISyncOptions = { dry: false }
+  ): Promise<ISyncResult> {
+    const [file, allTypings] = await Promise.all([
+      packageJSONService.readPackageFile(filePath),
+      typeDefinitionSource.fetch()
+    ])
 
-      const newTypings = filterNewTypings(allPackageNames, allTypings)
-      const devDepsToAdd = await Promise.all(
-        newTypings.map(async t => {
-          const latestVersion = await typeDefinitionSource.getLatestTypingsVersion(
-            t.typingsName
-          )
-          const codePackage = allPackages.find(
-            p => p.name === t.codePackageName
-          )
-          const semverRangeSpecifier = codePackage
-            ? getSemverRangeSpecifier(codePackage.version)
-            : '^'
-          return {
-            [typed(t.typingsName)]: semverRangeSpecifier + latestVersion
-          }
+    const subPackages = await Promise.all(
+      [
+        ...ensureWorkspacesArray(file.packages),
+        ...ensureWorkspacesArray(file.workspaces)
+      ].map(globber.globPackageFiles)
+    )
+      .then(flatten)
+      .then(uniq)
+
+    const syncedFiles: Array<ISyncedFile> = await Promise.all([
+      syncFile(filePath, file, allTypings, opts),
+      ...subPackages.map(p => syncFile(p, null, allTypings, opts))
+    ])
+
+    return {
+      syncedFiles
+    }
+  }
+
+  /**
+   * Syncs a single file.
+   *
+   * @param filePath
+   * @param file
+   * @param allTypings
+   * @param opts
+   */
+  async function syncFile(
+    filePath: string,
+    file: IPackageFile | null,
+    allTypings: Array<ITypeDefinition>,
+    opts: ISyncOptions
+  ): Promise<ISyncedFile> {
+    file = file || (await packageJSONService.readPackageFile(filePath))
+    const allPackages = [
+      ...getPackagesFromSection(file.dependencies),
+      ...getPackagesFromSection(file.devDependencies),
+      ...getPackagesFromSection(file.optionalDependencies),
+      ...getPackagesFromSection(file.peerDependencies)
+    ]
+    const allPackageNames = uniq(allPackages.map(p => p.name))
+
+    const newTypings = filterNewTypings(allPackageNames, allTypings)
+    const devDepsToAdd = await Promise.all(
+      newTypings.map(async t => {
+        const latestVersion = await getLatestTypingsVersion(t.typingsName)
+        const codePackage = allPackages.find(p => p.name === t.codePackageName)
+        const semverRangeSpecifier = codePackage
+          ? getSemverRangeSpecifier(codePackage.version)
+          : '^'
+        return {
+          [typed(t.typingsName)]: semverRangeSpecifier + latestVersion
+        }
+      })
+    ).then(mergeObjects)
+
+    if (!opts.dry) {
+      await packageJSONService.writePackageFile(filePath, {
+        ...file,
+        devDependencies: orderObject({
+          ...devDepsToAdd,
+          ...file.devDependencies
         })
-      ).then(mergeObjects)
+      } as IPackageFile)
+    }
 
-      if (!opts.dry) {
-        await packageJSONService.writePackageFile(filePath, {
-          ...file,
-          devDependencies: orderObject({
-            ...devDepsToAdd,
-            ...file.devDependencies
-          })
-        } as IPackageFile)
-      }
-
-      return {
-        newTypings
-      }
+    return {
+      filePath,
+      newTypings,
+      package: file
     }
   }
 }
@@ -165,4 +218,23 @@ function getSemverRangeSpecifier(version: string): string {
   }
 
   return ''
+}
+
+/**
+ * Ensures that we have a valid workspaces array.
+ *
+ * @param data
+ */
+function ensureWorkspacesArray(data?: IWorkspacesSection): IWorkspacesSection {
+  /* istanbul ignore next */
+  if (
+    !data ||
+    !Array.isArray(data) ||
+    // tslint:disable-next-line
+    !data.every(s => typeof s === 'string')
+  ) {
+    return []
+  }
+
+  return data
 }

@@ -85,3 +85,49 @@ export function promisify(fn: Function) {
     })
   }
 }
+
+/**
+ * Flattens a 2-dimensional array.
+ *
+ * @param source
+ */
+export function flatten<T>(source: Array<Array<T>>): Array<T> {
+  const result: Array<T> = []
+  for (const items of source) {
+    for (const item of items) {
+      result.push(item)
+    }
+  }
+  return result
+}
+
+/**
+ * Async memoize.
+ *
+ * @param fn
+ */
+export function memoizeAsync<T, U extends any[], V>(
+  fn: (...args: U) => Promise<V>
+) {
+  const cache = new Map<any, Promise<V>>()
+
+  async function run(...args: U): Promise<V> {
+    try {
+      return await fn(...args)
+    } catch (err) {
+      cache.delete(args[0])
+      throw err
+    }
+  }
+
+  return async function(...args: U): Promise<V> {
+    const key = args[0]
+    if (cache.has(key)) {
+      return cache.get(key)!
+    }
+
+    const p = run(...args)
+    cache.set(key, p)
+    return p
+  }
+}

@@ -5,6 +5,7 @@ import {
   IPackageFile
 } from '../types'
 import { createTypeSyncer } from '../type-syncer'
+import { IGlobber } from '../globber'
 
 const typedefs: ITypeDefinition[] = [
   {
@@ -35,7 +36,7 @@ const typedefs: ITypeDefinition[] = [
 ]
 
 function buildSyncer() {
-  const packageFile: IPackageFile = {
+  const rootPackageFile: IPackageFile = {
     name: 'consumer',
     dependencies: {
       package1: '^1.0.0',
@@ -53,6 +54,22 @@ function buildSyncer() {
       '@myorg/package7': '^1.0.0',
       package8: '~1.0.0',
       package9: '1.0.0'
+    },
+    packages: ['packages/*'],
+    workspaces: ['packages/*']
+  }
+
+  const package1File: IPackageFile = {
+    name: 'package-1',
+    dependencies: {
+      package1: '^1.0.0'
+    }
+  }
+
+  const package2File: IPackageFile = {
+    name: 'package-1',
+    dependencies: {
+      package3: '^1.0.0'
     }
   }
 
@@ -61,15 +78,40 @@ function buildSyncer() {
     getLatestTypingsVersion: jest.fn(() => Promise.resolve('1.0.0'))
   }
   const packageService: IPackageJSONService = {
-    readPackageFile: jest.fn(() => Promise.resolve(packageFile)),
+    readPackageFile: jest.fn(async (filepath: string) => {
+      switch (filepath) {
+        case 'package.json':
+          return rootPackageFile
+        case 'packages/package-1/package.json':
+          return package1File
+        case 'packages/package-2/package.json':
+          return package2File
+        default:
+          throw new Error('What?!')
+      }
+    }),
     writePackageFile: jest.fn(() => Promise.resolve())
+  }
+
+  const globber: IGlobber = {
+    globPackageFiles: jest.fn(async pattern => {
+      switch (pattern) {
+        case 'packages/*':
+          return [
+            'packages/package-1/package.json',
+            'packages/package-2/package.json'
+          ]
+        default:
+          return []
+      }
+    })
   }
 
   return {
     typedefSource,
     packageService,
-    packageFile,
-    syncer: createTypeSyncer(packageService, typedefSource)
+    rootPackageFile,
+    syncer: createTypeSyncer(packageService, typedefSource, globber)
   }
 }
 
@@ -77,8 +119,9 @@ describe('type syncer', () => {
   it('adds new packages to the package.json', async () => {
     const { syncer, packageService } = buildSyncer()
     const result = await syncer.sync('package.json')
-    const writtenPackage = (packageService.writePackageFile as jest.Mock<any>)
-      .mock.calls[0][1] as IPackageFile
+    const writtenPackage = (packageService.writePackageFile as jest.Mock<
+      any
+    >).mock.calls.find(c => c[0] === 'package.json')![1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package1': '^1.0.0',
       '@types/package3': '^1.0.0',
@@ -90,7 +133,12 @@ describe('type syncer', () => {
       package4: '^1.0.0',
       package5: '^1.0.0'
     })
-    expect(result.newTypings.map(x => x.typingsName).sort()).toEqual([
+    expect(result.syncedFiles).toHaveLength(3)
+
+    expect(result.syncedFiles[0].filePath).toEqual('package.json')
+    expect(
+      result.syncedFiles[0].newTypings.map(x => x.typingsName).sort()
+    ).toEqual([
       'myorg__package7',
       'package1',
       'package3',
@@ -98,6 +146,20 @@ describe('type syncer', () => {
       'package8',
       'package9'
     ])
+
+    expect(result.syncedFiles[1].filePath).toEqual(
+      'packages/package-1/package.json'
+    )
+    expect(
+      result.syncedFiles[1].newTypings.map(x => x.typingsName).sort()
+    ).toEqual(['package1'])
+
+    expect(result.syncedFiles[2].filePath).toEqual(
+      'packages/package-2/package.json'
+    )
+    expect(
+      result.syncedFiles[2].newTypings.map(x => x.typingsName).sort()
+    ).toEqual(['package3'])
   })
 
   it('does not write packages if options.dry is specified', async () => {

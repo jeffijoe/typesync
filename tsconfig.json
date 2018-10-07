@@ -7,8 +7,6 @@
     "outDir": "lib",
     "strictNullChecks": true,
     "esModuleInterop": true,
-    "noEmitHelpers": true,
-    "importHelpers": true,
     "noImplicitAny": true,
     "lib": ["es2015", "es2016"]
   }

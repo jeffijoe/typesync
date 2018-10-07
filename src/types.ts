@@ -52,6 +52,8 @@ export interface IPackageFile {
   devDependencies?: IDependenciesSection
   peerDependencies?: IDependenciesSection
   optionalDependencies?: IDependenciesSection
+  packages?: IWorkspacesSection
+  workspaces?: IWorkspacesSection
   [key: string]: any
 }
 
@@ -61,6 +63,11 @@ export interface IPackageFile {
 export interface IDependenciesSection {
   [packageName: string]: string
 }
+
+/**
+ * Section in package.json representing workspaces (yarn/lerna).
+ */
+export type IWorkspacesSection = Array<string>
 
 /**
  * Package + version.
@@ -82,9 +89,27 @@ export interface ITypeDefinition {
  */
 export interface ISyncResult {
   /**
+   * The files that were synced.
+   */
+  syncedFiles: Array<ISyncedFile>
+}
+
+/**
+ * A file that was synced.
+ */
+export interface ISyncedFile {
+  /**
+   * The cwd-relative path to the synced file.
+   */
+  filePath: string
+  /**
+   * The package file that was synced.
+   */
+  package: IPackageFile
+  /**
    * How many new typings were added.
    */
-  newTypings: Array<ITypeDefinition>
+  newTypings: Array<ITypeDefinition & { codePackageName: string }>
 }
 
 /**
