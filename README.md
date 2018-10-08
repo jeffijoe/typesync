@@ -37,6 +37,10 @@ TypeSync will add the latest available typings package that are missing — this
 
 If you use a Semver `^` or `~` for a package, the same prefix will be used for the typings package. If you pin to an exact version (`"some-package": "1.2.3"`), no prefix will be written.
 
+## Monorepos
+
+TypeSync added support for monorepos in v0.4.0. It will look at `packages`/`workspaces` globs in `package.json` and sync every matching file in one fell swoop.
+
 # Why?
 
 Installing typings manually sucks. Flow has `flow-typed` which installs type definitions by looking at a `package.json`, which would be cool to have for TypeScript. Now we do!
