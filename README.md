@@ -41,6 +41,10 @@ If you use a Semver `^` or `~` for a package, the same prefix will be used for t
 
 Installing typings manually sucks. Flow has `flow-typed` which installs type definitions by looking at a `package.json`, which would be cool to have for TypeScript. Now we do!
 
+# Changelog
+
+See [CHANGELOG.md](/CHANGELOG.md)
+
 # Author
 
 Jeff Hansen - [@Jeffijoe](https://twitter.com/jeffijoe)
