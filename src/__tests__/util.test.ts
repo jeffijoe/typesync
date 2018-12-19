@@ -4,7 +4,8 @@ import {
   mergeObjects,
   orderObject,
   promisify,
-  memoizeAsync
+  memoizeAsync,
+  ensureWorkspacesArray
 } from '../util'
 
 describe('util', () => {
@@ -98,6 +99,20 @@ describe('util', () => {
         await m('hello').catch(err => err.message),
         await m('hello').catch(err => err.message)
       ]).toEqual(['hello1', 'hello2'])
+    })
+  })
+
+  describe('ensureWorkspacesArray', () => {
+    it('handles bad cases', () => {
+      expect(ensureWorkspacesArray(null as any)).toEqual([])
+      expect(ensureWorkspacesArray({} as any)).toEqual([])
+      expect(ensureWorkspacesArray({ packages: {} } as any)).toEqual([])
+      expect(ensureWorkspacesArray({ packages: [1, 2, '3'] } as any)).toEqual(
+        []
+      )
+      expect(ensureWorkspacesArray({ packages: ['lol'] } as any)).toEqual([
+        'lol'
+      ])
     })
   })
 })
