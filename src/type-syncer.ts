@@ -8,8 +8,7 @@ import {
   IDependenciesSection,
   IPackageVersion,
   ISyncResult,
-  ISyncedFile,
-  IWorkspacesSection
+  ISyncedFile
 } from './types'
 import {
   filterMap,
@@ -18,7 +17,8 @@ import {
   orderObject,
   uniq,
   flatten,
-  memoizeAsync
+  memoizeAsync,
+  ensureWorkspacesArray
 } from './util'
 import { IGlobber } from './globber'
 
@@ -218,23 +218,4 @@ function getSemverRangeSpecifier(version: string): string {
   }
 
   return ''
-}
-
-/**
- * Ensures that we have a valid workspaces array.
- *
- * @param data
- */
-function ensureWorkspacesArray(data?: IWorkspacesSection): IWorkspacesSection {
-  /* istanbul ignore next */
-  if (
-    !data ||
-    !Array.isArray(data) ||
-    // tslint:disable-next-line
-    !data.every(s => typeof s === 'string')
-  ) {
-    return []
-  }
-
-  return data
 }

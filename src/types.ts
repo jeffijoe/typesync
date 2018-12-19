@@ -53,7 +53,7 @@ export interface IPackageFile {
   peerDependencies?: IDependenciesSection
   optionalDependencies?: IDependenciesSection
   packages?: IWorkspacesSection
-  workspaces?: IWorkspacesSection
+  workspaces?: IWorkspacesSection | IYarnWorkspacesConfig
   [key: string]: any
 }
 
@@ -68,6 +68,13 @@ export interface IDependenciesSection {
  * Section in package.json representing workspaces (yarn/lerna).
  */
 export type IWorkspacesSection = Array<string>
+
+/**
+ * Yarn is a special snowflake.
+ */
+export interface IYarnWorkspacesConfig {
+  packages: IWorkspacesSection
+}
 
 /**
  * Package + version.

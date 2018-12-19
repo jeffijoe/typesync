@@ -1,3 +1,5 @@
+import { IWorkspacesSection, IYarnWorkspacesConfig } from './types'
+
 /**
  * Returns unique items.
  *
@@ -130,4 +132,28 @@ export function memoizeAsync<T, U extends any[], V>(
     cache.set(key, p)
     return p
   }
+}
+
+/**
+ * Ensures that we have a valid workspaces array.
+ *
+ * @param data
+ */
+export function ensureWorkspacesArray(
+  data?: IWorkspacesSection | IYarnWorkspacesConfig
+): IWorkspacesSection {
+  if (!data) {
+    return []
+  }
+
+  if (!Array.isArray(data)) {
+    return ensureWorkspacesArray(data.packages)
+  }
+
+  // tslint:disable-next-line
+  if (!data.every(s => typeof s === 'string')) {
+    return []
+  }
+
+  return data
 }
