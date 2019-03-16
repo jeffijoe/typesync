@@ -47,7 +47,7 @@ export interface IPackageJSONService {
  * Package.json file.
  */
 export interface IPackageFile {
-  name: string
+  name?: string
   dependencies?: IDependenciesSection
   devDependencies?: IDependenciesSection
   peerDependencies?: IDependenciesSection

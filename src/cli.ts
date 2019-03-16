@@ -1,5 +1,6 @@
-import { createContainer, InjectionMode, asFunction, asValue } from 'awilix'
+import { createContainer, InjectionMode, asFunction } from 'awilix'
 import chalk from 'chalk'
+import * as path from 'path'
 import * as C from './cli-util'
 import { ITypeSyncer, ITypeDefinition, ISyncedFile } from './types'
 import { createTypeSyncer } from './type-syncer'
@@ -82,9 +83,12 @@ function renderSyncedFile(file: ISyncedFile) {
     file.newTypings.length === 0
       ? chalk`{blue.bold (no new typings added)}`
       : chalk`{green.bold (${file.newTypings.length.toString()} new typings added)}`
-  const title = chalk`📦 ${file.package.name} {gray.italic — ${
+
+  const dirName = path.basename(path.dirname(path.resolve(file.filePath)))
+  const title = chalk`📦 ${file.package.name || dirName} {gray.italic — ${
     file.filePath
   }} ${badge}`
+
   const nl = '\n'
   return (
     title +
