@@ -8,7 +8,9 @@ import {
   IDependenciesSection,
   IPackageVersion,
   ISyncResult,
-  ISyncedFile
+  ISyncedFile,
+  IPackageSource,
+  IPackageInfo
 } from './types'
 import {
   filterMap,
@@ -21,6 +23,7 @@ import {
   ensureWorkspacesArray
 } from './util'
 import { IGlobber } from './globber'
+import { satisfies } from 'semver'
 
 /**
  * Creates a type syncer.
@@ -31,11 +34,11 @@ import { IGlobber } from './globber'
 export function createTypeSyncer(
   packageJSONService: IPackageJSONService,
   typeDefinitionSource: ITypeDefinitionSource,
+  packageSource: IPackageSource,
   globber: IGlobber
 ): ITypeSyncer {
-  const getLatestTypingsVersion = memoizeAsync(
-    typeDefinitionSource.getLatestTypingsVersion
-  )
+  const fetchPackageInfo = memoizeAsync(packageSource.fetch)
+
   return {
     sync
   }
@@ -95,15 +98,43 @@ export function createTypeSyncer(
     const allPackageNames = uniq(allPackages.map(p => p.name))
 
     const newTypings = filterNewTypings(allPackageNames, allTypings)
+    // This is pushed to in the inner `map`, because packages that have DT-typings
+    // *as well* as internal typings should be exclused.
+    const used: Array<ReturnType<typeof filterNewTypings>[0]> = []
     const devDepsToAdd = await Promise.all(
       newTypings.map(async t => {
-        const latestVersion = await getLatestTypingsVersion(t.typingsName)
-        const codePackage = allPackages.find(p => p.name === t.codePackageName)
-        const semverRangeSpecifier = codePackage
-          ? getSemverRangeSpecifier(codePackage.version)
-          : '^'
+        // Fetch the code package from the source.
+        const typePackageInfoPromise = fetchPackageInfo(typed(t.typingsName))
+        const codePackageInfo = await fetchPackageInfo(t.codePackageName)
+        const codePackage = allPackages.find(p => p.name === t.codePackageName)!
+
+        // Find the closest matching code package version relative to what's in our package.json
+        const closestMatchingCodeVersion = getClosestMatchingVersion(
+          codePackageInfo,
+          codePackage.version
+        )
+
+        // If the closest matching version contains internal typings, don't include it.
+        if (closestMatchingCodeVersion.containsInternalTypings) {
+          return {}
+        }
+
+        // Look for the closest matching typings package.
+        const typePackageInfo = await typePackageInfoPromise
+        // Gets the closest matching typings version, or the newest one.
+        const closestMatchingTypingsVersion = getClosestMatchingVersion(
+          typePackageInfo,
+          codePackage.version
+        )
+
+        const version = closestMatchingTypingsVersion.version
+        const semverRangeSpecifier = getSemverRangeSpecifier(
+          codePackage.version
+        )
+
+        used.push(t)
         return {
-          [typed(t.typingsName)]: semverRangeSpecifier + latestVersion
+          [typed(t.typingsName)]: semverRangeSpecifier + version
         }
       })
     ).then(mergeObjects)
@@ -120,10 +151,23 @@ export function createTypeSyncer(
 
     return {
       filePath,
-      newTypings,
+      newTypings: used,
       package: file
     }
   }
+}
+
+/**
+ * Gets the closest matching package version info.
+ *
+ * @param packageInfo
+ * @param version
+ */
+function getClosestMatchingVersion(packageInfo: IPackageInfo, version: string) {
+  return (
+    packageInfo.versions.find(v => satisfies(v.version, version)) ||
+    packageInfo.versions[0]
+  )
 }
 
 /**
@@ -139,11 +183,14 @@ function filterNewTypings(
   const existingTypings = allPackageNames.filter(x => x.startsWith('@types/'))
   return filterMap(allPackageNames, p => {
     const scopeInfo = getPackageScope(p)
+    let typingsName = p
     if (scopeInfo && scopeInfo[0] !== 'types') {
-      p = `${scopeInfo[0]}__${scopeInfo[1]}`
+      typingsName = `${scopeInfo[0]}__${scopeInfo[1]}`
     }
 
-    const typingsForPackage = allTypings.find(x => x.typingsName === p)
+    const typingsForPackage = allTypings.find(
+      x => x.typingsName === typingsName
+    )
     if (!typingsForPackage) {
       // No typings available.
       return false

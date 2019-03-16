@@ -1,3 +1,13 @@
+# v0.5.0
+
+- Don't install typings for packages that provide typings ([#24](https://github.com/jeffijoe/typesync/issues/24))
+- Best-effort at respecting semver, falls back to latest ([#25](https://github.com/jeffijoe/typesync/issues/25))
+- Add note about `npx` to README ([#13](https://github.com/jeffijoe/typesync/issues/13))
+
+# v0.4.1
+
+- Support object variant of Yarn workspaces config.
+
 # v0.4.0
 
 - Support monorepos by reading `packages`/`workspaces` and syncing matching `package.json` files ([#11](https://github.com/jeffijoe/typesync/issues/11))

@@ -23,10 +23,18 @@ export interface ITypeDefinitionSource {
    * Fetches available type definitions.
    */
   fetch(): Promise<Array<ITypeDefinition>>
+}
+
+/**
+ * Fetches info about a package.
+ */
+export interface IPackageSource {
   /**
-   * Gets the latest version of the typings for the specified typings package.
+   * Fetches package info from an external source.
+   *
+   * @param packageName
    */
-  getLatestTypingsVersion(typingsPackageName: string): Promise<string>
+  fetch(packageName: string): Promise<IPackageInfo>
 }
 
 /**
@@ -41,6 +49,23 @@ export interface IPackageJSONService {
    * Writes the JSON to the specified file.
    */
   writePackageFile(filePath: string, fileContents: IPackageFile): Promise<void>
+}
+
+/**
+ * Interface for the Package Info structure.
+ */
+export interface IPackageInfo {
+  name: string
+  latestVersion: string
+  versions: Array<IPackageVersionInfo>
+}
+
+/**
+ * Version descriptor for versions returned in remote package info.
+ */
+export interface IPackageVersionInfo {
+  version: string
+  containsInternalTypings: boolean
 }
 
 /**
@@ -77,7 +102,7 @@ export interface IYarnWorkspacesConfig {
 }
 
 /**
- * Package + version.
+ * Package + version record, collected from the {"package": "^1.2.3"} sections.
  */
 export interface IPackageVersion {
   name: string

@@ -5,7 +5,7 @@
     "moduleResolution": "node",
     "target": "es5",
     "outDir": "lib",
-    "strictNullChecks": true,
+    "strict": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "lib": ["es2015", "es2016"]

@@ -51,16 +51,19 @@ export function mergeObjects<T>(source: Array<T>): T {
  * Returns the assumed types package name.
  * @param name Package name
  */
-export function typed(name: string, urlEncode = false): string {
-  return `@types${urlEncode ? '%2F' : '/'}${name}`
+export function typed(name: string): string {
+  return `@types/${name}`
 }
 
 /**
  * Orders an object.
  * @param source
  */
-export function orderObject<T>(source: T): T {
-  const keys = Object.keys(source).sort()
+export function orderObject<T>(
+  source: T,
+  comparer?: (a: string, b: string) => number
+): T {
+  const keys = Object.keys(source).sort(comparer)
   const result: any = {}
   for (const key of keys) {
     result[key] = (source as any)[key]
