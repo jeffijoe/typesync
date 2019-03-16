@@ -2,7 +2,7 @@
 
 - Don't install typings for packages that provide typings ([#24](https://github.com/jeffijoe/typesync/issues/24))
 - Best-effort at respecting semver, falls back to latest ([#25](https://github.com/jeffijoe/typesync/issues/25))
-- Add note about `npx` to README ([#13](https://github.com/jeffijoe/typesync/issues/13))
+- Add note about `npx` to README ([#21](https://github.com/jeffijoe/typesync/issues/21))
 
 # v0.4.1
 
