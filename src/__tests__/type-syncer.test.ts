@@ -2,10 +2,13 @@ import {
   ITypeDefinitionSource,
   IPackageJSONService,
   ITypeDefinition,
-  IPackageFile
+  IPackageFile,
+  IPackageSource,
+  IPackageInfo
 } from '../types'
 import { createTypeSyncer } from '../type-syncer'
 import { IGlobber } from '../globber'
+import { typed } from '../util'
 
 const typedefs: ITypeDefinition[] = [
   {
@@ -16,6 +19,9 @@ const typedefs: ITypeDefinition[] = [
   },
   {
     typingsName: 'package3'
+  },
+  {
+    typingsName: 'packageWithInternalTypings'
   },
   {
     typingsName: 'package4'
@@ -32,6 +38,9 @@ const typedefs: ITypeDefinition[] = [
   },
   {
     typingsName: 'package9'
+  },
+  {
+    typingsName: 'packageWithOldTypings'
   }
 ]
 
@@ -40,7 +49,9 @@ function buildSyncer() {
     name: 'consumer',
     dependencies: {
       package1: '^1.0.0',
-      package3: '^1.0.0'
+      package3: '^1.0.0',
+      packageWithInternalTypings: '^1.0.0',
+      packageWithOldTypings: '^1.0.0'
     },
     devDependencies: {
       '@types/package4': '^1.0.0',
@@ -74,8 +85,7 @@ function buildSyncer() {
   }
 
   const typedefSource: ITypeDefinitionSource = {
-    fetch: jest.fn(() => Promise.resolve(typedefs)),
-    getLatestTypingsVersion: jest.fn(() => Promise.resolve('1.0.0'))
+    fetch: jest.fn(() => Promise.resolve(typedefs))
   }
   const packageService: IPackageJSONService = {
     readPackageFile: jest.fn(async (filepath: string) => {
@@ -107,11 +117,37 @@ function buildSyncer() {
     })
   }
 
+  const packageSource: IPackageSource = {
+    fetch: jest.fn(async name => {
+      return {
+        name,
+        latestVersion: '2.0.0',
+        versions: [
+          {
+            version: '2.0.0',
+            containsInternalTypings: false
+          },
+          {
+            version:
+              name === '@types/packageWithOldTypings' ? '0.0.1' : '1.0.0',
+            containsInternalTypings: name === 'packageWithInternalTypings'
+          }
+        ]
+      } as IPackageInfo
+    })
+  }
+
   return {
     typedefSource,
     packageService,
     rootPackageFile,
-    syncer: createTypeSyncer(packageService, typedefSource, globber)
+    packageSource,
+    syncer: createTypeSyncer(
+      packageService,
+      typedefSource,
+      packageSource,
+      globber
+    )
   }
 }
 
@@ -130,6 +166,7 @@ describe('type syncer', () => {
       '@types/myorg__package7': '^1.0.0',
       '@types/package8': '~1.0.0',
       '@types/package9': '1.0.0',
+      '@types/packageWithOldTypings': '^2.0.0',
       package4: '^1.0.0',
       package5: '^1.0.0'
     })
@@ -144,7 +181,8 @@ describe('type syncer', () => {
       'package3',
       'package5',
       'package8',
-      'package9'
+      'package9',
+      'packageWithOldTypings'
     ])
 
     expect(result.syncedFiles[1].filePath).toEqual(
