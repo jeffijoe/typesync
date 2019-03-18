@@ -7,6 +7,7 @@ import { createTypeSyncer } from './type-syncer'
 import { createTypeDefinitionSource } from './type-definition-source'
 import { createPackageJSONFileService } from './package-json-file-service'
 import { createGlobber } from './globber'
+import { createPackageSource } from './package-source'
 
 /**
  * Starts the TypeSync CLI.
@@ -19,6 +20,7 @@ export async function startCli() {
     }).register({
       typeDefinitionSource: asFunction(createTypeDefinitionSource).singleton(),
       packageJSONService: asFunction(createPackageJSONFileService).singleton(),
+      packageSource: asFunction(createPackageSource).singleton(),
       globber: asFunction(createGlobber).singleton(),
       typeSyncer: asFunction(createTypeSyncer)
     })
