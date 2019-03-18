@@ -1,3 +1,7 @@
+# v0.5.1
+
+- Fix issue where TypeSync wouldn't start
+
 # v0.5.0
 
 - Don't install typings for packages that provide typings ([#24](https://github.com/jeffijoe/typesync/issues/24))
