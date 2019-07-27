@@ -1,3 +1,7 @@
+# v0.5.2
+
+- Updated packages ([#31](https://github.com/jeffijoe/typesync/issues/31))
+
 # v0.5.1
 
 - Fix issue where TypeSync wouldn't start
