@@ -48,7 +48,7 @@
   "homepage": "https://github.com/jeffijoe/typesync#readme",
   "dependencies": {
     "awilix": "^3.0.9",
-    "axios": "^0.18.0",
+    "axios": "^0.19.0",
     "chalk": "^2.4.1",
     "detect-indent": "^5.0.0",
     "glob": "^7.1.3",
