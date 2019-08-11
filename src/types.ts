@@ -13,6 +13,10 @@ export interface ISyncOptions {
    * If set, will not write to package.json.
    */
   dry?: boolean
+  /**
+   * Ignore certain deps.
+   */
+  ignore?: IIgnoreDeps
 }
 
 /**
@@ -114,6 +118,14 @@ export interface IPackageVersion {
  */
 export interface ITypeDefinition {
   typingsName: string
+  isGlobal: boolean
+}
+
+/**
+ * A type definition with the corresponding code package name.
+ */
+export interface ISyncedTypeDefinition extends ITypeDefinition {
+  codePackageName: string
 }
 
 /**
@@ -139,15 +151,29 @@ export interface ISyncedFile {
    */
   package: IPackageFile
   /**
-   * How many new typings were added.
+   * The new typings that were added.
    */
-  newTypings: Array<ITypeDefinition & { codePackageName: string }>
+  newTypings: Array<ISyncedTypeDefinition>
+  /**
+   * The typings that were removed because they were unused.
+   */
+  removedTypings: Array<ISyncedTypeDefinition>
+}
+
+/**
+ * Options for ignoring dependency sections.
+ */
+export interface IIgnoreDeps {
+  dev?: boolean
+  deps?: boolean
+  optional?: boolean
+  peer?: boolean
 }
 
 /**
  * CLI arguments.
  */
 export interface ICLIArguments {
-  flags: { [key: string]: boolean | undefined }
+  flags: { [key: string]: boolean | string | undefined }
   args: Array<string>
 }

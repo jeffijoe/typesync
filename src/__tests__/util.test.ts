@@ -5,7 +5,8 @@ import {
   orderObject,
   promisify,
   memoizeAsync,
-  ensureWorkspacesArray
+  ensureWorkspacesArray,
+  untyped
 } from '../util'
 
 describe('util', () => {
@@ -113,6 +114,14 @@ describe('util', () => {
       expect(ensureWorkspacesArray({ packages: ['lol'] } as any)).toEqual([
         'lol'
       ])
+    })
+  })
+
+  describe('untyped', () => {
+    it('correctly converts a type package name to a code package name', () => {
+      expect(untyped('lol')).toBe('lol')
+      expect(untyped('@types/lol')).toBe('lol')
+      expect(untyped('@types/rofl__lol')).toBe('@rofl/lol')
     })
   })
 })

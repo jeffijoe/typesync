@@ -10,7 +10,8 @@ import {
   ISyncResult,
   ISyncedFile,
   IPackageSource,
-  IPackageInfo
+  IPackageInfo,
+  ISyncedTypeDefinition
 } from './types'
 import {
   filterMap,
@@ -20,7 +21,8 @@ import {
   uniq,
   flatten,
   memoizeAsync,
-  ensureWorkspacesArray
+  ensureWorkspacesArray,
+  untyped
 } from './util'
 import { IGlobber } from './globber'
 import { satisfies } from 'semver'
@@ -88,12 +90,13 @@ export function createTypeSyncer(
     allTypings: Array<ITypeDefinition>,
     opts: ISyncOptions
   ): Promise<ISyncedFile> {
+    const ignore = opts.ignore || {}
     file = file || (await packageJSONService.readPackageFile(filePath))
     const allPackages = [
-      ...getPackagesFromSection(file.dependencies),
-      ...getPackagesFromSection(file.devDependencies),
-      ...getPackagesFromSection(file.optionalDependencies),
-      ...getPackagesFromSection(file.peerDependencies)
+      ...getPackagesFromSection(file.dependencies, ignore.deps),
+      ...getPackagesFromSection(file.devDependencies, ignore.dev),
+      ...getPackagesFromSection(file.optionalDependencies, ignore.optional),
+      ...getPackagesFromSection(file.peerDependencies, ignore.peer)
     ]
     const allPackageNames = uniq(allPackages.map(p => p.name))
 
@@ -138,13 +141,14 @@ export function createTypeSyncer(
         }
       })
     ).then(mergeObjects)
-
+    const devDeps = file.devDependencies || /* istanbul ignore next */ {}
+    const unused = getUnusedTypings(allPackageNames, devDeps, allTypings)
     if (!opts.dry) {
       await packageJSONService.writePackageFile(filePath, {
         ...file,
         devDependencies: orderObject({
           ...devDepsToAdd,
-          ...file.devDependencies
+          ...removeUnusedTypings(devDeps, unused)
         })
       } as IPackageFile)
     }
@@ -152,9 +156,71 @@ export function createTypeSyncer(
     return {
       filePath,
       newTypings: used,
+      removedTypings: unused,
       package: file
     }
   }
+}
+
+/**
+ * Removes unused typings from the devDependencies section.
+ *
+ * @param allPackageNames
+ * @param devDependencies
+ */
+function removeUnusedTypings(
+  devDependencies: IDependenciesSection,
+  unusedTypings: Array<ISyncedTypeDefinition & { typingsPackageName: string }>
+): IDependenciesSection {
+  const result: IDependenciesSection = {}
+  for (let packageName in devDependencies) {
+    const version = devDependencies[packageName]
+    if (unusedTypings.some(t => t.typingsPackageName === packageName)) {
+      continue
+    }
+    result[packageName] = version
+  }
+  return result
+}
+
+/**
+ * Removes unused typings from the devDependencies section.
+ *
+ * @param allPackageNames
+ * @param devDependencies
+ */
+function getUnusedTypings(
+  allPackageNames: string[],
+  devDependencies: IDependenciesSection,
+  allTypings: Array<ITypeDefinition>
+) {
+  const result: Array<
+    ISyncedTypeDefinition & { typingsPackageName: string }
+  > = []
+  for (let packageName in devDependencies) {
+    if (packageName.startsWith('@types/')) {
+      const codePackageName = untyped(packageName)
+      // Make sure the corresponding code package is in `allPackages`.
+      const hasCodePackageForTyping = allPackageNames.some(
+        p => p === codePackageName
+      )
+      if (!hasCodePackageForTyping) {
+        const typingsNameForCodePackage = getTypingsName(codePackageName)
+        const typeDef = allTypings.find(
+          t => t.typingsName === typingsNameForCodePackage
+        )
+
+        if (typeDef && !typeDef.isGlobal) {
+          result.push({
+            codePackageName,
+            typingsPackageName: packageName,
+            ...typeDef!
+          })
+        }
+      }
+    }
+  }
+  return result
 }
 
 /**
@@ -182,11 +248,7 @@ function filterNewTypings(
 ): Array<ITypeDefinition & { codePackageName: string }> {
   const existingTypings = allPackageNames.filter(x => x.startsWith('@types/'))
   return filterMap(allPackageNames, p => {
-    const scopeInfo = getPackageScope(p)
-    let typingsName = p
-    if (scopeInfo && scopeInfo[0] !== 'types') {
-      typingsName = `${scopeInfo[0]}__${scopeInfo[1]}`
-    }
+    let typingsName = getTypingsName(p)
 
     const typingsForPackage = allTypings.find(
       x => x.typingsName === typingsName
@@ -210,6 +272,21 @@ function filterNewTypings(
 }
 
 /**
+ * Gets the typings name for the specified package name.
+ * For example, `koa` would be `koa`, but `@koa/router` would be `koa__router`.
+ *
+ * @param packageName the package name to generate the typings name for
+ */
+function getTypingsName(packageName: string) {
+  const scopeInfo = getPackageScope(packageName)
+  let typingsName = packageName
+  if (scopeInfo && scopeInfo[0] !== 'types') {
+    typingsName = `${scopeInfo[0]}__${scopeInfo[1]}`
+  }
+  return typingsName
+}
+
+/**
  * If a package is scoped, returns the scope + package as a tuple, otherwise null.
  *
  * @param packageName Package name to check scope for.
@@ -230,10 +307,10 @@ function getPackageScope(packageName: string): [string, string] | null {
  * @param section
  */
 function getPackagesFromSection(
-  section?: IDependenciesSection
+  section?: IDependenciesSection,
+  ignore?: boolean
 ): Array<IPackageVersion> {
-  /* istanbul ignore next */
-  if (!section) {
+  if (ignore || !section) {
     return []
   }
 

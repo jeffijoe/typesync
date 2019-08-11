@@ -1,4 +1,4 @@
-import { ITypeDefinitionSource } from './types'
+import { ITypeDefinitionSource, ITypeDefinition } from './types'
 import axios from 'axios'
 import { unzipResponse } from './response-util'
 
@@ -20,8 +20,9 @@ export function createTypeDefinitionSource(): ITypeDefinitionSource {
         })
         .then(unzipResponse)
 
-      return data.map((d: any) => ({
-        typingsName: d.t
+      return data.map<ITypeDefinition>((d: any) => ({
+        typingsName: d.t,
+        isGlobal: d.g && d.g.length > 0
       }))
     }
   }

@@ -33,11 +33,22 @@ typesync [path/to/package.json] [--dry]
 
 Path is relative to the current working directory. If omitted, defaults to `package.json`.
 
+## `--dry`
+
 If `--dry` is specified, will not actually write to the file, it only prints added typings,
+
+## `--ignoredeps`
+
+To ignore certain sections, you can use the `--ignoredeps=` flag. For example, to ignore `devDependencies`, use `--ignoredeps=dev`. To ignore multiple, comma-separate them, like this: `--ignoredeps=deps,peer` (ignores `dependencies` and `peerDependencies`).
+
+* `--ignoredeps=deps` — ignores `dependencies`
+* `--ignoredeps=dev` — ignores `devDependencies`
+* `--ignoredeps=peer` — ignores `peerDependencies`
+* `--ignoredeps=optional` — ignores `optionalDependencies`
 
 **Note**: `typesync` only modifies your `package.json` - you still need to run `npm install`, or — if drinking the k00laid — `yarn`.
 
-## Typings packages
+# Typings packages
 
 TypeSync will add typings for packages that:
 
@@ -48,7 +59,9 @@ TypeSync will try to respect semver parity for the code and typings packages, an
 
 If you use a Semver `^` or `~` for a package, the same prefix will be used for the typings package. If you pin to an exact version (`"some-package": "1.2.3"`), no prefix will be written.
 
-## Monorepos
+If a typings package in your `package.json` is not used (has no corresponding code package in your `package.json` and does not contribute to the global namespace), TypeSync will automatically remove it.
+
+# Monorepos
 
 TypeSync added support for monorepos in v0.4.0. It will look at `packages`/`workspaces` globs in `package.json` and sync every matching file in one fell swoop.
 

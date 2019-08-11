@@ -2,7 +2,7 @@ import { createContainer, InjectionMode, asFunction } from 'awilix'
 import chalk from 'chalk'
 import * as path from 'path'
 import * as C from './cli-util'
-import { ITypeSyncer, ITypeDefinition, ISyncedFile } from './types'
+import { ITypeSyncer, ITypeDefinition, ISyncedFile, IIgnoreDeps } from './types'
 import { createTypeSyncer } from './type-syncer'
 import { createTypeDefinitionSource } from './type-definition-source'
 import { createPackageJSONFileService } from './package-json-file-service'
@@ -42,6 +42,14 @@ async function run(syncer: ITypeSyncer) {
     printHelp()
     return
   }
+  const ignore: IIgnoreDeps = {}
+  if (typeof flags.ignoredeps === 'string') {
+    const splat = flags.ignoredeps.split(',')
+    ignore.deps = splat.includes('deps')
+    ignore.dev = splat.includes('dev')
+    ignore.optional = splat.includes('optional')
+    ignore.peer = splat.includes('peer')
+  }
 
   C.log(chalk`TypeSync v{white ${require('../package.json').version}}`)
   if (flags.dry) {
@@ -49,19 +57,36 @@ async function run(syncer: ITypeSyncer) {
   }
   const result = await C.spinWhile(
     `Syncing type definitions in ${chalk.cyan(filePath)}...`,
-    () => syncer.sync(filePath, { dry: flags.dry })
+    () => syncer.sync(filePath, { dry: !!flags.dry, ignore })
   )
 
   const syncedFilesOutput = result.syncedFiles
     .map(renderSyncedFile)
     .join('\n\n')
-  const totalNewTypings = result.syncedFiles
-    .map(f => f.newTypings.length)
-    .reduce((accum, next) => accum + next, 0)
+  const totals = result.syncedFiles
+    .map(f => ({
+      newTypings: f.newTypings.length,
+      removedTypings: f.removedTypings.length
+    }))
+    .reduce(
+      (accum, next) => ({
+        newTypings: accum.newTypings + next.newTypings,
+        removedTypings: accum.removedTypings + next.removedTypings
+      }),
+      { newTypings: 0, removedTypings: 0 }
+    )
   C.success(
-    totalNewTypings === 0
-      ? `No new typings added, looks like you're all synced up!`
-      : chalk`${totalNewTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
+    totals.newTypings === 0
+      ? `No new typings added, looks like you're all synced up!${
+          totals.removedTypings > 0
+            ? chalk` {gray.italic Also removed ${totals.removedTypings.toString()} unused typings, no big deal.}`
+            : ''
+        }`
+      : chalk`${totals.newTypings.toString()} new typings added${
+          totals.removedTypings > 0
+            ? chalk` {italic (${totals.removedTypings.toString()} unused removed)}`
+            : ''
+        }.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
   )
 }
 
@@ -70,9 +95,18 @@ async function run(syncer: ITypeSyncer) {
  * @param typeDef
  * @param isLast
  */
-function renderTypeDef(typeDef: ITypeDefinition, isLast: boolean) {
+function renderTypeDef(
+  typeDef: ITypeDefinition & { action: string },
+  isLast: boolean
+) {
   const treeNode = isLast ? '└─' : '├─'
-  return chalk`${treeNode} {gray @types/}{bold.blue ${typeDef.typingsName}}`
+  return chalk`${treeNode} ${
+    typeDef.action === 'add' ? chalk`{green.bold +}` : chalk`{red.bold -}`
+  } {gray @types/}${
+    typeDef.action === 'add'
+      ? chalk`{bold.blue ${typeDef.typingsName}}`
+      : chalk`{bold.yellow ${typeDef.typingsName}} {gray.italic (unused)}`
+  }`
 }
 
 /**
@@ -82,9 +116,9 @@ function renderTypeDef(typeDef: ITypeDefinition, isLast: boolean) {
  */
 function renderSyncedFile(file: ISyncedFile) {
   const badge =
-    file.newTypings.length === 0
+    file.newTypings.length === 0 && file.removedTypings.length === 0
       ? chalk`{blue.bold (no new typings added)}`
-      : chalk`{green.bold (${file.newTypings.length.toString()} new typings added)}`
+      : chalk`{green.bold (${file.newTypings.length.toString()} new typings added, ${file.removedTypings.length.toString()} unused typings removed)}`
 
   const dirName = path.basename(path.dirname(path.resolve(file.filePath)))
   const title = chalk`📦 ${file.package.name || dirName} {gray.italic — ${
@@ -92,15 +126,18 @@ function renderSyncedFile(file: ISyncedFile) {
   }} ${badge}`
 
   const nl = '\n'
-  return (
+  const combined = [
+    ...file.newTypings.map(t => ({ ...t, action: 'add' })),
+    ...file.removedTypings.map(t => ({ ...t, action: 'remove' }))
+  ]
+  const rendered =
     title +
     nl +
-    file.newTypings
-      .map(t =>
-        renderTypeDef(t, file.newTypings[file.newTypings.length - 1] === t)
-      )
+    combined
+      .map(t => renderTypeDef(t, combined[combined.length - 1] === t))
       .join(nl)
-  )
+
+  return rendered
 }
 
 /**
@@ -112,8 +149,9 @@ function printHelp() {
 {blue.bold typesync} - adds missing TypeScript definitions to package.json
 
 Options
-  {magenta.bold --dry}      dry run, won't save the package.json
-  {magenta.bold --help}     shows this help menu
+  {magenta.bold --dry}                                   dry run, won't save the package.json
+  {magenta.bold --ignoredeps=<deps|dev|peer|optional>}   ignores dependencies in the specified sections (comma separate for multiple). Example: {magenta ignoredeps=dev,peer}
+  {magenta.bold --help}                                  shows this help menu
   `.trim()
   )
 }
