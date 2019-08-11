@@ -56,6 +56,23 @@ export function typed(name: string): string {
 }
 
 /**
+ * Returns the assumed code package name based on a types package name.
+ * @param name
+ */
+export function untyped(name: string): string {
+  const prefix = '@types/'
+  if (!name.startsWith(prefix)) {
+    return name
+  }
+  name = name.substring(prefix.length)
+  const splat = name.split('__')
+  if (splat.length === 2) {
+    return `@${splat[0]}/${splat[1]}`
+  }
+  return name
+}
+
+/**
  * Orders an object.
  * @param source
  */

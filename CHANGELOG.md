@@ -1,3 +1,8 @@
+# v0.6.0
+
+- Automatically removes unused typings ([#35](https://github.com/jeffijoe/typesync/issues/35))
+- `--ignoredeps=<deps,dev,optional,peer>` flag ([#30](https://github.com/jeffijoe/typesync/issues/30))
+
 # v0.5.2
 
 - Updated packages ([#31](https://github.com/jeffijoe/typesync/issues/31))

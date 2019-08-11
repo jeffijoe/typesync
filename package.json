@@ -56,14 +56,12 @@
     "semver": "^6.3.0"
   },
   "devDependencies": {
-    "@types/detect-indent": "^6.0.0",
     "@types/glob": "^7.1.1",
-    "@types/jest": "^24.0.15",
-    "@types/ora": "^3.2.0",
-    "@types/prettier": "^1.18.0",
+    "@types/jest": "^24.0.17",
+    "@types/prettier": "^1.18.1",
     "@types/rimraf": "^2.0.2",
     "@types/semver": "^6.0.1",
-    "coveralls": "^3.0.5",
+    "coveralls": "^3.0.6",
     "jest": "^24.8.0",
     "nodemon": "^1.19.1",
     "prettier": "^1.18.2",
