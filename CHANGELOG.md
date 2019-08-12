@@ -1,3 +1,7 @@
+# v0.6.1
+
+- Fix issue with unzipping, simply by _not unzipping at all_ ([#37](https://github.com/jeffijoe/typesync/issues/37))
+
 # v0.6.0
 
 - Automatically removes unused typings ([#35](https://github.com/jeffijoe/typesync/issues/35))

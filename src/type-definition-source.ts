@@ -1,6 +1,5 @@
 import { ITypeDefinitionSource, ITypeDefinition } from './types'
 import axios from 'axios'
-import { unzipResponse } from './response-util'
 
 const typedefsUrl =
   'https://typespublisher.blob.core.windows.net/typespublisher/data/search-index-min.json'
@@ -14,11 +13,7 @@ export function createTypeDefinitionSource(): ITypeDefinitionSource {
      * Fetches available type defs.
      */
     fetch: async () => {
-      const data = await axios
-        .get(typedefsUrl, {
-          responseType: 'stream'
-        })
-        .then(unzipResponse)
+      const data = await axios.get(typedefsUrl).then(x => x.data as any[])
 
       return data.map<ITypeDefinition>((d: any) => ({
         typingsName: d.t,
