@@ -21,7 +21,7 @@ describe('package json file service', () => {
       expect.assertions(1)
       await subject
         .readPackageFile('nonexistent.json')
-        .catch(err => expect(err.message).toMatch(/exist/i))
+        .catch((err) => expect(err.message).toMatch(/exist/i))
     })
   })
 
@@ -32,8 +32,8 @@ describe('package json file service', () => {
         name: 'fony-package',
         dependencies: {
           '@types/package1': '^1.0.0',
-          package1: '^1.0.0'
-        }
+          package1: '^1.0.0',
+        },
       }
       await subject.writePackageFile(file, data)
       const after = await subject.readPackageFile(file)
@@ -44,24 +44,24 @@ describe('package json file service', () => {
     it('preserves trailing newline when writing', async () => {
       const [noNewline, withNewline] = await Promise.all([
         _writeFixture(false),
-        _writeFixture(true)
+        _writeFixture(true),
       ])
       const data = {
         name: 'fony-package',
         dependencies: {
           '@types/package1': '^1.0.0',
-          package1: '^1.0.0'
-        }
+          package1: '^1.0.0',
+        },
       }
 
       await Promise.all([
         subject.writePackageFile(noNewline, data),
-        subject.writePackageFile(withNewline, data)
+        subject.writePackageFile(withNewline, data),
       ])
 
       const [noNewlineContent, withNewlineContent] = await Promise.all([
-        readFileAsync(noNewline).then(x => x.toString()),
-        readFileAsync(withNewline).then(x => x.toString())
+        readFileAsync(noNewline).then((x) => x.toString()),
+        readFileAsync(withNewline).then((x) => x.toString()),
       ])
 
       expect(noNewlineContent[noNewlineContent.length - 1]).not.toBe('\n')
@@ -85,8 +85,8 @@ function _writeFixture(withTrailingNewline = false): Promise<string> {
       {
         name: 'fony-package',
         dependencies: {
-          package1: '^1.0.0'
-        }
+          package1: '^1.0.0',
+        },
       },
       null,
       2
@@ -95,5 +95,5 @@ function _writeFixture(withTrailingNewline = false): Promise<string> {
 }
 
 function cleanup(...files: string[]): Promise<any> {
-  return Promise.all(files.map(f => unlinkAsync(f)))
+  return Promise.all(files.map((f) => unlinkAsync(f)))
 }

@@ -6,7 +6,7 @@ import {
   promisify,
   memoizeAsync,
   ensureWorkspacesArray,
-  untyped
+  untyped,
 } from '../util'
 
 describe('util', () => {
@@ -19,7 +19,7 @@ describe('util', () => {
   describe('filterMap', () => {
     it('filters out false values', () => {
       expect(
-        filterMap([1, 2, 3, 4], item => (item % 2 === 0 ? false : item + 1))
+        filterMap([1, 2, 3, 4], (item) => (item % 2 === 0 ? false : item + 1))
       ).toEqual([2, 4])
     })
   })
@@ -29,7 +29,7 @@ describe('util', () => {
       expect(mergeObjects([{ a: 1 }, { b: 2 }, { a: 3 }, { c: 4 }])).toEqual({
         a: 3,
         b: 2,
-        c: 4
+        c: 4,
       })
     })
   })
@@ -63,7 +63,7 @@ describe('util', () => {
       const original = (arg1: any, arg2: any, cb: Function) =>
         cb(new Error('oh shit'), null)
       const promisified = promisify(original)
-      const err = await promisified(2, 2).catch(err => err)
+      const err = await promisified(2, 2).catch((err) => err)
       expect(err.message).toBe('oh shit')
     })
 
@@ -71,7 +71,7 @@ describe('util', () => {
       const original = (arg1: any, arg2: any, cb: Function) =>
         cb(new Error('oh shit'))
       const promisified = promisify(original)
-      const err = await promisified(2, 2).catch(err => err)
+      const err = await promisified(2, 2).catch((err) => err)
       expect(err.message).toBe('oh shit')
     })
   })
@@ -86,7 +86,7 @@ describe('util', () => {
       expect([await m('hello'), await m('hello')]).toEqual(['hello1', 'hello1'])
       expect([await m('goodbye'), await m('goodbye')]).toEqual([
         'goodbye2',
-        'goodbye2'
+        'goodbye2',
       ])
     })
 
@@ -97,8 +97,8 @@ describe('util', () => {
         Promise.reject(new Error(k + (++i).toString()))
       )
       expect([
-        await m('hello').catch(err => err.message),
-        await m('hello').catch(err => err.message)
+        await m('hello').catch((err) => err.message),
+        await m('hello').catch((err) => err.message),
       ]).toEqual(['hello1', 'hello2'])
     })
   })
@@ -112,7 +112,7 @@ describe('util', () => {
         []
       )
       expect(ensureWorkspacesArray({ packages: ['lol'] } as any)).toEqual([
-        'lol'
+        'lol',
       ])
     })
   })

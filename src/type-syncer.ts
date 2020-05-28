@@ -11,7 +11,7 @@ import {
   ISyncedFile,
   IPackageSource,
   IPackageInfo,
-  ISyncedTypeDefinition
+  ISyncedTypeDefinition,
 } from './types'
 import {
   filterMap,
@@ -22,7 +22,7 @@ import {
   flatten,
   memoizeAsync,
   ensureWorkspacesArray,
-  untyped
+  untyped,
 } from './util'
 import { IGlobber } from './globber'
 import { satisfies } from 'semver'
@@ -42,7 +42,7 @@ export function createTypeSyncer(
   const fetchPackageInfo = memoizeAsync(packageSource.fetch)
 
   return {
-    sync
+    sync,
   }
 
   /**
@@ -54,13 +54,13 @@ export function createTypeSyncer(
   ): Promise<ISyncResult> {
     const [file, allTypings] = await Promise.all([
       packageJSONService.readPackageFile(filePath),
-      typeDefinitionSource.fetch()
+      typeDefinitionSource.fetch(),
     ])
 
     const subPackages = await Promise.all(
       [
         ...ensureWorkspacesArray(file.packages),
-        ...ensureWorkspacesArray(file.workspaces)
+        ...ensureWorkspacesArray(file.workspaces),
       ].map(globber.globPackageFiles)
     )
       .then(flatten)
@@ -68,11 +68,11 @@ export function createTypeSyncer(
 
     const syncedFiles: Array<ISyncedFile> = await Promise.all([
       syncFile(filePath, file, allTypings, opts),
-      ...subPackages.map(p => syncFile(p, null, allTypings, opts))
+      ...subPackages.map((p) => syncFile(p, null, allTypings, opts)),
     ])
 
     return {
-      syncedFiles
+      syncedFiles,
     }
   }
 
@@ -96,20 +96,22 @@ export function createTypeSyncer(
       ...getPackagesFromSection(file.dependencies, ignore.deps),
       ...getPackagesFromSection(file.devDependencies, ignore.dev),
       ...getPackagesFromSection(file.optionalDependencies, ignore.optional),
-      ...getPackagesFromSection(file.peerDependencies, ignore.peer)
+      ...getPackagesFromSection(file.peerDependencies, ignore.peer),
     ]
-    const allPackageNames = uniq(allPackages.map(p => p.name))
+    const allPackageNames = uniq(allPackages.map((p) => p.name))
 
     const newTypings = filterNewTypings(allPackageNames, allTypings)
     // This is pushed to in the inner `map`, because packages that have DT-typings
     // *as well* as internal typings should be exclused.
     const used: Array<ReturnType<typeof filterNewTypings>[0]> = []
     const devDepsToAdd = await Promise.all(
-      newTypings.map(async t => {
+      newTypings.map(async (t) => {
         // Fetch the code package from the source.
         const typePackageInfoPromise = fetchPackageInfo(typed(t.typingsName))
         const codePackageInfo = await fetchPackageInfo(t.codePackageName)
-        const codePackage = allPackages.find(p => p.name === t.codePackageName)!
+        const codePackage = allPackages.find(
+          (p) => p.name === t.codePackageName
+        )!
 
         // Find the closest matching code package version relative to what's in our package.json
         const closestMatchingCodeVersion = getClosestMatchingVersion(
@@ -137,7 +139,7 @@ export function createTypeSyncer(
 
         used.push(t)
         return {
-          [typed(t.typingsName)]: semverRangeSpecifier + version
+          [typed(t.typingsName)]: semverRangeSpecifier + version,
         }
       })
     ).then(mergeObjects)
@@ -148,8 +150,8 @@ export function createTypeSyncer(
         ...file,
         devDependencies: orderObject({
           ...devDepsToAdd,
-          ...removeUnusedTypings(devDeps, unused)
-        })
+          ...removeUnusedTypings(devDeps, unused),
+        }),
       } as IPackageFile)
     }
 
@@ -157,7 +159,7 @@ export function createTypeSyncer(
       filePath,
       newTypings: used,
       removedTypings: unused,
-      package: file
+      package: file,
     }
   }
 }
@@ -175,7 +177,7 @@ function removeUnusedTypings(
   const result: IDependenciesSection = {}
   for (let packageName in devDependencies) {
     const version = devDependencies[packageName]
-    if (unusedTypings.some(t => t.typingsPackageName === packageName)) {
+    if (unusedTypings.some((t) => t.typingsPackageName === packageName)) {
       continue
     }
     result[packageName] = version
@@ -202,19 +204,19 @@ function getUnusedTypings(
       const codePackageName = untyped(packageName)
       // Make sure the corresponding code package is in `allPackages`.
       const hasCodePackageForTyping = allPackageNames.some(
-        p => p === codePackageName
+        (p) => p === codePackageName
       )
       if (!hasCodePackageForTyping) {
         const typingsNameForCodePackage = getTypingsName(codePackageName)
         const typeDef = allTypings.find(
-          t => t.typingsName === typingsNameForCodePackage
+          (t) => t.typingsName === typingsNameForCodePackage
         )
 
         if (typeDef && !typeDef.isGlobal) {
           result.push({
             codePackageName,
             typingsPackageName: packageName,
-            ...typeDef!
+            ...typeDef,
           })
         }
       }
@@ -231,7 +233,7 @@ function getUnusedTypings(
  */
 function getClosestMatchingVersion(packageInfo: IPackageInfo, version: string) {
   return (
-    packageInfo.versions.find(v => satisfies(v.version, version)) ||
+    packageInfo.versions.find((v) => satisfies(v.version, version)) ||
     packageInfo.versions[0]
   )
 }
@@ -246,12 +248,12 @@ function filterNewTypings(
   allPackageNames: Array<string>,
   allTypings: Array<ITypeDefinition>
 ): Array<ITypeDefinition & { codePackageName: string }> {
-  const existingTypings = allPackageNames.filter(x => x.startsWith('@types/'))
-  return filterMap(allPackageNames, p => {
+  const existingTypings = allPackageNames.filter((x) => x.startsWith('@types/'))
+  return filterMap(allPackageNames, (p) => {
     let typingsName = getTypingsName(p)
 
     const typingsForPackage = allTypings.find(
-      x => x.typingsName === typingsName
+      (x) => x.typingsName === typingsName
     )
     if (!typingsForPackage) {
       // No typings available.
@@ -259,14 +261,16 @@ function filterNewTypings(
     }
 
     const fullTypingsPackage = typed(typingsForPackage.typingsName)
-    const alreadyHasTyping = existingTypings.some(t => t === fullTypingsPackage)
+    const alreadyHasTyping = existingTypings.some(
+      (t) => t === fullTypingsPackage
+    )
     if (alreadyHasTyping) {
       return false
     }
 
     return {
       ...typingsForPackage,
-      codePackageName: p
+      codePackageName: p,
     }
   })
 }
@@ -318,7 +322,7 @@ function getPackagesFromSection(
   for (const name in section) {
     result.push({
       name,
-      version: section[name]
+      version: section[name],
     })
   }
 
