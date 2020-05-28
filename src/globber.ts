@@ -21,13 +21,16 @@ export function createGlobber() {
   return {
     globPackageFiles(pattern: string) {
       return new Promise<Array<string>>((resolve, reject) =>
-        glob(path.join(pattern, 'package.json'), {ignore: '**/node_modules/**'}, (err, matches) =>
-          err
-            ? /* istanbul ignore next: errors are for people who don't know what they are doing */
-              reject(err)
-            : resolve(uniq(matches))
+        glob(
+          path.join(pattern, 'package.json'),
+          { ignore: '**/node_modules/**' },
+          (err, matches) =>
+            err
+              ? /* istanbul ignore next: errors are for people who don't know what they are doing */
+                reject(err)
+              : resolve(uniq(matches))
         )
       )
-    }
+    },
   }
 }

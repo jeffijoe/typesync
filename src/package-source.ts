@@ -10,14 +10,14 @@ export function createPackageSource(): IPackageSource {
     /**
      * Fetches info about a package, or `null` if not found.
      */
-    fetch: async name => {
+    fetch: async (name) => {
       const data = await npmClient.getPackageManifest(encodeURIComponent(name))
       const versions = Object.keys(data.versions).map<IPackageVersionInfo>(
-        v => {
+        (v) => {
           const item = data.versions[v]
           return {
             version: item.version,
-            containsInternalTypings: !!item.types || !!item.typings
+            containsInternalTypings: !!item.types || !!item.typings,
           }
         }
       )
@@ -28,8 +28,8 @@ export function createPackageSource(): IPackageSource {
         // Sort by version, highest version first.
         versions: versions
           .sort((left, right) => compare(left.version, right.version))
-          .reverse()
+          .reverse(),
       }
-    }
+    },
   }
 }

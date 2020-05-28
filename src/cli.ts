@@ -16,13 +16,13 @@ export async function startCli() {
   try {
     // Awilix is a dependency injection container.
     const container = createContainer({
-      injectionMode: InjectionMode.CLASSIC
+      injectionMode: InjectionMode.CLASSIC,
     }).register({
       typeDefinitionSource: asFunction(createTypeDefinitionSource).singleton(),
       packageJSONService: asFunction(createPackageJSONFileService).singleton(),
       packageSource: asFunction(createPackageSource).singleton(),
       globber: asFunction(createGlobber).singleton(),
-      typeSyncer: asFunction(createTypeSyncer)
+      typeSyncer: asFunction(createTypeSyncer),
     })
     await run(container.resolve<ITypeSyncer>('typeSyncer'))
   } catch (err) {
@@ -64,14 +64,14 @@ async function run(syncer: ITypeSyncer) {
     .map(renderSyncedFile)
     .join('\n\n')
   const totals = result.syncedFiles
-    .map(f => ({
+    .map((f) => ({
       newTypings: f.newTypings.length,
-      removedTypings: f.removedTypings.length
+      removedTypings: f.removedTypings.length,
     }))
     .reduce(
       (accum, next) => ({
         newTypings: accum.newTypings + next.newTypings,
-        removedTypings: accum.removedTypings + next.removedTypings
+        removedTypings: accum.removedTypings + next.removedTypings,
       }),
       { newTypings: 0, removedTypings: 0 }
     )
@@ -127,14 +127,14 @@ function renderSyncedFile(file: ISyncedFile) {
 
   const nl = '\n'
   const combined = [
-    ...file.newTypings.map(t => ({ ...t, action: 'add' })),
-    ...file.removedTypings.map(t => ({ ...t, action: 'remove' }))
+    ...file.newTypings.map((t) => ({ ...t, action: 'add' })),
+    ...file.removedTypings.map((t) => ({ ...t, action: 'remove' })),
   ]
   const rendered =
     title +
     nl +
     combined
-      .map(t => renderTypeDef(t, combined[combined.length - 1] === t))
+      .map((t) => renderTypeDef(t, combined[combined.length - 1] === t))
       .join(nl)
 
   return rendered

@@ -9,7 +9,7 @@ const writeFileAsync = promisify(fs.writeFile)
 
 export function createPackageJSONFileService(): IPackageJSONService {
   return {
-    readPackageFile: async filePath => {
+    readPackageFile: async (filePath) => {
       const contents = await readFileContents(filePath)
       return JSON.parse(contents) as IPackageFile
     },
@@ -25,7 +25,7 @@ export function createPackageJSONFileService(): IPackageJSONService {
         indent /* istanbul ignore next */ || '  '
       )
       await writeFileAsync(filePath, data + (trailingNewline ? '\n' : ''))
-    }
+    },
   }
 }
 
@@ -43,7 +43,7 @@ async function assertFile(filePath: string) {
 async function existsAsync(filePath: string): Promise<boolean> {
   return statAsync(filePath)
     .then(() => true)
-    .catch(err => {
+    .catch((err) => {
       /* istanbul ignore else */
       if (err.code === 'ENOENT') {
         return false

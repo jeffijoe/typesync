@@ -4,7 +4,7 @@ import {
   ITypeDefinition,
   IPackageFile,
   IPackageSource,
-  IPackageInfo
+  IPackageInfo,
 } from '../types'
 import { createTypeSyncer } from '../type-syncer'
 import { IGlobber } from '../globber'
@@ -12,61 +12,61 @@ import { IGlobber } from '../globber'
 const typedefs: ITypeDefinition[] = [
   {
     typingsName: 'package1',
-    isGlobal: false
+    isGlobal: false,
   },
   {
     typingsName: 'package2',
-    isGlobal: false
+    isGlobal: false,
   },
   {
     typingsName: 'package3',
-    isGlobal: false
+    isGlobal: false,
   },
   {
     typingsName: 'packageWithInternalTypings',
-    isGlobal: false
+    isGlobal: false,
   },
   {
     typingsName: 'package4',
-    isGlobal: false
+    isGlobal: false,
   },
   {
     typingsName: 'package5',
-    isGlobal: false
+    isGlobal: false,
   },
   // None for package6
   {
     typingsName: 'myorg__package7',
-    isGlobal: false
+    isGlobal: false,
   },
   {
     typingsName: 'package8',
-    isGlobal: false
+    isGlobal: false,
   },
   {
     typingsName: 'package9',
-    isGlobal: false
+    isGlobal: false,
   },
   {
     typingsName: 'packageWithOldTypings',
-    isGlobal: false
+    isGlobal: false,
   },
   {
     typingsName: 'scoped__unused',
-    isGlobal: false
+    isGlobal: false,
   },
   {
     typingsName: 'unused',
-    isGlobal: false
+    isGlobal: false,
   },
   {
     typingsName: 'unused-global',
-    isGlobal: true
+    isGlobal: true,
   },
   {
     typingsName: 'scoped__unused-global',
-    isGlobal: true
-  }
+    isGlobal: true,
+  },
 ]
 
 function buildSyncer() {
@@ -76,7 +76,7 @@ function buildSyncer() {
       package1: '^1.0.0',
       package3: '^1.0.0',
       packageWithInternalTypings: '^1.0.0',
-      packageWithOldTypings: '^1.0.0'
+      packageWithOldTypings: '^1.0.0',
     },
     devDependencies: {
       '@types/package4': '^1.0.0',
@@ -85,36 +85,36 @@ function buildSyncer() {
       '@types/unused-global': '^1.0.0',
       '@types/scoped__unused-global': '^1.0.0',
       package4: '^1.0.0',
-      package5: '^1.0.0'
+      package5: '^1.0.0',
     },
     optionalDependencies: {
-      package6: '^1.0.0'
+      package6: '^1.0.0',
     },
     peerDependencies: {
       '@myorg/package7': '^1.0.0',
       package8: '~1.0.0',
-      package9: '1.0.0'
+      package9: '1.0.0',
     },
     packages: ['packages/*'],
-    workspaces: ['packages/*']
+    workspaces: ['packages/*'],
   }
 
   const package1File: IPackageFile = {
     name: 'package-1',
     dependencies: {
-      package1: '^1.0.0'
-    }
+      package1: '^1.0.0',
+    },
   }
 
   const package2File: IPackageFile = {
     name: 'package-1',
     dependencies: {
-      package3: '^1.0.0'
-    }
+      package3: '^1.0.0',
+    },
   }
 
   const typedefSource: ITypeDefinitionSource = {
-    fetch: jest.fn(() => Promise.resolve(typedefs))
+    fetch: jest.fn(() => Promise.resolve(typedefs)),
   }
   const packageService: IPackageJSONService = {
     readPackageFile: jest.fn(async (filepath: string) => {
@@ -129,41 +129,41 @@ function buildSyncer() {
           throw new Error('What?!')
       }
     }),
-    writePackageFile: jest.fn(() => Promise.resolve())
+    writePackageFile: jest.fn(() => Promise.resolve()),
   }
 
   const globber: IGlobber = {
-    globPackageFiles: jest.fn(async pattern => {
+    globPackageFiles: jest.fn(async (pattern) => {
       switch (pattern) {
         case 'packages/*':
           return [
             'packages/package-1/package.json',
-            'packages/package-2/package.json'
+            'packages/package-2/package.json',
           ]
         default:
           return []
       }
-    })
+    }),
   }
 
   const packageSource: IPackageSource = {
-    fetch: jest.fn(async name => {
+    fetch: jest.fn(async (name) => {
       return {
         name,
         latestVersion: '2.0.0',
         versions: [
           {
             version: '2.0.0',
-            containsInternalTypings: false
+            containsInternalTypings: false,
           },
           {
             version:
               name === '@types/packageWithOldTypings' ? '0.0.1' : '1.0.0',
-            containsInternalTypings: name === 'packageWithInternalTypings'
-          }
-        ]
+            containsInternalTypings: name === 'packageWithInternalTypings',
+          },
+        ],
       } as IPackageInfo
-    })
+    }),
   }
 
   return {
@@ -176,7 +176,7 @@ function buildSyncer() {
       typedefSource,
       packageSource,
       globber
-    )
+    ),
   }
 }
 
@@ -186,7 +186,7 @@ describe('type syncer', () => {
     const result = await syncer.sync('package.json')
     const writtenPackage = (packageService.writePackageFile as jest.Mock<
       any
-    >).mock.calls.find(c => c[0] === 'package.json')![1] as IPackageFile
+    >).mock.calls.find((c) => c[0] === 'package.json')[1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package1': '^1.0.0',
       '@types/package3': '^1.0.0',
@@ -199,13 +199,13 @@ describe('type syncer', () => {
       '@types/unused-global': '^1.0.0',
       '@types/scoped__unused-global': '^1.0.0',
       package4: '^1.0.0',
-      package5: '^1.0.0'
+      package5: '^1.0.0',
     })
     expect(result.syncedFiles).toHaveLength(3)
 
     expect(result.syncedFiles[0].filePath).toEqual('package.json')
     expect(
-      result.syncedFiles[0].newTypings.map(x => x.typingsName).sort()
+      result.syncedFiles[0].newTypings.map((x) => x.typingsName).sort()
     ).toEqual([
       'myorg__package7',
       'package1',
@@ -213,21 +213,21 @@ describe('type syncer', () => {
       'package5',
       'package8',
       'package9',
-      'packageWithOldTypings'
+      'packageWithOldTypings',
     ])
 
     expect(result.syncedFiles[1].filePath).toEqual(
       'packages/package-1/package.json'
     )
     expect(
-      result.syncedFiles[1].newTypings.map(x => x.typingsName).sort()
+      result.syncedFiles[1].newTypings.map((x) => x.typingsName).sort()
     ).toEqual(['package1'])
 
     expect(result.syncedFiles[2].filePath).toEqual(
       'packages/package-2/package.json'
     )
     expect(
-      result.syncedFiles[2].newTypings.map(x => x.typingsName).sort()
+      result.syncedFiles[2].newTypings.map((x) => x.typingsName).sort()
     ).toEqual(['package3'])
   })
 
@@ -235,12 +235,12 @@ describe('type syncer', () => {
     const { syncer, packageService } = buildSyncer()
     const result = await syncer.sync('package.json', {
       ignore: {
-        dev: true
-      }
+        dev: true,
+      },
     })
     const writtenPackage = (packageService.writePackageFile as jest.Mock<
       any
-    >).mock.calls.find(c => c[0] === 'package.json')![1] as IPackageFile
+    >).mock.calls.find((c) => c[0] === 'package.json')[1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package1': '^1.0.0',
       '@types/package3': '^1.0.0',
@@ -251,7 +251,7 @@ describe('type syncer', () => {
       '@types/unused-global': '^1.0.0',
       '@types/scoped__unused-global': '^1.0.0',
       package4: '^1.0.0',
-      package5: '^1.0.0'
+      package5: '^1.0.0',
     })
   })
 

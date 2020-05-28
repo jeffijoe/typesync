@@ -13,12 +13,12 @@ export function createTypeDefinitionSource(): ITypeDefinitionSource {
      * Fetches available type defs.
      */
     fetch: async () => {
-      const data = await axios.get(typedefsUrl).then(x => x.data as any[])
+      const data = await axios.get(typedefsUrl).then((x) => x.data as any[])
 
       return data.map<ITypeDefinition>((d: any) => ({
         typingsName: d.t,
-        isGlobal: d.g && d.g.length > 0
+        isGlobal: d.g && d.g.length > 0,
       }))
-    }
+    },
   }
 }

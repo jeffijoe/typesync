@@ -142,7 +142,7 @@ export function memoizeAsync<T, U extends any[], V>(
     }
   }
 
-  return async function(...args: U): Promise<V> {
+  return async function (...args: U): Promise<V> {
     const key = args[0]
     if (cache.has(key)) {
       return cache.get(key)!
@@ -171,7 +171,7 @@ export function ensureWorkspacesArray(
   }
 
   // tslint:disable-next-line
-  if (!data.every(s => typeof s === 'string')) {
+  if (!data.every((s) => typeof s === 'string')) {
     return []
   }
 
