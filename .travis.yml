@@ -3,9 +3,10 @@ language: node_js
 
 # Add additional versions here as appropriate.
 node_js:
-  - "stable"
-  - "10"
-  - "8"
+  - 'stable'
+  - '14'
+  - '12'
+  - '10'
 
 # Lint errors should trigger a failure.
 before_script: npm run lint

@@ -1,3 +1,9 @@
+# v0.7.0
+
+- Update packages
+- Bump engine version to `10.0`
+- Ignore `node_modules` when globbing ([#52](https://github.com/jeffijoe/typesync/pull/52), [tanmen](https://github.com/tanmen))
+
 # v0.6.1
 
 - Fix issue with unzipping, simply by _not unzipping at all_ ([#37](https://github.com/jeffijoe/typesync/issues/37))
