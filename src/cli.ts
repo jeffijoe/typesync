@@ -2,10 +2,11 @@ import { createContainer, InjectionMode, asFunction } from 'awilix'
 import chalk from 'chalk'
 import * as path from 'path'
 import * as C from './cli-util'
-import { ITypeSyncer, ITypeDefinition, ISyncedFile, IIgnoreDeps } from './types'
+import { ITypeSyncer, ITypeDefinition, ISyncedFile } from './types'
 import { createTypeSyncer } from './type-syncer'
 import { createTypeDefinitionSource } from './type-definition-source'
 import { createPackageJSONFileService } from './package-json-file-service'
+import { createConfigService } from './config-service'
 import { createGlobber } from './globber'
 import { createPackageSource } from './package-source'
 
@@ -21,6 +22,7 @@ export async function startCli() {
       typeDefinitionSource: asFunction(createTypeDefinitionSource).singleton(),
       packageJSONService: asFunction(createPackageJSONFileService).singleton(),
       packageSource: asFunction(createPackageSource).singleton(),
+      configService: asFunction(createConfigService).singleton(),
       globber: asFunction(createGlobber).singleton(),
       typeSyncer: asFunction(createTypeSyncer),
     })
@@ -42,14 +44,6 @@ async function run(syncer: ITypeSyncer) {
     printHelp()
     return
   }
-  const ignore: IIgnoreDeps = {}
-  if (typeof flags.ignoredeps === 'string') {
-    const splat = flags.ignoredeps.split(',')
-    ignore.deps = splat.includes('deps')
-    ignore.dev = splat.includes('dev')
-    ignore.optional = splat.includes('optional')
-    ignore.peer = splat.includes('peer')
-  }
 
   C.log(chalk`TypeSync v{white ${require('../package.json').version}}`)
   if (flags.dry) {
@@ -57,7 +51,7 @@ async function run(syncer: ITypeSyncer) {
   }
   const result = await C.spinWhile(
     `Syncing type definitions in ${chalk.cyan(filePath)}...`,
-    () => syncer.sync(filePath, { dry: !!flags.dry, ignore })
+    () => syncer.sync(filePath, flags)
   )
 
   const syncedFilesOutput = result.syncedFiles

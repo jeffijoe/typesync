@@ -2,7 +2,7 @@
  * The guts of the program.
  */
 export interface ITypeSyncer {
-  sync(filePath: string, opts?: ISyncOptions): Promise<ISyncResult>
+  sync(filePath: string, flags: ICLIArguments['flags']): Promise<ISyncResult>
 }
 
 /**
@@ -10,13 +10,26 @@ export interface ITypeSyncer {
  */
 export interface ISyncOptions {
   /**
-   * If set, will not write to package.json.
-   */
-  dry?: boolean
-  /**
    * Ignore certain deps.
    */
-  ignore?: IIgnoreDeps
+  ignoreDeps?: IDependencySection[]
+  /**
+   * Ignore certain packages.
+   */
+  ignorePackages?: string[]
+}
+
+/**
+ * Config Service.
+ */
+export interface IConfigService {
+  /**
+   * Get typesync config.
+   */
+  readConfig(
+    filePath: string,
+    flags: ICLIArguments['flags']
+  ): Promise<ISyncOptions>
 }
 
 /**
@@ -161,13 +174,13 @@ export interface ISyncedFile {
 }
 
 /**
- * Options for ignoring dependency sections.
+ * Dependency sections.
  */
-export interface IIgnoreDeps {
-  dev?: boolean
-  deps?: boolean
-  optional?: boolean
-  peer?: boolean
+export enum IDependencySection {
+  dev = 'dev',
+  deps = 'deps',
+  optional = 'optional',
+  peer = 'peer',
 }
 
 /**

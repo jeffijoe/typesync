@@ -1,6 +1,7 @@
 import {
   uniq,
   filterMap,
+  shrinkObject,
   mergeObjects,
   orderObject,
   promisify,
@@ -21,6 +22,16 @@ describe('util', () => {
       expect(
         filterMap([1, 2, 3, 4], (item) => (item % 2 === 0 ? false : item + 1))
       ).toEqual([2, 4])
+    })
+  })
+
+  describe('shrinkObject', () => {
+    it('removes blank attributes in the object', () => {
+      expect(shrinkObject({ a: 1, b: undefined, c: '2', d: null })).toEqual({
+        a: 1,
+        c: '2',
+        d: null,
+      })
     })
   })
 
