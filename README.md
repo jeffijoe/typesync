@@ -33,6 +33,8 @@ typesync [path/to/package.json] [--dry]
 
 Path is relative to the current working directory. If omitted, defaults to `package.json`.
 
+**Note**: `typesync` only modifies your `package.json` - you still need to run `npm install`, or — if drinking the k00laid — `yarn`.
+
 ## `--dry`
 
 If `--dry` is specified, will not actually write to the file, it only prints added typings,
@@ -48,14 +50,12 @@ To ignore certain sections, you can use the `--ignoredeps=` flag. For example, t
 
 ## `--ignorepackages`
 
-To ignore certain packagess, you can use the `--ignorepackages=` flag. For example, to ignore `nodemon`, use `--ignorepackages='nodemon`.
+To ignore certain packages, you can use the `--ignorepackages=` flag. For example, to ignore `nodemon`, use `--ignorepackages=nodemon`.
 To ignore multiple, comma-separate them, like this: `--ignorepackages=nodemon,whatever` (ignores `nodemon` and `whatever`).
-
-**Note**: `typesync` only modifies your `package.json` - you still need to run `npm install`, or — if drinking the k00laid — `yarn`.
 
 ## Use config file
 
-Alternatively, you can use a TypeSync config file: `.typesyncrc`. TypeSync will **automatically** search for configuration files under the same folder of the `package.json`.
+Alternatively, you can use a TypeSync config file: `.typesyncrc` or a `"typesync"` section in your `package.json`. TypeSync will **automatically** search for configuration files. See [cosmiconfig][cosmiconfig] for details.
 
 ```json
 // .typesyncrc
@@ -93,3 +93,5 @@ See [CHANGELOG.md](/CHANGELOG.md)
 # Author
 
 Jeff Hansen - [@Jeffijoe](https://twitter.com/jeffijoe)
+
+  [cosmiconfig]: https://github.com/davidtheclark/cosmiconfig

@@ -1,0 +1,5 @@
+# These packages are dev tools and we don't need their typings.
+ignorePackages:
+  - nodemon
+  - prettier
+  - rimraf
