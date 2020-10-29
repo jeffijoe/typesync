@@ -1,3 +1,10 @@
+# v0.8.0
+
+- Update packages
+- Add `.typesyncrc` support ([#58](https://github.com/jeffijoe/typesync/pull/58), [Hopsken](https://github.com/Hopsken))
+- Add `--ignorepackages` support ([#58](https://github.com/jeffijoe/typesync/pull/58), [Hopsken](https://github.com/Hopsken))
+- Read registry URL from npm config ([#57](https://github.com/jeffijoe/typesync/pull/57), [Hopsken](https://github.com/Hopsken))
+
 # v0.7.0
 
 - Update packages
