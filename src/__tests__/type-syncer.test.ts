@@ -5,6 +5,8 @@ import {
   IPackageFile,
   IPackageSource,
   IPackageInfo,
+  IConfigService,
+  ISyncOptions,
 } from '../types'
 import { createTypeSyncer } from '../type-syncer'
 import { IGlobber } from '../globber'
@@ -120,6 +122,8 @@ function buildSyncer() {
     readPackageFile: jest.fn(async (filepath: string) => {
       switch (filepath) {
         case 'package.json':
+        case 'package-ignore-dev.json':
+        case 'package-ignore-package1.json':
           return rootPackageFile
         case 'packages/package-1/package.json':
           return package1File
@@ -166,15 +170,32 @@ function buildSyncer() {
     }),
   }
 
+  const configService: IConfigService = {
+    readConfig: jest.fn(async (filePath: string) => {
+      switch (filePath) {
+        case 'package.json':
+          return {}
+        case 'package-ignore-dev.json':
+          return { ignoreDeps: ['dev'] } as ISyncOptions
+        case 'package-ignore-package1.json':
+          return { ignorePackages: ['package1'] }
+        default:
+          return {}
+      }
+    }),
+  }
+
   return {
     typedefSource,
     packageService,
     rootPackageFile,
     packageSource,
+    configService,
     syncer: createTypeSyncer(
       packageService,
       typedefSource,
       packageSource,
+      configService,
       globber
     ),
   }
@@ -183,7 +204,7 @@ function buildSyncer() {
 describe('type syncer', () => {
   it('adds new packages to package.json and removes unused typings that are not global', async () => {
     const { syncer, packageService } = buildSyncer()
-    const result = await syncer.sync('package.json')
+    const result = await syncer.sync('package.json', {})
     const writtenPackage = (packageService.writePackageFile as jest.Mock<
       any
     >).mock.calls.find((c) => c[0] === 'package.json')[1] as IPackageFile
@@ -233,17 +254,38 @@ describe('type syncer', () => {
 
   it('ignores deps when asked to', async () => {
     const { syncer, packageService } = buildSyncer()
-    const result = await syncer.sync('package.json', {
-      ignore: {
-        dev: true,
-      },
-    })
+    await syncer.sync('package-ignore-dev.json', {})
     const writtenPackage = (packageService.writePackageFile as jest.Mock<
       any
-    >).mock.calls.find((c) => c[0] === 'package.json')[1] as IPackageFile
+    >).mock.calls.find(
+      (c) => c[0] === 'package-ignore-dev.json'
+    )[1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package1': '^1.0.0',
       '@types/package3': '^1.0.0',
+      '@types/myorg__package7': '^1.0.0',
+      '@types/package8': '~1.0.0',
+      '@types/package9': '1.0.0',
+      '@types/packageWithOldTypings': '^2.0.0',
+      '@types/unused-global': '^1.0.0',
+      '@types/scoped__unused-global': '^1.0.0',
+      package4: '^1.0.0',
+      package5: '^1.0.0',
+    })
+  })
+
+  it('ignores packages when asked to', async () => {
+    const { syncer, packageService } = buildSyncer()
+    await syncer.sync('package-ignore-package1.json', {})
+    const writtenPackage = (packageService.writePackageFile as jest.Mock<
+      any
+    >).mock.calls.find(
+      (c) => c[0] === 'package-ignore-package1.json'
+    )[1] as IPackageFile
+    expect(writtenPackage.devDependencies).toEqual({
+      '@types/package3': '^1.0.0',
+      '@types/package4': '^1.0.0',
+      '@types/package5': '^1.0.0',
       '@types/myorg__package7': '^1.0.0',
       '@types/package8': '~1.0.0',
       '@types/package9': '1.0.0',

@@ -1,0 +1,8 @@
+{
+  "ignoreDeps": [
+    "dev"
+  ],
+  "ignorePackages": [
+    "package1"
+  ]
+}

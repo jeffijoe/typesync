@@ -12,6 +12,9 @@ import {
   IPackageSource,
   IPackageInfo,
   ISyncedTypeDefinition,
+  IConfigService,
+  IDependencySection,
+  ICLIArguments,
 } from './types'
 import {
   filterMap,
@@ -37,6 +40,7 @@ export function createTypeSyncer(
   packageJSONService: IPackageJSONService,
   typeDefinitionSource: ITypeDefinitionSource,
   packageSource: IPackageSource,
+  configService: IConfigService,
   globber: IGlobber
 ): ITypeSyncer {
   const fetchPackageInfo = memoizeAsync(packageSource.fetch)
@@ -50,11 +54,13 @@ export function createTypeSyncer(
    */
   async function sync(
     filePath: string,
-    opts: ISyncOptions = { dry: false }
+    flags: ICLIArguments['flags']
   ): Promise<ISyncResult> {
-    const [file, allTypings] = await Promise.all([
+    const dryRun = !!flags.dry
+    const [file, allTypings, syncOpts] = await Promise.all([
       packageJSONService.readPackageFile(filePath),
       typeDefinitionSource.fetch(),
+      configService.readConfig(filePath, flags),
     ])
 
     const subPackages = await Promise.all(
@@ -67,8 +73,10 @@ export function createTypeSyncer(
       .then(uniq)
 
     const syncedFiles: Array<ISyncedFile> = await Promise.all([
-      syncFile(filePath, file, allTypings, opts),
-      ...subPackages.map((p) => syncFile(p, null, allTypings, opts)),
+      syncFile(filePath, file, allTypings, syncOpts, dryRun),
+      ...subPackages.map((p) =>
+        syncFile(p, null, allTypings, syncOpts, dryRun)
+      ),
     ])
 
     return {
@@ -88,16 +96,22 @@ export function createTypeSyncer(
     filePath: string,
     file: IPackageFile | null,
     allTypings: Array<ITypeDefinition>,
-    opts: ISyncOptions
+    opts: ISyncOptions,
+    dryRun: boolean
   ): Promise<ISyncedFile> {
-    const ignore = opts.ignore || {}
-    file = file || (await packageJSONService.readPackageFile(filePath))
-    const allPackages = [
-      ...getPackagesFromSection(file.dependencies, ignore.deps),
-      ...getPackagesFromSection(file.devDependencies, ignore.dev),
-      ...getPackagesFromSection(file.optionalDependencies, ignore.optional),
-      ...getPackagesFromSection(file.peerDependencies, ignore.peer),
-    ]
+    const { ignoreDeps, ignorePackages } = opts
+
+    const packageFile =
+      file || (await packageJSONService.readPackageFile(filePath))
+    const allPackages = flatten(
+      filterMap(Object.values(IDependencySection), (dep) => {
+        if (ignoreDeps?.includes(dep)) {
+          return false
+        }
+        const section = getDependenciesBySection(packageFile, dep)
+        return getPackagesFromSection(section, ignorePackages)
+      })
+    )
     const allPackageNames = uniq(allPackages.map((p) => p.name))
 
     const newTypings = filterNewTypings(allPackageNames, allTypings)
@@ -143,11 +157,11 @@ export function createTypeSyncer(
         }
       })
     ).then(mergeObjects)
-    const devDeps = file.devDependencies || /* istanbul ignore next */ {}
+    const devDeps = packageFile.devDependencies || /* istanbul ignore next */ {}
     const unused = getUnusedTypings(allPackageNames, devDeps, allTypings)
-    if (!opts.dry) {
+    if (!dryRun) {
       await packageJSONService.writePackageFile(filePath, {
-        ...file,
+        ...packageFile,
         devDependencies: orderObject({
           ...devDepsToAdd,
           ...removeUnusedTypings(devDeps, unused),
@@ -159,7 +173,7 @@ export function createTypeSyncer(
       filePath,
       newTypings: used,
       removedTypings: unused,
-      package: file,
+      package: packageFile,
     }
   }
 }
@@ -306,27 +320,47 @@ function getPackageScope(packageName: string): [string, string] | null {
 }
 
 /**
- * Gets packages from a dependencies section.
+ * Get packages from a dependency section
  *
  * @param section
+ * @param ignorePackages
  */
 function getPackagesFromSection(
-  section?: IDependenciesSection,
-  ignore?: boolean
-): Array<IPackageVersion> {
-  if (ignore || !section) {
-    return []
-  }
+  section: IDependenciesSection,
+  ignorePackages?: string[]
+): IPackageVersion[] {
+  return filterMap(Object.keys(section), (name) => {
+    if (ignorePackages?.includes(name)) {
+      return false
+    }
 
-  const result: Array<IPackageVersion> = []
-  for (const name in section) {
-    result.push({
-      name,
-      version: section[name],
-    })
-  }
+    return { name, version: section[name] }
+  })
+}
 
-  return result
+/**
+ * Get dependencies from a package section
+ *
+ * @param file Package file
+ * @param section Package section, eg: dev, peer
+ */
+function getDependenciesBySection(
+  file: IPackageFile,
+  section: IDependencySection
+): IDependenciesSection {
+  const dependenciesSection = (() => {
+    switch (section) {
+      case IDependencySection.deps:
+        return file.dependencies
+      case IDependencySection.dev:
+        return file.devDependencies
+      case IDependencySection.optional:
+        return file.optionalDependencies
+      case IDependencySection.peer:
+        return file.peerDependencies
+    }
+  })()
+  return dependenciesSection ?? {}
 }
 
 const CARET = '^'.charCodeAt(0)

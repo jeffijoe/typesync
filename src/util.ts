@@ -39,6 +39,24 @@ export function filterMap<T, R>(
 }
 
 /**
+ * Remove blank attributes in a object.
+ *
+ * @param source
+ */
+export function shrinkObject<T extends object>(source: T): Required<T> {
+  const object: any = {}
+
+  for (const key in source) {
+    // tslint:disable-next-line
+    if (typeof source[key] !== 'undefined') {
+      object[key] = source[key]
+    }
+  }
+
+  return object
+}
+
+/**
  * Merges a sequence of objects into a single object using `reduce`.
  *
  * @param source An array of objects to merge.
