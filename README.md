@@ -71,7 +71,7 @@ To run TypeSync and install packages automatically after every package install, 
 
 ```json
 {
-  "scripts: {
+  "scripts": {
     "postinstall": "typesync && npm install"
   }
 }
@@ -81,7 +81,7 @@ Or, if you use `yarn`:
 
 ```json
 {
-  "scripts: {
+  "scripts": {
     "postinstall": "typesync && yarn"
   }
 }
