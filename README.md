@@ -65,6 +65,28 @@ Alternatively, you can use a TypeSync config file: `.typesyncrc` or a `"typesync
 }
 ```
 
+## Run TypeSync Automatically After Every Install
+
+To run TypeSync and install packages automatically after every package install, use a `postinstall` script to your `package.json`:
+
+```json
+{
+  "scripts: {
+    "postinstall": "typesync && npm install"
+  }
+}
+```
+
+Or, if you use `yarn`:
+
+```json
+{
+  "scripts: {
+    "postinstall": "typesync && yarn"
+  }
+}
+```
+
 # Typings packages
 
 TypeSync will add typings for packages that:
