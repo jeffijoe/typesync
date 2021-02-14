@@ -67,24 +67,45 @@ Alternatively, you can use a TypeSync config file: `.typesyncrc` or a `"typesync
 
 ## Run TypeSync Automatically After Every Install
 
-To run TypeSync and install packages automatically after every package install, use a `postinstall` script to your `package.json`:
+To run TypeSync and install packages automatically after every package install, create a file called `install-with-types.sh` with the following content:
+
+```sh
+npm install $1
+npx typesync
+npm install
+```
+
+If you use `yarn`, use this instead:
+
+```sh
+yarn add $1
+yarn typesync
+yarn
+```
+
+Run this command to make the file executable:
+
+```sh
+chmod +x install-with-types.sh
+```
+
+Add the following to `package.json`:
 
 ```json
 {
   "scripts": {
-    "postinstall": "typesync && npm install"
+    "i": "./install-with-types.sh"
   }
 }
 ```
 
-Or, if you use `yarn`:
+Then install packages like this:
 
-```json
-{
-  "scripts": {
-    "postinstall": "typesync && yarn"
-  }
-}
+```bash
+npm run i <pkg name>
+
+# Or, with yarn:
+yarn i <pkg name>
 ```
 
 # Typings packages
