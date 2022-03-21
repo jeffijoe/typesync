@@ -35,9 +35,12 @@ Path is relative to the current working directory. If omitted, defaults to `pack
 
 **Note**: `typesync` only modifies your `package.json` - you still need to run `npm install`, or — if drinking the k00laid — `yarn`.
 
-## `--dry`
+## `--dry[=fail]`
 
-If `--dry` is specified, will not actually write to the file, it only prints added typings,
+If `--dry` is specified, will not actually write to the file, it only prints added/removed typings.
+
+The same is true for `--dry=fail`, with the additional effect of failing the command in case there are changes.
+This is useful for CI scenarios.
 
 ## `--ignoredeps`
 
