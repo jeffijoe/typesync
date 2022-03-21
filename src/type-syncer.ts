@@ -210,9 +210,8 @@ function getUnusedTypings(
   devDependencies: IDependenciesSection,
   allTypings: Array<ITypeDefinition>
 ) {
-  const result: Array<
-    ISyncedTypeDefinition & { typingsPackageName: string }
-  > = []
+  const result: Array<ISyncedTypeDefinition & { typingsPackageName: string }> =
+    []
   for (let packageName in devDependencies) {
     if (packageName.startsWith('@types/')) {
       const codePackageName = untyped(packageName)
