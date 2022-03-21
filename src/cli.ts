@@ -27,7 +27,7 @@ export async function startCli() {
       typeSyncer: asFunction(createTypeSyncer),
     })
     await run(container.resolve<ITypeSyncer>('typeSyncer'))
-  } catch (err) {
+  } catch (err: any) {
     C.error(err)
     process.exitCode = 1
   }
@@ -69,6 +69,13 @@ async function run(syncer: ITypeSyncer) {
       }),
       { newTypings: 0, removedTypings: 0 }
     )
+  if (
+    flags.dry === 'fail' &&
+    totals.newTypings > 0 &&
+    totals.removedTypings > 0
+  ) {
+    throw new Error('Typings changed, check failed.')
+  }
   C.success(
     totals.newTypings === 0
       ? `No new typings added, looks like you're all synced up!${
