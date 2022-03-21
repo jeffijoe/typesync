@@ -74,7 +74,9 @@ async function run(syncer: ITypeSyncer) {
     totals.newTypings > 0 &&
     totals.removedTypings > 0
   ) {
-    throw new Error('Typings changed, check failed.')
+    C.error('Typings changed; check failed.')
+    process.exitCode = 1
+    return
   }
   C.success(
     totals.newTypings === 0

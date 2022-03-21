@@ -1,3 +1,9 @@
+# v0.9.0
+
+- **BREAKING**: Bump Node version to 12.
+- Update packages
+- [#72](https://github.com/jeffijoe/typesync/issues/72): Add `--dry-fail` support ([#83](https://github.com/jeffijoe/typesync/pull/83), [@chelkyl](https://github.com/chelkyl))
+
 # v0.8.0
 
 - Update packages

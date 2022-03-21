@@ -8,6 +8,7 @@
     "strict": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
-    "lib": ["es2015", "es2016"]
+    "skipLibCheck": true,
+    "lib": ["es2016"]
   }
 }
