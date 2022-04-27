@@ -1,3 +1,8 @@
+# v0.9.1
+
+- `--dry-fail` should fail when either adding or removing typings ([#87](https://github.com/jeffijoe/typesync/pull/87), [@chelkyl](https://github.com/chelkyl))
+- Update packages
+
 # v0.9.0
 
 - **BREAKING**: Bump Node version to 12.
