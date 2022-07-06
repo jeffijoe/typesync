@@ -48,7 +48,7 @@
   },
   "homepage": "https://github.com/jeffijoe/typesync#readme",
   "dependencies": {
-    "awilix": "^7.0.2",
+    "awilix": "^7.0.3",
     "axios": "^0.27.2",
     "chalk": "^4.1.0",
     "cosmiconfig": "^7.0.1",
@@ -59,24 +59,25 @@
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
-    "@types/jest": "^27.4.1",
-    "@types/semver": "^7.3.9",
+    "@types/jest": "^28.1.4",
+    "@types/semver": "^7.3.10",
     "coveralls": "^3.1.1",
-    "jest": "^27.5.1",
-    "nodemon": "^2.0.15",
-    "prettier": "^2.6.2",
+    "jest": "^28.1.2",
+    "nodemon": "^2.0.19",
+    "prettier": "^2.7.1",
     "rimraf": "^3.0.2",
-    "ts-jest": "^27.1.4",
+    "ts-jest": "^28.0.5",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
-    "typescript": "^4.6.3"
+    "typescript": "^4.7.4"
   },
   "jest": {
     "testEnvironment": "node",
     "collectCoverageFrom": [
       "src/**",
       "!src/cli-util.ts",
+      "!src/index.ts",
       "!src/cli.ts",
       "!src/fakes.ts",
       "!src/types.ts"
