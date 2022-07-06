@@ -1,3 +1,8 @@
+# v0.9.2
+
+- Update packages
+- [#90](https://github.com/jeffijoe/typesync/issues/90): add `index.ts`
+
 # v0.9.1
 
 - `--dry-fail` should fail when either adding or removing typings ([#87](https://github.com/jeffijoe/typesync/pull/87), [@chelkyl](https://github.com/chelkyl))
