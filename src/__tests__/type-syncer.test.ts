@@ -101,6 +101,23 @@ function buildSyncer() {
     workspaces: ['packages/*'],
   }
 
+  // synced package file with ignoreDeps: dev
+  const syncedPackageFile: IPackageFile = {
+    ...rootPackageFile,
+    devDependencies: {
+      '@types/package1': '^1.0.0',
+      '@types/package3': '^1.0.0',
+      '@types/myorg__package7': '^1.0.0',
+      '@types/package8': '~1.0.0',
+      '@types/package9': '1.0.0',
+      '@types/packageWithOldTypings': '^2.0.0',
+      '@types/unused-global': '^1.0.0',
+      '@types/scoped__unused-global': '^1.0.0',
+      package4: '^1.0.0',
+      package5: '^1.0.0',
+    },
+  }
+
   const package1File: IPackageFile = {
     name: 'package-1',
     dependencies: {
@@ -125,6 +142,8 @@ function buildSyncer() {
         case 'package-ignore-dev.json':
         case 'package-ignore-package1.json':
           return rootPackageFile
+        case 'package-ignore-dev-synced.json':
+          return syncedPackageFile
         case 'packages/package-1/package.json':
           return package1File
         case 'packages/package-2/package.json':
@@ -176,6 +195,7 @@ function buildSyncer() {
         case 'package.json':
           return {}
         case 'package-ignore-dev.json':
+        case 'package-ignore-dev-synced.json':
           return { ignoreDeps: ['dev'] } as ISyncOptions
         case 'package-ignore-package1.json':
           return { ignorePackages: ['package1'] }
@@ -301,5 +321,16 @@ describe('type syncer', () => {
     const { syncer, packageService } = buildSyncer()
     await syncer.sync('package.json', { dry: true })
     expect(packageService.writePackageFile as jest.Mock<any>).not.toBeCalled()
+  })
+
+  it('does not detect diff when already synced', async () => {
+    const { syncer, packageService } = buildSyncer()
+    const { syncedFiles } = await syncer.sync(
+      'package-ignore-dev-synced.json',
+      {}
+    )
+    const root = syncedFiles[0]
+    expect(root.newTypings).toEqual([])
+    expect(root.removedTypings).toEqual([])
   })
 })
