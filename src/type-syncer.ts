@@ -104,12 +104,10 @@ export function createTypeSyncer(
     const packageFile =
       file || (await packageJSONService.readPackageFile(filePath))
     const allPackages = flatten(
-      filterMap(Object.values(IDependencySection), (dep) => {
-        if (ignoreDeps?.includes(dep)) {
-          return false
-        }
+      Object.values(IDependencySection).map((dep) => {
         const section = getDependenciesBySection(packageFile, dep)
-        return getPackagesFromSection(section, ignorePackages)
+        const ignoredSection = ignoreDeps?.includes(dep)
+        return getPackagesFromSection(section, ignoredSection, ignorePackages)
       })
     )
     const allPackageNames = uniq(allPackages.map((p) => p.name))
@@ -322,15 +320,23 @@ function getPackageScope(packageName: string): [string, string] | null {
  * Get packages from a dependency section
  *
  * @param section
+ * @param ignoredSection
  * @param ignorePackages
  */
 function getPackagesFromSection(
   section: IDependenciesSection,
+  ignoredSection?: boolean,
   ignorePackages?: string[]
 ): IPackageVersion[] {
   return filterMap(Object.keys(section), (name) => {
-    if (ignorePackages?.includes(name)) {
-      return false
+    const isTyping = name.startsWith('@types/')
+
+    // Never ignore `@types` packages.
+    if (!isTyping) {
+      // If it's not a `@types` package, check whether the section or package is ignored.
+      if (ignoredSection || ignorePackages?.includes(name)) {
+        return false
+      }
     }
 
     return { name, version: section[name] }
