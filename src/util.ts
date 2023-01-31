@@ -94,7 +94,7 @@ export function untyped(name: string): string {
  * Orders an object.
  * @param source
  */
-export function orderObject<T>(
+export function orderObject<T extends {}>(
   source: T,
   comparer?: (a: string, b: string) => number
 ): T {

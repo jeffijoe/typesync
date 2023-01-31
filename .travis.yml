@@ -7,9 +7,9 @@ dist: focal
 # Add additional versions here as appropriate.
 node_js:
   - 'stable'
+  - '18'
   - '16'
   - '14'
-  - '12'
 
 # Lint errors should trigger a failure.
 before_script: npm run lint
