@@ -3,11 +3,11 @@ import { parseArguments } from '../cli-util'
 test('parseArguments', () => {
   expect(parseArguments(['--dry', '--ignoredeps=dev,peer', 'haha']))
     .toMatchInlineSnapshot(`
-    Object {
-      "args": Array [
+    {
+      "args": [
         "haha",
       ],
-      "flags": Object {
+      "flags": {
         "dry": true,
         "ignoredeps": "dev,peer",
       },
