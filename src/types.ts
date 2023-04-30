@@ -33,16 +33,6 @@ export interface IConfigService {
 }
 
 /**
- * Fetches available type definitions.
- */
-export interface ITypeDefinitionSource {
-  /**
-   * Fetches available type definitions.
-   */
-  fetch(): Promise<Array<ITypeDefinition>>
-}
-
-/**
  * Fetches info about a package.
  */
 export interface IPackageSource {
@@ -51,7 +41,7 @@ export interface IPackageSource {
    *
    * @param packageName
    */
-  fetch(packageName: string): Promise<IPackageInfo>
+  fetch(packageName: string): Promise<IPackageInfo | null>
 }
 
 /**
@@ -127,17 +117,18 @@ export interface IPackageVersion {
 }
 
 /**
- * Represents a type definition pulled from a source.
+ * Describes how a package may be typed.
  */
-export interface ITypeDefinition {
+export interface IPackageTypingDescriptor {
   typingsName: string
-  isGlobal: boolean
+  codePackageName: string
+  typesPackageName: string
 }
 
 /**
  * A type definition with the corresponding code package name.
  */
-export interface ISyncedTypeDefinition extends ITypeDefinition {
+export interface ISyncedTypeDefinition extends IPackageTypingDescriptor {
   codePackageName: string
 }
 
@@ -167,10 +158,6 @@ export interface ISyncedFile {
    * The new typings that were added.
    */
   newTypings: Array<ISyncedTypeDefinition>
-  /**
-   * The typings that were removed because they were unused.
-   */
-  removedTypings: Array<ISyncedTypeDefinition>
 }
 
 /**

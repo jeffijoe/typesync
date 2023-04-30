@@ -1,8 +1,7 @@
 import {
   ITypeSyncer,
   IPackageJSONService,
-  ITypeDefinitionSource,
-  ITypeDefinition,
+  IPackageTypingDescriptor,
   IPackageFile,
   ISyncOptions,
   IDependenciesSection,
@@ -11,7 +10,6 @@ import {
   ISyncedFile,
   IPackageSource,
   IPackageInfo,
-  ISyncedTypeDefinition,
   IConfigService,
   IDependencySection,
   ICLIArguments,
@@ -38,7 +36,6 @@ import { satisfies } from 'semver'
  */
 export function createTypeSyncer(
   packageJSONService: IPackageJSONService,
-  typeDefinitionSource: ITypeDefinitionSource,
   packageSource: IPackageSource,
   configService: IConfigService,
   globber: IGlobber
@@ -57,9 +54,8 @@ export function createTypeSyncer(
     flags: ICLIArguments['flags']
   ): Promise<ISyncResult> {
     const dryRun = !!flags.dry
-    const [file, allTypings, syncOpts] = await Promise.all([
+    const [file, syncOpts] = await Promise.all([
       packageJSONService.readPackageFile(filePath),
-      typeDefinitionSource.fetch(),
       configService.readConfig(filePath, flags),
     ])
 
@@ -73,10 +69,8 @@ export function createTypeSyncer(
       .then(uniq)
 
     const syncedFiles: Array<ISyncedFile> = await Promise.all([
-      syncFile(filePath, file, allTypings, syncOpts, dryRun),
-      ...subPackages.map((p) =>
-        syncFile(p, null, allTypings, syncOpts, dryRun)
-      ),
+      syncFile(filePath, file, syncOpts, dryRun),
+      ...subPackages.map((p) => syncFile(p, null, syncOpts, dryRun)),
     ])
 
     return {
@@ -95,7 +89,6 @@ export function createTypeSyncer(
   async function syncFile(
     filePath: string,
     file: IPackageFile | null,
-    allTypings: Array<ITypeDefinition>,
     opts: ISyncOptions,
     dryRun: boolean
   ): Promise<ISyncedFile> {
@@ -111,16 +104,22 @@ export function createTypeSyncer(
       })
     )
     const allPackageNames = uniq(allPackages.map((p) => p.name))
-
-    const newTypings = filterNewTypings(allPackageNames, allTypings)
+    const potentiallyUntypedPackages =
+      getPotentiallyUntypedPackages(allPackageNames)
     // This is pushed to in the inner `map`, because packages that have DT-typings
-    // *as well* as internal typings should be exclused.
-    const used: Array<ReturnType<typeof filterNewTypings>[0]> = []
+    // *as well* as internal typings should be excluded.
+    const used: Array<ReturnType<typeof getPotentiallyUntypedPackages>[0]> = []
     const devDepsToAdd = await Promise.all(
-      newTypings.map(async (t) => {
+      potentiallyUntypedPackages.map(async (t) => {
         // Fetch the code package from the source.
-        const typePackageInfoPromise = fetchPackageInfo(typed(t.typingsName))
+        const typePackageInfoPromise = fetchPackageInfo(t.typesPackageName)
         const codePackageInfo = await fetchPackageInfo(t.codePackageName)
+
+        // If the code package was not found, there's nothing else to do.
+        if (!codePackageInfo) {
+          return {}
+        }
+
         const codePackage = allPackages.find(
           (p) => p.name === t.codePackageName
         )!
@@ -138,6 +137,13 @@ export function createTypeSyncer(
 
         // Look for the closest matching typings package.
         const typePackageInfo = await typePackageInfoPromise
+
+        // If the types package was not found, there's nothing else to do.
+        /* istanbul ignore next */
+        if (!typePackageInfo) {
+          return {}
+        }
+
         // Gets the closest matching typings version, or the newest one.
         const closestMatchingTypingsVersion = getClosestMatchingVersion(
           typePackageInfo,
@@ -151,18 +157,17 @@ export function createTypeSyncer(
 
         used.push(t)
         return {
-          [typed(t.typingsName)]: semverRangeSpecifier + version,
+          [t.typesPackageName]: semverRangeSpecifier + version,
         }
       })
     ).then(mergeObjects)
-    const devDeps = packageFile.devDependencies || /* istanbul ignore next */ {}
-    const unused = getUnusedTypings(allPackageNames, devDeps, allTypings)
+    const devDeps = packageFile.devDependencies
     if (!dryRun) {
       await packageJSONService.writePackageFile(filePath, {
         ...packageFile,
         devDependencies: orderObject({
           ...devDepsToAdd,
-          ...removeUnusedTypings(devDeps, unused),
+          ...devDeps,
         }),
       } as IPackageFile)
     }
@@ -170,70 +175,9 @@ export function createTypeSyncer(
     return {
       filePath,
       newTypings: used,
-      removedTypings: unused,
       package: packageFile,
     }
   }
-}
-
-/**
- * Removes unused typings from the devDependencies section.
- *
- * @param allPackageNames
- * @param devDependencies
- */
-function removeUnusedTypings(
-  devDependencies: IDependenciesSection,
-  unusedTypings: Array<ISyncedTypeDefinition & { typingsPackageName: string }>
-): IDependenciesSection {
-  const result: IDependenciesSection = {}
-  for (let packageName in devDependencies) {
-    const version = devDependencies[packageName]
-    if (unusedTypings.some((t) => t.typingsPackageName === packageName)) {
-      continue
-    }
-    result[packageName] = version
-  }
-  return result
-}
-
-/**
- * Removes unused typings from the devDependencies section.
- *
- * @param allPackageNames
- * @param devDependencies
- */
-function getUnusedTypings(
-  allPackageNames: string[],
-  devDependencies: IDependenciesSection,
-  allTypings: Array<ITypeDefinition>
-) {
-  const result: Array<ISyncedTypeDefinition & { typingsPackageName: string }> =
-    []
-  for (let packageName in devDependencies) {
-    if (packageName.startsWith('@types/')) {
-      const codePackageName = untyped(packageName)
-      // Make sure the corresponding code package is in `allPackages`.
-      const hasCodePackageForTyping = allPackageNames.some(
-        (p) => p === codePackageName
-      )
-      if (!hasCodePackageForTyping) {
-        const typingsNameForCodePackage = getTypingsName(codePackageName)
-        const typeDef = allTypings.find(
-          (t) => t.typingsName === typingsNameForCodePackage
-        )
-
-        if (typeDef && !typeDef.isGlobal) {
-          result.push({
-            codePackageName,
-            typingsPackageName: packageName,
-            ...typeDef,
-          })
-        }
-      }
-    }
-  }
-  return result
 }
 
 /**
@@ -250,28 +194,23 @@ function getClosestMatchingVersion(packageInfo: IPackageInfo, version: string) {
 }
 
 /**
- * Returns an array of new typings as well as the code package name that was matched to it.
+ * Returns an array of packages that do not have a `@types/` package.
  *
  * @param allPackageNames Used to filter the typings that are new.
  * @param allTypings All typings available
  */
-function filterNewTypings(
-  allPackageNames: Array<string>,
-  allTypings: Array<ITypeDefinition>
-): Array<ITypeDefinition & { codePackageName: string }> {
+function getPotentiallyUntypedPackages(
+  allPackageNames: Array<string>
+): Array<IPackageTypingDescriptor> {
   const existingTypings = allPackageNames.filter((x) => x.startsWith('@types/'))
   return filterMap(allPackageNames, (p) => {
-    let typingsName = getTypingsName(p)
-
-    const typingsForPackage = allTypings.find(
-      (x) => x.typingsName === typingsName
-    )
-    if (!typingsForPackage) {
-      // No typings available.
+    // Ignore typings packages themselves.
+    if (p.startsWith('@types/')) {
       return false
     }
 
-    const fullTypingsPackage = typed(typingsForPackage.typingsName)
+    let typingsName = getTypingsName(p)
+    const fullTypingsPackage = typed(p)
     const alreadyHasTyping = existingTypings.some(
       (t) => t === fullTypingsPackage
     )
@@ -280,7 +219,8 @@ function filterNewTypings(
     }
 
     return {
-      ...typingsForPackage,
+      typingsName: typingsName,
+      typesPackageName: fullTypingsPackage,
       codePackageName: p,
     }
   })

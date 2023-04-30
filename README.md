@@ -56,7 +56,7 @@ To ignore certain sections, you can use the `--ignoredeps=` flag. For example, t
 To ignore certain packages, you can use the `--ignorepackages=` flag. For example, to ignore `nodemon`, use `--ignorepackages=nodemon`.
 To ignore multiple, comma-separate them, like this: `--ignorepackages=nodemon,whatever` (ignores `nodemon` and `whatever`).
 
-## Use config file
+## Using a config file
 
 Alternatively, you can use a TypeSync config file: `.typesyncrc` or a `"typesync"` section in your `package.json`. TypeSync will **automatically** search for configuration files. See [cosmiconfig][cosmiconfig] for details.
 
@@ -121,8 +121,6 @@ TypeSync will add typings for packages that:
 TypeSync will try to respect semver parity for the code and typings packages, and will fall back to the latest available typings package.
 
 If you use a Semver `^` or `~` for a package, the same prefix will be used for the typings package. If you pin to an exact version (`"some-package": "1.2.3"`), no prefix will be written.
-
-If a typings package in your `package.json` is not used (has no corresponding code package in your `package.json` and does not contribute to the global namespace), TypeSync will automatically remove it.
 
 # Monorepos
 

@@ -70,6 +70,12 @@ export function mergeObjects<T>(source: Array<T>): T {
  * @param name Package name
  */
 export function typed(name: string): string {
+  // If the package is scoped, the typings scheme is slightly different.
+  if (/^@.*?\//i.test(name)) {
+    const splat = name.split('/')
+    return `@types/${splat[0].slice(1)}__${splat[1]}`
+  }
+
   return `@types/${name}`
 }
 
