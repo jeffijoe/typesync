@@ -2,8 +2,9 @@ import { createPackageSource } from '../package-source'
 
 test('package source', async () => {
   const source = createPackageSource()
-  const result = await source.fetch('awilix')
+  const result = (await source.fetch('awilix'))!
 
+  expect(result).not.toBeNull()
   expect(result.name).toBe('awilix')
   expect(result.latestVersion).toBeDefined()
 
@@ -20,4 +21,10 @@ test('package source', async () => {
     version: '3.0.0',
     containsInternalTypings: true,
   })
+})
+
+test('not found', async () => {
+  const source = createPackageSource()
+  const result = await source.fetch(`some-nonexistent-package-${Date.now()}`)
+  expect(result).toBeNull()
 })

@@ -1,7 +1,6 @@
 import {
-  ITypeDefinitionSource,
   IPackageJSONService,
-  ITypeDefinition,
+  IPackageTypingDescriptor,
   IPackageFile,
   IPackageSource,
   IPackageInfo,
@@ -11,63 +10,57 @@ import {
 import { createTypeSyncer } from '../type-syncer'
 import { IGlobber } from '../globber'
 
-const typedefs: ITypeDefinition[] = [
+const descriptors: IPackageTypingDescriptor[] = [
   {
     typingsName: 'package1',
-    isGlobal: false,
+    codePackageName: 'package1',
+    typesPackageName: '@types/package1',
   },
   {
     typingsName: 'package2',
-    isGlobal: false,
+    codePackageName: 'package2',
+    typesPackageName: '@types/package2',
   },
   {
     typingsName: 'package3',
-    isGlobal: false,
+    codePackageName: 'package3',
+    typesPackageName: '@types/package3',
   },
   {
     typingsName: 'packageWithInternalTypings',
-    isGlobal: false,
+    codePackageName: 'packageWithInternalTypings',
+    typesPackageName: '@types/packageWithInternalTypings',
   },
   {
     typingsName: 'package4',
-    isGlobal: false,
+    codePackageName: 'package4',
+    typesPackageName: '@types/package4',
   },
   {
     typingsName: 'package5',
-    isGlobal: false,
+    codePackageName: 'package5',
+    typesPackageName: '@types/package5',
   },
   // None for package6
   {
     typingsName: 'myorg__package7',
-    isGlobal: false,
+    codePackageName: '@myorg/package7',
+    typesPackageName: '@types/myorg__package7',
   },
   {
     typingsName: 'package8',
-    isGlobal: false,
+    codePackageName: 'package8',
+    typesPackageName: '@types/package8',
   },
   {
     typingsName: 'package9',
-    isGlobal: false,
+    codePackageName: 'package9',
+    typesPackageName: '@types/package9',
   },
   {
     typingsName: 'packageWithOldTypings',
-    isGlobal: false,
-  },
-  {
-    typingsName: 'scoped__unused',
-    isGlobal: false,
-  },
-  {
-    typingsName: 'unused',
-    isGlobal: false,
-  },
-  {
-    typingsName: 'unused-global',
-    isGlobal: true,
-  },
-  {
-    typingsName: 'scoped__unused-global',
-    isGlobal: true,
+    codePackageName: 'packageWithOldTypings',
+    typesPackageName: '@types/packageWithOldTypings',
   },
 ]
 
@@ -82,10 +75,6 @@ function buildSyncer() {
     },
     devDependencies: {
       '@types/package4': '^1.0.0',
-      '@types/unused': '^1.0.0',
-      '@types/scoped__unused': '^1.0.0',
-      '@types/unused-global': '^1.0.0',
-      '@types/scoped__unused-global': '^1.0.0',
       package4: '^1.0.0',
       package5: '^1.0.0',
     },
@@ -111,8 +100,6 @@ function buildSyncer() {
       '@types/package8': '~1.0.0',
       '@types/package9': '1.0.0',
       '@types/packageWithOldTypings': '^2.0.0',
-      '@types/unused-global': '^1.0.0',
-      '@types/scoped__unused-global': '^1.0.0',
       package4: '^1.0.0',
       package5: '^1.0.0',
     },
@@ -132,9 +119,6 @@ function buildSyncer() {
     },
   }
 
-  const typedefSource: ITypeDefinitionSource = {
-    fetch: jest.fn(() => Promise.resolve(typedefs)),
-  }
   const packageService: IPackageJSONService = {
     readPackageFile: jest.fn(async (filepath: string) => {
       switch (filepath) {
@@ -171,6 +155,13 @@ function buildSyncer() {
 
   const packageSource: IPackageSource = {
     fetch: jest.fn(async (name) => {
+      const found = descriptors.find(
+        (t) => t.codePackageName === name || t.typesPackageName === name
+      )
+      if (!found) {
+        return null
+      }
+
       return {
         name,
         latestVersion: '2.0.0',
@@ -206,14 +197,12 @@ function buildSyncer() {
   }
 
   return {
-    typedefSource,
     packageService,
     rootPackageFile,
     packageSource,
     configService,
     syncer: createTypeSyncer(
       packageService,
-      typedefSource,
       packageSource,
       configService,
       globber
@@ -222,7 +211,7 @@ function buildSyncer() {
 }
 
 describe('type syncer', () => {
-  it('adds new packages to package.json and removes unused typings that are not global', async () => {
+  it('adds new packages to package.json', async () => {
     const { syncer, packageService } = buildSyncer()
     const result = await syncer.sync('package.json', {})
     const writtenPackage = (
@@ -237,8 +226,6 @@ describe('type syncer', () => {
       '@types/package8': '~1.0.0',
       '@types/package9': '1.0.0',
       '@types/packageWithOldTypings': '^2.0.0',
-      '@types/unused-global': '^1.0.0',
-      '@types/scoped__unused-global': '^1.0.0',
       package4: '^1.0.0',
       package5: '^1.0.0',
     })
@@ -283,12 +270,14 @@ describe('type syncer', () => {
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package1': '^1.0.0',
       '@types/package3': '^1.0.0',
+      // Package 4's typings were already in the root package's `devDependencies`,
+      // but package 5's were not, that's why we still write package4's typings but not
+      // package 5's.
+      '@types/package4': '^1.0.0',
       '@types/myorg__package7': '^1.0.0',
       '@types/package8': '~1.0.0',
       '@types/package9': '1.0.0',
       '@types/packageWithOldTypings': '^2.0.0',
-      '@types/unused-global': '^1.0.0',
-      '@types/scoped__unused-global': '^1.0.0',
       package4: '^1.0.0',
       package5: '^1.0.0',
     })
@@ -310,8 +299,6 @@ describe('type syncer', () => {
       '@types/package8': '~1.0.0',
       '@types/package9': '1.0.0',
       '@types/packageWithOldTypings': '^2.0.0',
-      '@types/unused-global': '^1.0.0',
-      '@types/scoped__unused-global': '^1.0.0',
       package4: '^1.0.0',
       package5: '^1.0.0',
     })
@@ -331,6 +318,5 @@ describe('type syncer', () => {
     )
     const root = syncedFiles[0]
     expect(root.newTypings).toEqual([])
-    expect(root.removedTypings).toEqual([])
   })
 })

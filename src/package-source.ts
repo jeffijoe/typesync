@@ -11,7 +11,21 @@ export function createPackageSource(): IPackageSource {
      * Fetches info about a package, or `null` if not found.
      */
     fetch: async (name) => {
-      const data = await npmClient.getPackageManifest(encodeURIComponent(name))
+      const data = await npmClient
+        .getPackageManifest(encodeURIComponent(name))
+        .catch((err: any) => {
+          if (err.response.status === 404) {
+            return null
+          }
+
+          /* istanbul ignore next */
+          throw err
+        })
+
+      if (!data) {
+        return null
+      }
+
       const versions = Object.keys(data.versions).map<IPackageVersionInfo>(
         (v) => {
           const item = data.versions[v]

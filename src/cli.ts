@@ -2,9 +2,8 @@ import { createContainer, InjectionMode, asFunction } from 'awilix'
 import chalk from 'chalk'
 import * as path from 'path'
 import * as C from './cli-util'
-import { ITypeSyncer, ITypeDefinition, ISyncedFile } from './types'
+import { ITypeSyncer, IPackageTypingDescriptor, ISyncedFile } from './types'
 import { createTypeSyncer } from './type-syncer'
-import { createTypeDefinitionSource } from './type-definition-source'
 import { createPackageJSONFileService } from './package-json-file-service'
 import { createConfigService } from './config-service'
 import { createGlobber } from './globber'
@@ -19,7 +18,6 @@ export async function startCli() {
     const container = createContainer({
       injectionMode: InjectionMode.CLASSIC,
     }).register({
-      typeDefinitionSource: asFunction(createTypeDefinitionSource).singleton(),
       packageJSONService: asFunction(createPackageJSONFileService).singleton(),
       packageSource: asFunction(createPackageSource).singleton(),
       configService: asFunction(createConfigService).singleton(),
@@ -60,35 +58,22 @@ async function run(syncer: ITypeSyncer) {
   const totals = result.syncedFiles
     .map((f) => ({
       newTypings: f.newTypings.length,
-      removedTypings: f.removedTypings.length,
     }))
     .reduce(
       (accum, next) => ({
         newTypings: accum.newTypings + next.newTypings,
-        removedTypings: accum.removedTypings + next.removedTypings,
       }),
-      { newTypings: 0, removedTypings: 0 }
+      { newTypings: 0 }
     )
-  if (
-    flags.dry === 'fail' &&
-    (totals.newTypings > 0 || totals.removedTypings > 0)
-  ) {
+  if (flags.dry === 'fail' && totals.newTypings > 0) {
     C.error('Typings changed; check failed.')
     process.exitCode = 1
     return
   }
   C.success(
     totals.newTypings === 0
-      ? `No new typings added, looks like you're all synced up!${
-          totals.removedTypings > 0
-            ? chalk` {gray.italic Also removed ${totals.removedTypings.toString()} unused typings, no big deal.}`
-            : ''
-        }`
-      : chalk`${totals.newTypings.toString()} new typings added${
-          totals.removedTypings > 0
-            ? chalk` {italic (${totals.removedTypings.toString()} unused removed)}`
-            : ''
-        }.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
+      ? `No new typings added, looks like you're all synced up!`
+      : chalk`${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
   )
 }
 
@@ -97,18 +82,9 @@ async function run(syncer: ITypeSyncer) {
  * @param typeDef
  * @param isLast
  */
-function renderTypeDef(
-  typeDef: ITypeDefinition & { action: string },
-  isLast: boolean
-) {
+function renderTypeDef(typeDef: IPackageTypingDescriptor, isLast: boolean) {
   const treeNode = isLast ? '└─' : '├─'
-  return chalk`${treeNode} ${
-    typeDef.action === 'add' ? chalk`{green.bold +}` : chalk`{red.bold -}`
-  } {gray @types/}${
-    typeDef.action === 'add'
-      ? chalk`{bold.blue ${typeDef.typingsName}}`
-      : chalk`{bold.yellow ${typeDef.typingsName}} {gray.italic (unused)}`
-  }`
+  return chalk`${treeNode} ${chalk`{green.bold +}`} {gray @types/}${chalk`{bold.blue ${typeDef.typingsName}}`}`
 }
 
 /**
@@ -118,9 +94,9 @@ function renderTypeDef(
  */
 function renderSyncedFile(file: ISyncedFile) {
   const badge =
-    file.newTypings.length === 0 && file.removedTypings.length === 0
+    file.newTypings.length === 0
       ? chalk`{blue.bold (no new typings added)}`
-      : chalk`{green.bold (${file.newTypings.length.toString()} new typings added, ${file.removedTypings.length.toString()} unused typings removed)}`
+      : chalk`{green.bold (${file.newTypings.length.toString()} new typings added)}`
 
   const dirName = path.basename(path.dirname(path.resolve(file.filePath)))
   const title = chalk`📦 ${file.package.name || dirName} {gray.italic — ${
@@ -128,10 +104,7 @@ function renderSyncedFile(file: ISyncedFile) {
   }} ${badge}`
 
   const nl = '\n'
-  const combined = [
-    ...file.newTypings.map((t) => ({ ...t, action: 'add' })),
-    ...file.removedTypings.map((t) => ({ ...t, action: 'remove' })),
-  ]
+  const combined = [...file.newTypings.map((t) => ({ ...t, action: 'add' }))]
   const rendered =
     title +
     nl +

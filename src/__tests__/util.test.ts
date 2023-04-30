@@ -8,6 +8,7 @@ import {
   memoizeAsync,
   ensureWorkspacesArray,
   untyped,
+  typed,
 } from '../util'
 
 describe('util', () => {
@@ -125,6 +126,13 @@ describe('util', () => {
       expect(ensureWorkspacesArray({ packages: ['lol'] } as any)).toEqual([
         'lol',
       ])
+    })
+  })
+
+  describe('typed', () => {
+    it('correctly returns the typings package name for a code package name', () => {
+      expect(typed('jquery')).toBe('@types/jquery')
+      expect(typed('@koa/router')).toBe('@types/koa__router')
     })
   })
 

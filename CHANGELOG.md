@@ -1,3 +1,14 @@
+# v0.11.0
+
+- Microsoft removed their `search-index` resource, so will check npm directly.
+- Remove the "remove unused typings" feature as it relied on the information in the Microsoft index and isn't easily available elsewhere for the time being.
+- Update packages.
+
+# v0.10.0
+
+- Update packages
+- [#94](https://github.com/jeffijoe/typesync/issues/94): Fix diffing, [@oreshinya](https://github.com/oreshinya)
+
 # v0.9.2
 
 - Update packages
