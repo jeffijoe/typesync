@@ -1,5 +1,6 @@
 # v0.11.0
 
+- Use `npm-registry-fetch` instead of `axios` for fetching package info from npm.
 - Microsoft removed their `search-index` resource, so will check npm directly.
 - Remove the "remove unused typings" feature as it relied on the information in the Microsoft index and isn't easily available elsewhere for the time being.
 - Update packages.

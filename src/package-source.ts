@@ -1,5 +1,5 @@
 import { IPackageSource, IPackageVersionInfo } from './types'
-import { npmClient } from './npm-client'
+import fetch from 'npm-registry-fetch'
 import { compare } from 'semver'
 
 /**
@@ -11,16 +11,18 @@ export function createPackageSource(): IPackageSource {
      * Fetches info about a package, or `null` if not found.
      */
     fetch: async (name) => {
-      const data = await npmClient
-        .getPackageManifest(encodeURIComponent(name))
-        .catch((err: any) => {
-          if (err.response.status === 404) {
+      const response = await fetch(encodeURIComponent(name)).catch(
+        (err: any) => {
+          if (err.statusCode === 404) {
             return null
           }
 
           /* istanbul ignore next */
           throw err
-        })
+        }
+      )
+
+      const data = await response?.json()
 
       if (!data) {
         return null
