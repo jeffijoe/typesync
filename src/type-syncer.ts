@@ -138,9 +138,8 @@ export function createTypeSyncer(
         // Look for the closest matching typings package.
         const typePackageInfo = await typePackageInfoPromise
 
-        // If the types package was not found, there's nothing else to do.
-        /* istanbul ignore next */
-        if (!typePackageInfo) {
+        // If the types package was not found, or if it was deprecated, there's nothing else to do.
+        if (!typePackageInfo || typePackageInfo.deprecated) {
           return {}
         }
 

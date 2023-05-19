@@ -64,6 +64,7 @@ export interface IPackageJSONService {
 export interface IPackageInfo {
   name: string
   latestVersion: string
+  deprecated: boolean
   versions: Array<IPackageVersionInfo>
 }
 
