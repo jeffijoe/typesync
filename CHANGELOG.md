@@ -1,3 +1,8 @@
+# v0.11.1
+
+- [#79](https://github.com/jeffijoe/typesync/issues/79):  Ignore deprecated `@typings/` packages.
+- Upgrade packages.
+
 # v0.11.0
 
 - Use `npm-registry-fetch` instead of `axios` for fetching package info from npm.

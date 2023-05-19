@@ -40,6 +40,7 @@ export function createPackageSource(): IPackageSource {
 
       return {
         name: data.name,
+        deprecated: Boolean(data.deprecated),
         latestVersion: data['dist-tags'].latest,
         // Sort by version, highest version first.
         versions: versions

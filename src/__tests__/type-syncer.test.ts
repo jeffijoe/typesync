@@ -32,6 +32,11 @@ const descriptors: IPackageTypingDescriptor[] = [
     typesPackageName: '@types/packageWithInternalTypings',
   },
   {
+    typingsName: 'packageWithDeprecatedTypings',
+    codePackageName: 'packageWithDeprecatedTypings',
+    typesPackageName: '@types/packageWithDeprecatedTypings',
+  },
+  {
     typingsName: 'package4',
     codePackageName: 'package4',
     typesPackageName: '@types/package4',
@@ -72,6 +77,7 @@ function buildSyncer() {
       package3: '^1.0.0',
       packageWithInternalTypings: '^1.0.0',
       packageWithOldTypings: '^1.0.0',
+      packageWithDeprecatedTypings: '^2.0.0',
     },
     devDependencies: {
       '@types/package4': '^1.0.0',
@@ -162,9 +168,10 @@ function buildSyncer() {
         return null
       }
 
-      return {
+      const info: IPackageInfo = {
         name,
         latestVersion: '2.0.0',
+        deprecated: name === '@types/packageWithDeprecatedTypings',
         versions: [
           {
             version: '2.0.0',
@@ -176,7 +183,8 @@ function buildSyncer() {
             containsInternalTypings: name === 'packageWithInternalTypings',
           },
         ],
-      } as IPackageInfo
+      }
+      return info
     }),
   }
 
