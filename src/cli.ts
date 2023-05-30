@@ -14,7 +14,9 @@ import { createPackageSource } from './package-source'
  */
 export async function startCli() {
   try {
-    // Awilix is a dependency injection container.
+    /**
+    * Awilix is a dependency injection container.
+    */ 
     const container = createContainer({
       injectionMode: InjectionMode.CLASSIC,
     }).register({
