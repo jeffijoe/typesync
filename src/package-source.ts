@@ -19,7 +19,7 @@ export function createPackageSource(): IPackageSource {
 
           /* istanbul ignore next */
           throw err
-        }
+        },
       )
 
       const data = await response?.json()
@@ -35,7 +35,7 @@ export function createPackageSource(): IPackageSource {
             version: item.version,
             containsInternalTypings: !!item.types || !!item.typings,
           }
-        }
+        },
       )
 
       return {

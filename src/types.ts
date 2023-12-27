@@ -28,7 +28,7 @@ export interface IConfigService {
    */
   readConfig(
     filePath: string,
-    flags: ICLIArguments['flags']
+    flags: ICLIArguments['flags'],
   ): Promise<ISyncOptions>
 }
 

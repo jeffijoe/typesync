@@ -162,7 +162,7 @@ function buildSyncer() {
   const packageSource: IPackageSource = {
     fetch: jest.fn(async (name) => {
       const found = descriptors.find(
-        (t) => t.codePackageName === name || t.typesPackageName === name
+        (t) => t.codePackageName === name || t.typesPackageName === name,
       )
       if (!found) {
         return null
@@ -213,7 +213,7 @@ function buildSyncer() {
       packageService,
       packageSource,
       configService,
-      globber
+      globber,
     ),
   }
 }
@@ -241,7 +241,7 @@ describe('type syncer', () => {
 
     expect(result.syncedFiles[0].filePath).toEqual('package.json')
     expect(
-      result.syncedFiles[0].newTypings.map((x) => x.typingsName).sort()
+      result.syncedFiles[0].newTypings.map((x) => x.typingsName).sort(),
     ).toEqual([
       'myorg__package7',
       'package1',
@@ -253,17 +253,17 @@ describe('type syncer', () => {
     ])
 
     expect(result.syncedFiles[1].filePath).toEqual(
-      'packages/package-1/package.json'
+      'packages/package-1/package.json',
     )
     expect(
-      result.syncedFiles[1].newTypings.map((x) => x.typingsName).sort()
+      result.syncedFiles[1].newTypings.map((x) => x.typingsName).sort(),
     ).toEqual(['package1'])
 
     expect(result.syncedFiles[2].filePath).toEqual(
-      'packages/package-2/package.json'
+      'packages/package-2/package.json',
     )
     expect(
-      result.syncedFiles[2].newTypings.map((x) => x.typingsName).sort()
+      result.syncedFiles[2].newTypings.map((x) => x.typingsName).sort(),
     ).toEqual(['package3'])
   })
 
@@ -273,7 +273,7 @@ describe('type syncer', () => {
     const writtenPackage = (
       packageService.writePackageFile as jest.Mock<any>
     ).mock.calls.find(
-      (c) => c[0] === 'package-ignore-dev.json'
+      (c) => c[0] === 'package-ignore-dev.json',
     )[1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package1': '^1.0.0',
@@ -297,7 +297,7 @@ describe('type syncer', () => {
     const writtenPackage = (
       packageService.writePackageFile as jest.Mock<any>
     ).mock.calls.find(
-      (c) => c[0] === 'package-ignore-package1.json'
+      (c) => c[0] === 'package-ignore-package1.json',
     )[1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package3': '^1.0.0',
@@ -322,7 +322,7 @@ describe('type syncer', () => {
     const { syncer, packageService } = buildSyncer()
     const { syncedFiles } = await syncer.sync(
       'package-ignore-dev-synced.json',
-      {}
+      {},
     )
     const root = syncedFiles[0]
     expect(root.newTypings).toEqual([])

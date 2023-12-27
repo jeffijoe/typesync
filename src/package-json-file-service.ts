@@ -22,7 +22,7 @@ export function createPackageJSONFileService(): IPackageJSONService {
       const data = JSON.stringify(
         fileContent,
         null,
-        indent /* istanbul ignore next */ || '  '
+        indent /* istanbul ignore next */ || '  ',
       )
       await writeFileAsync(filePath, data + (trailingNewline ? '\n' : ''))
     },

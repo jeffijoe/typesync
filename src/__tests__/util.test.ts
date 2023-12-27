@@ -21,7 +21,7 @@ describe('util', () => {
   describe('filterMap', () => {
     it('filters out false values', () => {
       expect(
-        filterMap([1, 2, 3, 4], (item) => (item % 2 === 0 ? false : item + 1))
+        filterMap([1, 2, 3, 4], (item) => (item % 2 === 0 ? false : item + 1)),
       ).toEqual([2, 4])
     })
   })
@@ -93,7 +93,7 @@ describe('util', () => {
       let i = 0
 
       const m = memoizeAsync((k: string) =>
-        Promise.resolve(k + (++i).toString())
+        Promise.resolve(k + (++i).toString()),
       )
       expect([await m('hello'), await m('hello')]).toEqual(['hello1', 'hello1'])
       expect([await m('goodbye'), await m('goodbye')]).toEqual([
@@ -106,7 +106,7 @@ describe('util', () => {
       let i = 0
 
       const m = memoizeAsync((k: string) =>
-        Promise.reject(new Error(k + (++i).toString()))
+        Promise.reject(new Error(k + (++i).toString())),
       )
       expect([
         await m('hello').catch((err) => err.message),
@@ -121,7 +121,7 @@ describe('util', () => {
       expect(ensureWorkspacesArray({} as any)).toEqual([])
       expect(ensureWorkspacesArray({ packages: {} } as any)).toEqual([])
       expect(ensureWorkspacesArray({ packages: [1, 2, '3'] } as any)).toEqual(
-        []
+        [],
       )
       expect(ensureWorkspacesArray({ packages: ['lol'] } as any)).toEqual([
         'lol',

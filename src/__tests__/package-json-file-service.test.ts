@@ -89,8 +89,8 @@ function _writeFixture(withTrailingNewline = false): Promise<string> {
         },
       },
       null,
-      2
-    ) + (withTrailingNewline ? '\n' : '')
+      2,
+    ) + (withTrailingNewline ? '\n' : ''),
   ).then(() => file)
 }
 

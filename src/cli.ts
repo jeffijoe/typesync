@@ -49,7 +49,7 @@ async function run(syncer: ITypeSyncer) {
   }
   const result = await C.spinWhile(
     `Syncing type definitions in ${chalk.cyan(filePath)}...`,
-    () => syncer.sync(filePath, flags)
+    () => syncer.sync(filePath, flags),
   )
 
   const syncedFilesOutput = result.syncedFiles
@@ -63,7 +63,7 @@ async function run(syncer: ITypeSyncer) {
       (accum, next) => ({
         newTypings: accum.newTypings + next.newTypings,
       }),
-      { newTypings: 0 }
+      { newTypings: 0 },
     )
   if (flags.dry === 'fail' && totals.newTypings > 0) {
     C.error('Typings changed; check failed.')
@@ -73,7 +73,7 @@ async function run(syncer: ITypeSyncer) {
   C.success(
     totals.newTypings === 0
       ? `No new typings added, looks like you're all synced up!`
-      : chalk`${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`
+      : chalk`${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`,
   )
 }
 
@@ -127,6 +127,6 @@ Options
   {magenta.bold --dry}                                   dry run, won't save the package.json
   {magenta.bold --ignoredeps=<deps|dev|peer|optional>}   ignores dependencies in the specified sections (comma separate for multiple). Example: {magenta ignoredeps=dev,peer}
   {magenta.bold --help}                                  shows this help menu
-  `.trim()
+  `.trim(),
   )
 }

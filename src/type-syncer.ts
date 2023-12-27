@@ -23,7 +23,6 @@ import {
   flatten,
   memoizeAsync,
   ensureWorkspacesArray,
-  untyped,
 } from './util'
 import { IGlobber } from './globber'
 import { satisfies } from 'semver'
@@ -38,7 +37,7 @@ export function createTypeSyncer(
   packageJSONService: IPackageJSONService,
   packageSource: IPackageSource,
   configService: IConfigService,
-  globber: IGlobber
+  globber: IGlobber,
 ): ITypeSyncer {
   const fetchPackageInfo = memoizeAsync(packageSource.fetch)
 
@@ -51,7 +50,7 @@ export function createTypeSyncer(
    */
   async function sync(
     filePath: string,
-    flags: ICLIArguments['flags']
+    flags: ICLIArguments['flags'],
   ): Promise<ISyncResult> {
     const dryRun = !!flags.dry
     const [file, syncOpts] = await Promise.all([
@@ -63,7 +62,7 @@ export function createTypeSyncer(
       [
         ...ensureWorkspacesArray(file.packages),
         ...ensureWorkspacesArray(file.workspaces),
-      ].map(globber.globPackageFiles)
+      ].map(globber.globPackageFiles),
     )
       .then(flatten)
       .then(uniq)
@@ -90,7 +89,7 @@ export function createTypeSyncer(
     filePath: string,
     file: IPackageFile | null,
     opts: ISyncOptions,
-    dryRun: boolean
+    dryRun: boolean,
   ): Promise<ISyncedFile> {
     const { ignoreDeps, ignorePackages } = opts
 
@@ -101,7 +100,7 @@ export function createTypeSyncer(
         const section = getDependenciesBySection(packageFile, dep)
         const ignoredSection = ignoreDeps?.includes(dep)
         return getPackagesFromSection(section, ignoredSection, ignorePackages)
-      })
+      }),
     )
     const allPackageNames = uniq(allPackages.map((p) => p.name))
     const potentiallyUntypedPackages =
@@ -121,13 +120,13 @@ export function createTypeSyncer(
         }
 
         const codePackage = allPackages.find(
-          (p) => p.name === t.codePackageName
+          (p) => p.name === t.codePackageName,
         )!
 
         // Find the closest matching code package version relative to what's in our package.json
         const closestMatchingCodeVersion = getClosestMatchingVersion(
           codePackageInfo,
-          codePackage.version
+          codePackage.version,
         )
 
         // If the closest matching version contains internal typings, don't include it.
@@ -146,19 +145,19 @@ export function createTypeSyncer(
         // Gets the closest matching typings version, or the newest one.
         const closestMatchingTypingsVersion = getClosestMatchingVersion(
           typePackageInfo,
-          codePackage.version
+          codePackage.version,
         )
 
         const version = closestMatchingTypingsVersion.version
         const semverRangeSpecifier = getSemverRangeSpecifier(
-          codePackage.version
+          codePackage.version,
         )
 
         used.push(t)
         return {
           [t.typesPackageName]: semverRangeSpecifier + version,
         }
-      })
+      }),
     ).then(mergeObjects)
     const devDeps = packageFile.devDependencies
     if (!dryRun) {
@@ -199,7 +198,7 @@ function getClosestMatchingVersion(packageInfo: IPackageInfo, version: string) {
  * @param allTypings All typings available
  */
 function getPotentiallyUntypedPackages(
-  allPackageNames: Array<string>
+  allPackageNames: Array<string>,
 ): Array<IPackageTypingDescriptor> {
   const existingTypings = allPackageNames.filter((x) => x.startsWith('@types/'))
   return filterMap(allPackageNames, (p) => {
@@ -208,10 +207,10 @@ function getPotentiallyUntypedPackages(
       return false
     }
 
-    let typingsName = getTypingsName(p)
+    const typingsName = getTypingsName(p)
     const fullTypingsPackage = typed(p)
     const alreadyHasTyping = existingTypings.some(
-      (t) => t === fullTypingsPackage
+      (t) => t === fullTypingsPackage,
     )
     if (alreadyHasTyping) {
       return false
@@ -246,7 +245,7 @@ function getTypingsName(packageName: string) {
  * @param packageName Package name to check scope for.
  */
 function getPackageScope(packageName: string): [string, string] | null {
-  const EXPR = /^\@([^\/]+)\/(.*)$/i
+  const EXPR = /^@([^/]+)\/(.*)$/i
   const matches = EXPR.exec(packageName)
   if (!matches) {
     return null
@@ -265,7 +264,7 @@ function getPackageScope(packageName: string): [string, string] | null {
 function getPackagesFromSection(
   section: IDependenciesSection,
   ignoredSection?: boolean,
-  ignorePackages?: string[]
+  ignorePackages?: string[],
 ): IPackageVersion[] {
   return filterMap(Object.keys(section), (name) => {
     const isTyping = name.startsWith('@types/')
@@ -290,7 +289,7 @@ function getPackagesFromSection(
  */
 function getDependenciesBySection(
   file: IPackageFile,
-  section: IDependencySection
+  section: IDependencySection,
 ): IDependenciesSection {
   const dependenciesSection = (() => {
     switch (section) {

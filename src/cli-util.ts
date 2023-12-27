@@ -1,7 +1,6 @@
 import chalk from 'chalk'
 import { ICLIArguments } from './types'
-
-const ora = require('ora')
+import ora from 'ora'
 
 /**
  * Like regular console.log, but better.
