@@ -1,4 +1,4 @@
-import {glob} from 'glob'
+import { glob } from 'glob'
 import * as path from 'path'
 import { uniq } from './util'
 
@@ -20,9 +20,9 @@ export interface IGlobber {
 export function createGlobber() {
   return {
     globPackageFiles(pattern: string) {
-      return glob(
-        path.join(pattern, 'package.json'),
-        { ignore: '**/node_modules/**' })
+      return glob(path.join(pattern, 'package.json'), {
+        ignore: '**/node_modules/**',
+      }).then(uniq)
     },
   }
 }

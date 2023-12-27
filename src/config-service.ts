@@ -27,7 +27,7 @@ export function createConfigService(): IConfigService {
 function readCliConfig(flags: ICLIArguments['flags']): ISyncOptions {
   const readValues = <T extends string>(
     key: string,
-    validator?: (value: string) => boolean
+    validator?: (value: string) => boolean,
   ): T[] | undefined => {
     const values = flags[key]
     return typeof values === 'string'

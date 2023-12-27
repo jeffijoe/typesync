@@ -25,7 +25,7 @@ export function uniq<T>(source: Array<T>): Array<T> {
  */
 export function filterMap<T, R>(
   source: Array<T>,
-  iteratee: (item: T, index: number) => R | false
+  iteratee: (item: T, index: number) => R | false,
 ): Array<R> {
   const result: Array<R> = []
   let index = 0
@@ -100,10 +100,9 @@ export function untyped(name: string): string {
  * Orders an object.
  * @param source
  */
-export function orderObject<T extends {}>(
-  source: T,
-  comparer?: (a: string, b: string) => number
-): T {
+export function orderObject<
+  T extends Record<string | number | symbol, unknown>,
+>(source: T, comparer?: (a: string, b: string) => number): T {
   const keys = Object.keys(source).sort(comparer)
   const result: any = {}
   for (const key of keys) {
@@ -118,7 +117,7 @@ export function orderObject<T extends {}>(
  *
  * @param fn
  */
-export function promisify(fn: Function) {
+export function promisify(fn: (...args: any[]) => void) {
   return function promisified(...args: any[]) {
     return new Promise<any>((resolve, reject) => {
       fn(...args, function callback(err: any, result: any) {
@@ -152,8 +151,8 @@ export function flatten<T>(source: Array<Array<T>>): Array<T> {
  *
  * @param fn
  */
-export function memoizeAsync<T, U extends any[], V>(
-  fn: (...args: U) => Promise<V>
+export function memoizeAsync<U extends any[], V>(
+  fn: (...args: U) => Promise<V>,
 ) {
   const cache = new Map<any, Promise<V>>()
 
@@ -184,7 +183,7 @@ export function memoizeAsync<T, U extends any[], V>(
  * @param data
  */
 export function ensureWorkspacesArray(
-  data?: IWorkspacesSection | IYarnWorkspacesConfig
+  data?: IWorkspacesSection | IYarnWorkspacesConfig,
 ): IWorkspacesSection {
   if (!data) {
     return []
