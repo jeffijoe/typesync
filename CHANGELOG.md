@@ -1,6 +1,7 @@
 # v0.12.0
 
 - **[BREAKING CHANGE]** [#86](https://github.com/jeffijoe/typesync/issues/86): Use the DefinitelyTyped strategy for resolving typings versions. This also means we no longer use the existing semver range specifier used in `package.json`.
+- The success message after running `typesync` now indicates when `--dry` is used.
 - Upgrade packages.
 
 # v0.11.1
