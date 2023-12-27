@@ -120,7 +120,9 @@ TypeSync will add typings for packages that:
 
 TypeSync will try to respect semver parity for the code and typings packages, and will fall back to the latest available typings package.
 
-If you use a Semver `^` or `~` for a package, the same prefix will be used for the typings package. If you pin to an exact version (`"some-package": "1.2.3"`), no prefix will be written.
+When writing the typings package version to `package.json`, the `~` semver range is used. This is because typings published via [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped#how-do-definitely-typed-package-versions-relate-to-versions-of-the-corresponding-library) align typings versions with library versions using major and minor only.
+
+For example, if you depend on `react@^16.14.0`, then TypeSync will only look for typings packages that match `16.14.*`.
 
 # Monorepos
 
@@ -138,4 +140,4 @@ See [CHANGELOG.md](/CHANGELOG.md)
 
 Jeff Hansen - [@Jeffijoe](https://twitter.com/jeffijoe)
 
-  [cosmiconfig]: https://github.com/davidtheclark/cosmiconfig
+[cosmiconfig]: https://github.com/davidtheclark/cosmiconfig

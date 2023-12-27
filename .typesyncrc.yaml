@@ -3,3 +3,9 @@ ignorePackages:
   - nodemon
   - prettier
   - rimraf
+  - eslint
+  # Can't upgrade these libraries yet since they require ESM.
+  - chalk
+  - detect-indent
+  - ora
+  - eslint-config-prettier

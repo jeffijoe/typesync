@@ -72,8 +72,10 @@ async function run(syncer: ITypeSyncer) {
   }
   C.success(
     totals.newTypings === 0
-      ? `No new typings added, looks like you're all synced up!`
-      : chalk`${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`,
+      ? `No new typings to add, looks like you're all synced up!`
+      : flags.dry
+        ? chalk`${totals.newTypings.toString()} new typings can be added.\n\n${syncedFilesOutput}\n\n✨  Run {green typesync} again without the {gray --dry} flag to update your {gray package.json}.`
+        : chalk`${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`,
   )
 }
 
