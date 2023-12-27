@@ -9,7 +9,6 @@ import {
   ISyncResult,
   ISyncedFile,
   IPackageSource,
-  IPackageInfo,
   IConfigService,
   IDependencySection,
   ICLIArguments,
@@ -25,7 +24,7 @@ import {
   ensureWorkspacesArray,
 } from './util'
 import { IGlobber } from './globber'
-import { satisfies } from 'semver'
+import { getClosestMatchingVersion } from './versioning'
 
 /**
  * Creates a type syncer.
@@ -95,14 +94,14 @@ export function createTypeSyncer(
 
     const packageFile =
       file || (await packageJSONService.readPackageFile(filePath))
-    const allPackages = flatten(
+    const allLocalPackages = flatten(
       Object.values(IDependencySection).map((dep) => {
         const section = getDependenciesBySection(packageFile, dep)
         const ignoredSection = ignoreDeps?.includes(dep)
         return getPackagesFromSection(section, ignoredSection, ignorePackages)
       }),
     )
-    const allPackageNames = uniq(allPackages.map((p) => p.name))
+    const allPackageNames = uniq(allLocalPackages.map((p) => p.name))
     const potentiallyUntypedPackages =
       getPotentiallyUntypedPackages(allPackageNames)
     // This is pushed to in the inner `map`, because packages that have DT-typings
@@ -119,14 +118,14 @@ export function createTypeSyncer(
           return {}
         }
 
-        const codePackage = allPackages.find(
+        const localCodePackage = allLocalPackages.find(
           (p) => p.name === t.codePackageName,
         )!
 
         // Find the closest matching code package version relative to what's in our package.json
         const closestMatchingCodeVersion = getClosestMatchingVersion(
-          codePackageInfo,
-          codePackage.version,
+          codePackageInfo.versions,
+          localCodePackage.version,
         )
 
         // If the closest matching version contains internal typings, don't include it.
@@ -144,15 +143,12 @@ export function createTypeSyncer(
 
         // Gets the closest matching typings version, or the newest one.
         const closestMatchingTypingsVersion = getClosestMatchingVersion(
-          typePackageInfo,
-          codePackage.version,
+          typePackageInfo.versions,
+          localCodePackage.version,
         )
 
         const version = closestMatchingTypingsVersion.version
-        const semverRangeSpecifier = getSemverRangeSpecifier(
-          codePackage.version,
-        )
-
+        const semverRangeSpecifier = '~'
         used.push(t)
         return {
           [t.typesPackageName]: semverRangeSpecifier + version,
@@ -176,19 +172,6 @@ export function createTypeSyncer(
       package: packageFile,
     }
   }
-}
-
-/**
- * Gets the closest matching package version info.
- *
- * @param packageInfo
- * @param version
- */
-function getClosestMatchingVersion(packageInfo: IPackageInfo, version: string) {
-  return (
-    packageInfo.versions.find((v) => satisfies(v.version, version)) ||
-    packageInfo.versions[0]
-  )
 }
 
 /**
@@ -304,23 +287,4 @@ function getDependenciesBySection(
     }
   })()
   return dependenciesSection ?? {}
-}
-
-const CARET = '^'.charCodeAt(0)
-const TILDE = '~'.charCodeAt(0)
-
-/**
- * Gets the semver range specifier (~, ^)
- * @param version
- */
-function getSemverRangeSpecifier(version: string): string {
-  if (version.charCodeAt(0) === CARET) {
-    return '^'
-  }
-
-  if (version.charCodeAt(0) === TILDE) {
-    return '~'
-  }
-
-  return ''
 }

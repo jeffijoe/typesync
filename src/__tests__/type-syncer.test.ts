@@ -226,14 +226,14 @@ describe('type syncer', () => {
       packageService.writePackageFile as jest.Mock<any>
     ).mock.calls.find((c) => c[0] === 'package.json')[1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
-      '@types/package1': '^1.0.0',
-      '@types/package3': '^1.0.0',
+      '@types/package1': '~1.0.0',
+      '@types/package3': '~1.0.0',
       '@types/package4': '^1.0.0',
-      '@types/package5': '^1.0.0',
-      '@types/myorg__package7': '^1.0.0',
+      '@types/package5': '~1.0.0',
+      '@types/myorg__package7': '~1.0.0',
       '@types/package8': '~1.0.0',
-      '@types/package9': '1.0.0',
-      '@types/packageWithOldTypings': '^2.0.0',
+      '@types/package9': '~1.0.0',
+      '@types/packageWithOldTypings': '~2.0.0',
       package4: '^1.0.0',
       package5: '^1.0.0',
     })
@@ -276,16 +276,16 @@ describe('type syncer', () => {
       (c) => c[0] === 'package-ignore-dev.json',
     )[1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
-      '@types/package1': '^1.0.0',
-      '@types/package3': '^1.0.0',
+      '@types/package1': '~1.0.0',
+      '@types/package3': '~1.0.0',
       // Package 4's typings were already in the root package's `devDependencies`,
       // but package 5's were not, that's why we still write package4's typings but not
       // package 5's.
       '@types/package4': '^1.0.0',
-      '@types/myorg__package7': '^1.0.0',
+      '@types/myorg__package7': '~1.0.0',
       '@types/package8': '~1.0.0',
-      '@types/package9': '1.0.0',
-      '@types/packageWithOldTypings': '^2.0.0',
+      '@types/package9': '~1.0.0',
+      '@types/packageWithOldTypings': '~2.0.0',
       package4: '^1.0.0',
       package5: '^1.0.0',
     })
@@ -300,13 +300,13 @@ describe('type syncer', () => {
       (c) => c[0] === 'package-ignore-package1.json',
     )[1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
-      '@types/package3': '^1.0.0',
+      '@types/package3': '~1.0.0',
       '@types/package4': '^1.0.0',
-      '@types/package5': '^1.0.0',
-      '@types/myorg__package7': '^1.0.0',
+      '@types/package5': '~1.0.0',
+      '@types/myorg__package7': '~1.0.0',
       '@types/package8': '~1.0.0',
-      '@types/package9': '1.0.0',
-      '@types/packageWithOldTypings': '^2.0.0',
+      '@types/package9': '~1.0.0',
+      '@types/packageWithOldTypings': '~2.0.0',
       package4: '^1.0.0',
       package5: '^1.0.0',
     })

@@ -1,6 +1,11 @@
+# v0.12.0
+
+- **[BREAKING CHANGE]** [#86](https://github.com/jeffijoe/typesync/issues/86): Use the DefinitelyTyped strategy for resolving typings versions. This also means we no longer use the existing semver range specifier used in `package.json`.
+- Upgrade packages.
+
 # v0.11.1
 
-- [#79](https://github.com/jeffijoe/typesync/issues/79):  Ignore deprecated `@typings/` packages.
+- [#79](https://github.com/jeffijoe/typesync/issues/79): Ignore deprecated `@typings/` packages.
 - Upgrade packages.
 
 # v0.11.0
