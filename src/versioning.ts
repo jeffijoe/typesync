@@ -11,37 +11,39 @@ export function getClosestMatchingVersion(
   availableVersions: IPackageVersionInfo[],
   version: string,
 ) {
-  const parsedVersion = parseOrThrow(version)
+  const parsedVersion = parseVersion(version)
+  if (!parsedVersion) {
+    return availableVersions[0]
+  }
 
-  return (
-    availableVersions.find((v) => {
-      const parsedAvailableVersion = parseOrThrow(v.version)
-      if (parsedVersion.major !== parsedAvailableVersion.major) {
-        return false
-      }
+  const bestMatch = availableVersions.find((v) => {
+    const parsedAvailableVersion = parseVersion(v.version)
+    if (!parsedAvailableVersion) {
+      return false
+    }
 
-      if (parsedVersion.minor !== parsedAvailableVersion.minor) {
-        return false
-      }
+    if (parsedVersion.major !== parsedAvailableVersion.major) {
+      return false
+    }
 
-      return true
-    }) || availableVersions[0]
-  )
+    if (parsedVersion.minor !== parsedAvailableVersion.minor) {
+      return false
+    }
+
+    return true
+  })
+
+  return bestMatch || availableVersions[0]
 }
 
 /**
- * Parses the version or throws an error.
+ * Parses the version if possible.
  *
  * @param version
  * @returns
  */
-function parseOrThrow(version: string) {
-  const parsed = parse(cleanVersion(version))
-  if (!parsed) {
-    throw new Error(`Could not parse version '${version}'`)
-  }
-
-  return parsed
+function parseVersion(version: string) {
+  return parse(cleanVersion(version))
 }
 
 /**

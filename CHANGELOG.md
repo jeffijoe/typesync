@@ -1,3 +1,8 @@
+# v0.12.1
+
+- [#106](https://github.com/jeffijoe/typesync/issues/106): Don't throw an error when unable to parse versions; default to the latest available one instead.
+- Upgrade packages.
+
 # v0.12.0
 
 - **[BREAKING CHANGE]** [#86](https://github.com/jeffijoe/typesync/issues/86): Use the DefinitelyTyped strategy for resolving typings versions. This also means we no longer use the existing semver range specifier used in `package.json`.

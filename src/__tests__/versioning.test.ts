@@ -64,17 +64,22 @@ describe('getClosestMatchingVersion', () => {
     )
   })
 
-  it('throws when unable to parse version', () => {
-    expect(() =>
-      getClosestMatchingVersion(
-        [
-          {
-            containsInternalTypings: false,
-            version: 'not a version',
-          },
-        ],
-        'also not a version',
-      ),
-    ).toThrow()
+  it('returns the latest version when unable to parse version', () => {
+    const notVersions = [
+      {
+        containsInternalTypings: false,
+        version: 'not a version',
+      },
+      {
+        containsInternalTypings: false,
+        version: 'same',
+      },
+    ]
+    expect(
+      getClosestMatchingVersion(notVersions, 'also not a version').version,
+    ).toBe('not a version')
+    expect(getClosestMatchingVersion(notVersions, '1.0.0').version).toBe(
+      'not a version',
+    )
   })
 })
