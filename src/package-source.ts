@@ -28,24 +28,23 @@ export function createPackageSource(): IPackageSource {
         return null
       }
 
-      const versions = Object.keys(data.versions).map<IPackageVersionInfo>(
-        (v) => {
-          const item = data.versions[v]
-          return {
-            version: item.version,
-            containsInternalTypings: !!item.types || !!item.typings,
-          }
-        },
-      )
+      const versionIdentifiers = Object.keys(data.versions)
+        .sort(compare)
+        .reverse()
+      const versions = versionIdentifiers.map<IPackageVersionInfo>((v) => {
+        const item = data.versions[v]
+        return {
+          version: item.version,
+          containsInternalTypings: !!item.types || !!item.typings,
+        }
+      })
 
       return {
         name: data.name,
-        deprecated: Boolean(data.deprecated),
+        deprecated: Boolean(data.versions[versionIdentifiers[0]].deprecated),
         latestVersion: data['dist-tags'].latest,
         // Sort by version, highest version first.
-        versions: versions
-          .sort((left, right) => compare(left.version, right.version))
-          .reverse(),
+        versions: versions,
       }
     },
   }
