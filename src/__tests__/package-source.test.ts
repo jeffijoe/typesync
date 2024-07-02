@@ -6,6 +6,7 @@ test('package source', async () => {
 
   expect(result).not.toBeNull()
   expect(result.name).toBe('awilix')
+  expect(result.deprecated).toBe(false)
   expect(result.latestVersion).toBeDefined()
 
   // I wrote Awilix, and I know v2 didn't have typings while v3 did,
@@ -27,4 +28,11 @@ test('not found', async () => {
   const source = createPackageSource()
   const result = await source.fetch(`some-nonexistent-package-${Date.now()}`)
   expect(result).toBeNull()
+})
+
+test('deprecated', async () => {
+  const source = createPackageSource()
+  const result = await source.fetch(`@types/escape-goat`)
+  expect(result).not.toBeNull()
+  expect(result!.deprecated).toBe(true)
 })

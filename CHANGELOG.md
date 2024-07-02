@@ -1,3 +1,7 @@
+# v0.12.2
+
+- [#114](https://github.com/jeffijoe/typesync/issues/114): Fix check for deprecated packages.
+
 # v0.12.1
 
 - [#106](https://github.com/jeffijoe/typesync/issues/106): Don't throw an error when unable to parse versions; default to the latest available one instead.
