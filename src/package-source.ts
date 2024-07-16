@@ -22,7 +22,7 @@ export function createPackageSource(): IPackageSource {
 
       const data = await response?.json()
 
-      if (!data) {
+      if (!data?.versions) {
         return null
       }
 
