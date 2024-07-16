@@ -10,5 +10,7 @@
     "node_modules": true,
     "coverage": true,
     "lib": true
-  }
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "eslint.useFlatConfig": false
 }
