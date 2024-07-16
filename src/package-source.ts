@@ -11,16 +11,14 @@ export function createPackageSource(): IPackageSource {
      * Fetches info about a package, or `null` if not found.
      */
     fetch: async (name) => {
-      const response = await fetch(encodeURIComponent(name)).catch(
-        (err: any) => {
-          if (err.statusCode === 404) {
-            return null
-          }
+      const response = await fetch(encodeURI(name)).catch((err: any) => {
+        if (err.statusCode === 404) {
+          return null
+        }
 
-          /* istanbul ignore next */
-          throw err
-        },
-      )
+        /* istanbul ignore next */
+        throw err
+      })
 
       const data = await response?.json()
 
