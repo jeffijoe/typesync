@@ -1,14 +1,14 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es5",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "target": "es2021",
     "outDir": "lib",
     "strict": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
-    "lib": ["es2016"]
+    "lib": ["es2021"]
   }
 }
