@@ -1,6 +1,6 @@
 import { createContainer, InjectionMode, asFunction } from 'awilix'
 import chalk from 'chalk'
-import * as path from 'path'
+import * as path from 'node:path'
 import * as C from './cli-util'
 import { ITypeSyncer, IPackageTypingDescriptor, ISyncedFile } from './types'
 import { createTypeSyncer } from './type-syncer'

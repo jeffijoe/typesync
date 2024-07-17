@@ -1,5 +1,5 @@
 import { IPackageJSONService, IPackageFile } from './types'
-import * as fs from 'fs'
+import * as fs from 'node:fs'
 import { promisify } from './util'
 import detectIndent from 'detect-indent'
 

@@ -1,4 +1,4 @@
-import path from 'path'
+import * as path from 'node:path'
 import { createConfigService } from '../config-service'
 
 const testDirectory = path.resolve(__dirname, 'fixtures')

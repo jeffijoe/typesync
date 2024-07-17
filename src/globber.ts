@@ -1,5 +1,5 @@
 import { glob } from 'glob'
-import * as path from 'path'
+import * as path from 'node:path'
 import { uniq } from './util'
 
 /**

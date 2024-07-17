@@ -59,6 +59,7 @@
   "devDependencies": {
     "@types/glob": "^8.1.0",
     "@types/jest": "^29.5.12",
+    "@types/node": "~16.18.102",
     "@types/npm-registry-fetch": "^8.0.7",
     "@types/semver": "^7.5.8",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
