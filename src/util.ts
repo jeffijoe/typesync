@@ -47,7 +47,6 @@ export function shrinkObject<T extends object>(source: T): Required<T> {
   const object: any = {}
 
   for (const key in source) {
-    // tslint:disable-next-line
     if (typeof source[key] !== 'undefined') {
       object[key] = source[key]
     }
@@ -193,7 +192,6 @@ export function ensureWorkspacesArray(
     return ensureWorkspacesArray(data.packages)
   }
 
-  // tslint:disable-next-line
   if (!data.every((s) => typeof s === 'string')) {
     return []
   }

@@ -21,7 +21,10 @@ module.exports = {
         // and coming up with clever typings may break for consumers.
         '@typescript-eslint/no-explicit-any': 'off',
         // We use `require` for loading the `package.json` file.
-        '@typescript-eslint/no-var-requires': 'off',
+        '@typescript-eslint/no-var-requires': [
+          'error',
+          { allow: ['/package\\.json$'] },
+        ],
       },
     },
     // Tests

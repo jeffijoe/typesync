@@ -97,5 +97,6 @@
       "tsx",
       "js"
     ]
-  }
+  },
+  "packageManager": "npm@8.19.4"
 }
