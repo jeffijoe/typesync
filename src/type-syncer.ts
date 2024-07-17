@@ -25,6 +25,7 @@ import {
 } from './util'
 import { IGlobber } from './globber'
 import { getClosestMatchingVersion } from './versioning'
+import * as path from 'node:path'
 
 /**
  * Creates a type syncer.
@@ -51,9 +52,14 @@ export function createTypeSyncer(
     filePath: string,
     flags: ICLIArguments['flags'],
   ): Promise<ISyncResult> {
+    const pnpmWorkspaceFilename = path.relative(
+      path.dirname(filePath),
+      'pnpm-workspace.yaml',
+    )
     const dryRun = !!flags.dry
-    const [file, syncOpts] = await Promise.all([
+    const [file, pnpmWorkspaces, syncOpts] = await Promise.all([
       packageJSONService.readPackageFile(filePath),
+      packageJSONService.readPnpmWorkspaceFile(pnpmWorkspaceFilename),
       configService.readConfig(filePath, flags),
     ])
 
@@ -61,6 +67,9 @@ export function createTypeSyncer(
       [
         ...ensureWorkspacesArray(file.packages),
         ...ensureWorkspacesArray(file.workspaces),
+        ...(pnpmWorkspaces.hasWorkspacesConfig === true
+          ? ensureWorkspacesArray(pnpmWorkspaces.contents)
+          : []),
       ].map(globber.globPackageFiles),
     )
       .then(flatten)

@@ -1,7 +1,12 @@
-import { IPackageJSONService, IPackageFile } from './types'
+import {
+  IPackageJSONService,
+  IPackageFile,
+  type IYarnPnpmWorkspacesConfig,
+} from './types'
 import * as fs from 'node:fs'
 import { promisify } from './util'
 import detectIndent from 'detect-indent'
+import yaml from 'js-yaml'
 
 const statAsync = promisify(fs.stat)
 const readFileAsync = promisify(fs.readFile)
@@ -25,6 +30,18 @@ export function createPackageJSONFileService(): IPackageJSONService {
         indent /* istanbul ignore next */ || '  ',
       )
       await writeFileAsync(filePath, data + (trailingNewline ? '\n' : ''))
+    },
+    readPnpmWorkspaceFile: async (filePath) => {
+      try {
+        const contents = await readFileContents(filePath)
+
+        return {
+          hasWorkspacesConfig: true,
+          contents: yaml.load(contents) as IYarnPnpmWorkspacesConfig,
+        }
+      } catch (err) {
+        return { hasWorkspacesConfig: false }
+      }
     },
   }
 }

@@ -56,6 +56,16 @@ export interface IPackageJSONService {
    * Writes the JSON to the specified file.
    */
   writePackageFile(filePath: string, fileContents: IPackageFile): Promise<void>
+
+  /**
+   * Reads and parses YAML from the specified file. Path is relative to the current working directory.
+   */
+  readPnpmWorkspaceFile(
+    filePath: string,
+  ): Promise<
+    | { hasWorkspacesConfig: true; contents: IYarnPnpmWorkspacesConfig }
+    | { hasWorkspacesConfig: false }
+  >
 }
 
 /**
@@ -86,8 +96,8 @@ export interface IPackageFile {
   peerDependencies?: IDependenciesSection
   optionalDependencies?: IDependenciesSection
   packages?: IWorkspacesSection
-  workspaces?: IWorkspacesSection | IYarnWorkspacesConfig
-  [key: string]: any
+  workspaces?: IWorkspacesSection | IYarnPnpmWorkspacesConfig
+  [key: string]: unknown
 }
 
 /**
@@ -104,9 +114,11 @@ export type IWorkspacesSection = Array<string>
 
 /**
  * Yarn is a special snowflake.
+ * So is PNPM.
  */
-export interface IYarnWorkspacesConfig {
-  packages: IWorkspacesSection
+export interface IYarnPnpmWorkspacesConfig {
+  packages: IWorkspacesSection & 'yarn'
+  [key: string]: unknown
 }
 
 /**

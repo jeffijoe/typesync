@@ -143,6 +143,12 @@ function buildSyncer() {
       }
     }),
     writePackageFile: jest.fn(() => Promise.resolve()),
+    readPnpmWorkspaceFile: jest.fn(
+      async () =>
+        ({
+          hasWorkspacesConfig: false,
+        }) as const,
+    ),
   }
 
   const globber: IGlobber = {
