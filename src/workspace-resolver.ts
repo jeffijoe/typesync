@@ -18,7 +18,11 @@ export interface IWorkspaceResolverService {
    *
    * Path is relative to the current working directory.
    */
-  getWorkspaces(root: string, globber: IGlobber): Promise<IWorkspacesArray>
+  getWorkspaces(
+    packageJson: IPackageFile,
+    root: string,
+    globber: IGlobber,
+  ): Promise<IWorkspacesArray>
 }
 
 /**
@@ -90,8 +94,8 @@ export type IWorkspacesSection =
 
 export function createWorkspaceResolverService(): IWorkspaceResolverService {
   return {
-    getWorkspaces: async (root, globber) => {
-      const workspaces = await getWorkspaces(root)
+    getWorkspaces: async (packageJson, root, globber) => {
+      const workspaces = await getWorkspaces(packageJson, root)
       const workspacesArray = ensureWorkspacesArray(workspaces)
 
       const manifests = await Promise.all(
@@ -106,28 +110,15 @@ export function createWorkspaceResolverService(): IWorkspaceResolverService {
 }
 
 async function getWorkspaces(
+  packageJson: IPackageFile,
   root: string,
 ): Promise<IWorkspacesSection | undefined> {
-  const packageJsonWorkspaces = await getPackageJsonWorkspaces(root)
+  const packageJsonWorkspaces = packageJson.workspaces
   if (packageJsonWorkspaces !== undefined) {
     return packageJsonWorkspaces
   }
 
   return await getPnpmWorkspaces(root)
-}
-
-async function getPackageJsonWorkspaces(
-  root: string,
-): Promise<IWorkspacesSection | undefined> {
-  try {
-    const filePath = path.relative(root, 'package.json')
-    const contents = await readFileContents(filePath) // TODO: Don't do this twice.
-    const packageJson = JSON.parse(contents) as IPackageFile
-
-    return packageJson.workspaces
-  } catch {
-    return undefined
-  }
 }
 
 async function getPnpmWorkspaces(

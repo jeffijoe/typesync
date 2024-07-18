@@ -153,7 +153,7 @@ function buildSyncer() {
   }
 
   const workspaceResolverService: IWorkspaceResolverService = {
-    getWorkspaces: jest.fn(async (root, globber) => {
+    getWorkspaces: jest.fn(async (_, root, globber) => {
       let workspaces: IWorkspacesArray | undefined
 
       switch (root) {

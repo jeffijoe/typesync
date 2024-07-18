@@ -53,9 +53,8 @@ export function createTypeSyncer(
     flags: ICLIArguments['flags'],
   ): Promise<ISyncResult> {
     const dryRun = !!flags.dry
-    const [file, subPackages, syncOpts] = await Promise.all([
-      packageJSONService.readPackageFile(filePath),
-      workspaceResolverService.getWorkspaces(path.dirname(filePath), globber),
+    const [{ file, subPackages }, syncOpts] = await Promise.all([
+      getManifests(filePath, globber),
       configService.readConfig(filePath, flags),
     ])
 
@@ -66,6 +65,26 @@ export function createTypeSyncer(
 
     return {
       syncedFiles,
+    }
+  }
+
+  /**
+   * Get the `package.json` files and sub-packages.
+   *
+   * @param filePath
+   * @param globber
+   */
+  async function getManifests(filePath: string, globber: IGlobber) {
+    const file = await packageJSONService.readPackageFile(filePath)
+    const subPackages = await workspaceResolverService.getWorkspaces(
+      file,
+      path.dirname(filePath),
+      globber,
+    )
+
+    return {
+      file,
+      subPackages,
     }
   }
 
