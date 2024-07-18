@@ -1,4 +1,4 @@
-import { IPackageVersionInfo } from '../types'
+import type { IPackageVersionInfo } from '../types'
 import { getClosestMatchingVersion } from '../versioning'
 
 describe('getClosestMatchingVersion', () => {

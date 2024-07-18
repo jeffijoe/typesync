@@ -1,6 +1,6 @@
 import chalk from 'chalk'
-import { ICLIArguments } from './types'
 import ora from 'ora'
+import type { ICLIArguments } from './types'
 
 /**
  * Like regular console.log, but better.

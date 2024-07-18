@@ -1,16 +1,12 @@
-import {
-  IPackageJSONService,
-  IPackageFile,
-  type IYarnPnpmWorkspacesConfig,
-} from './types'
-import * as fs from 'node:fs'
-import { promisify } from './util'
+import * as fsp from 'node:fs/promises'
 import detectIndent from 'detect-indent'
 import yaml from 'js-yaml'
-
-const statAsync = promisify(fs.stat)
-const readFileAsync = promisify(fs.readFile)
-const writeFileAsync = promisify(fs.writeFile)
+import { readFileContents } from './fs-utils'
+import type {
+  IPackageFile,
+  IPackageJSONService,
+  IYarnPnpmWorkspacesConfig,
+} from './types'
 
 export function createPackageJSONFileService(): IPackageJSONService {
   return {
@@ -29,7 +25,7 @@ export function createPackageJSONFileService(): IPackageJSONService {
         null,
         indent /* istanbul ignore next */ || '  ',
       )
-      await writeFileAsync(filePath, data + (trailingNewline ? '\n' : ''))
+      await fsp.writeFile(filePath, data + (trailingNewline ? '\n' : ''))
     },
     readPnpmWorkspaceFile: async (filePath) => {
       try {
@@ -44,28 +40,4 @@ export function createPackageJSONFileService(): IPackageJSONService {
       }
     },
   }
-}
-
-async function readFileContents(filePath: string) {
-  await assertFile(filePath)
-  return readFileAsync(filePath, 'utf-8').then((x: Buffer) => x.toString())
-}
-
-async function assertFile(filePath: string) {
-  if (!(await existsAsync(filePath))) {
-    throw new Error(`${filePath} does not exist.`)
-  }
-}
-
-async function existsAsync(filePath: string): Promise<boolean> {
-  return statAsync(filePath)
-    .then(() => true)
-    .catch((err) => {
-      /* istanbul ignore else */
-      if (err.code === 'ENOENT') {
-        return false
-      }
-      /* istanbul ignore next */
-      throw err
-    })
 }

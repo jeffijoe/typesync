@@ -1,12 +1,7 @@
 import { createPackageJSONFileService } from '../package-json-file-service'
 import * as os from 'node:os'
 import * as path from 'node:path'
-import * as fs from 'node:fs'
-import { promisify } from '../util'
-
-const writeFileAsync = promisify(fs.writeFile)
-const readFileAsync = promisify(fs.readFile)
-const unlinkAsync = promisify(fs.unlink)
+import * as fsp from 'node:fs/promises'
 
 describe('package json file service', () => {
   const subject = createPackageJSONFileService()
@@ -60,8 +55,8 @@ describe('package json file service', () => {
       ])
 
       const [noNewlineContent, withNewlineContent] = await Promise.all([
-        readFileAsync(noNewline).then((x) => x.toString()),
-        readFileAsync(withNewline).then((x) => x.toString()),
+        fsp.readFile(noNewline).then((x) => x.toString()),
+        fsp.readFile(withNewline).then((x) => x.toString()),
       ])
 
       expect(noNewlineContent[noNewlineContent.length - 1]).not.toBe('\n')
@@ -71,15 +66,15 @@ describe('package json file service', () => {
 
     it('does not fail when writing to an empty file', async () => {
       const file = path.join(os.tmpdir(), `package-${Math.random()}.json`)
-      await writeFileAsync(file, '')
+      await fsp.writeFile(file, '')
       await subject.writePackageFile(file, { name: 'test' })
     })
   })
 })
 
-function _writeFixture(withTrailingNewline = false): Promise<string> {
+async function _writeFixture(withTrailingNewline = false): Promise<string> {
   const file = path.join(os.tmpdir(), `package-${Math.random()}.json`)
-  return writeFileAsync(
+  await fsp.writeFile(
     file,
     JSON.stringify(
       {
@@ -91,9 +86,11 @@ function _writeFixture(withTrailingNewline = false): Promise<string> {
       null,
       2,
     ) + (withTrailingNewline ? '\n' : ''),
-  ).then(() => file)
+  )
+
+  return file
 }
 
 function cleanup(...files: string[]): Promise<any> {
-  return Promise.all(files.map((f) => unlinkAsync(f)))
+  return Promise.all(files.map((f) => fsp.unlink(f)))
 }

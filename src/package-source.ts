@@ -1,6 +1,6 @@
-import { IPackageSource, IPackageVersionInfo } from './types'
 import fetch from 'npm-registry-fetch'
 import { compare } from 'semver'
+import type { IPackageSource, IPackageVersionInfo } from './types'
 
 /**
  * Creates a package source.

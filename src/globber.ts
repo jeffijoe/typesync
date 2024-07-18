@@ -1,5 +1,5 @@
-import { glob } from 'glob'
 import * as path from 'node:path'
+import { glob } from 'glob'
 import { uniq } from './util'
 
 /**
@@ -7,11 +7,11 @@ import { uniq } from './util'
  */
 export interface IGlobber {
   /**
-   * Globs for package.json files.
+   * Globs for `package.json` files.
    *
-   * @param pattern
+   * @param root
    */
-  globPackageFiles(pattern: string): Promise<Array<string>>
+  globPackageFiles(root: string): Promise<Array<string>>
 }
 
 /**
@@ -19,10 +19,15 @@ export interface IGlobber {
  */
 export function createGlobber() {
   return {
-    globPackageFiles(pattern: string) {
-      return glob(path.join(pattern, 'package.json'), {
+    async globPackageFiles(
+      root: string,
+      file = 'package.json',
+    ): Promise<Array<string>> {
+      const source = await glob(path.join(root, file), {
         ignore: '**/node_modules/**',
-      }).then(uniq)
+      })
+
+      return uniq(source)
     },
   }
 }

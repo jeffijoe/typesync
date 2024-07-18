@@ -1,31 +1,30 @@
+import * as path from 'node:path'
+import type { IGlobber } from './globber'
 import {
-  ITypeSyncer,
-  IPackageJSONService,
-  IPackageTypingDescriptor,
-  IPackageFile,
-  ISyncOptions,
-  IDependenciesSection,
-  IPackageVersion,
-  ISyncResult,
-  ISyncedFile,
-  IPackageSource,
-  IConfigService,
+  type ICLIArguments,
+  type IConfigService,
+  type IDependenciesSection,
   IDependencySection,
-  ICLIArguments,
+  type IPackageFile,
+  type IPackageJSONService,
+  type IPackageSource,
+  type IPackageTypingDescriptor,
+  type IPackageVersion,
+  type ISyncOptions,
+  type ISyncResult,
+  type ISyncedFile,
+  type ITypeSyncer,
 } from './types'
 import {
-  filterMap,
-  mergeObjects,
-  typed,
-  orderObject,
-  uniq,
-  flatten,
-  memoizeAsync,
   ensureWorkspacesArray,
+  filterMap,
+  memoizeAsync,
+  mergeObjects,
+  orderObject,
+  typed,
+  uniq,
 } from './util'
-import { IGlobber } from './globber'
 import { getClosestMatchingVersion } from './versioning'
-import * as path from 'node:path'
 
 /**
  * Creates a type syncer.
@@ -72,7 +71,7 @@ export function createTypeSyncer(
           : []),
       ].map(globber.globPackageFiles),
     )
-      .then(flatten)
+      .then((arr) => arr.flat())
       .then(uniq)
 
     const syncedFiles: Array<ISyncedFile> = await Promise.all([
@@ -103,19 +102,20 @@ export function createTypeSyncer(
 
     const packageFile =
       file || (await packageJSONService.readPackageFile(filePath))
-    const allLocalPackages = flatten(
-      Object.values(IDependencySection).map((dep) => {
+    const allLocalPackages = Object.values(IDependencySection)
+      .map((dep) => {
         const section = getDependenciesBySection(packageFile, dep)
         const ignoredSection = ignoreDeps?.includes(dep)
         return getPackagesFromSection(section, ignoredSection, ignorePackages)
-      }),
-    )
+      })
+      .flat()
     const allPackageNames = uniq(allLocalPackages.map((p) => p.name))
     const potentiallyUntypedPackages =
       getPotentiallyUntypedPackages(allPackageNames)
+
     // This is pushed to in the inner `map`, because packages that have DT-typings
     // *as well* as internal typings should be excluded.
-    const used: Array<ReturnType<typeof getPotentiallyUntypedPackages>[0]> = []
+    const used: ReturnType<typeof getPotentiallyUntypedPackages> = []
     const devDepsToAdd = await Promise.all(
       potentiallyUntypedPackages.map(async (t) => {
         // Fetch the code package from the source.

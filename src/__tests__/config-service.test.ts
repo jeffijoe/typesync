@@ -1,5 +1,6 @@
 import * as path from 'node:path'
 import { createConfigService } from '../config-service'
+import { IDependencySection } from '../types'
 
 const testDirectory = path.resolve(__dirname, 'fixtures')
 
@@ -11,16 +12,16 @@ describe('config service', () => {
     it('should load ".typesyncrc"', async () => {
       const config = await subject.readConfig(filepath, {})
 
-      expect(config.ignoreDeps).toEqual(['dev'])
+      expect(config.ignoreDeps).toEqual([IDependencySection.dev])
       expect(config.ignorePackages).toEqual(['package1'])
     })
 
     it('should read from cli args', async () => {
       const config = await subject.readConfig(filepath, {
-        ignoredeps: 'dev',
+        ignoredeps: IDependencySection.dev,
         ignorepackages: 'package1',
       })
-      expect(config.ignoreDeps).toEqual(['dev'])
+      expect(config.ignoreDeps).toEqual([IDependencySection.dev])
       expect(config.ignorePackages).toEqual(['package1'])
     })
 

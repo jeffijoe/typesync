@@ -1,10 +1,10 @@
 import * as path from 'node:path'
 import { cosmiconfig } from 'cosmiconfig'
 import {
-  IConfigService,
-  ISyncOptions,
+  type ICLIArguments,
+  type IConfigService,
   IDependencySection,
-  ICLIArguments,
+  type ISyncOptions,
 } from './types'
 import { shrinkObject } from './util'
 

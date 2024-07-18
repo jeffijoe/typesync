@@ -1,14 +1,14 @@
-import {
-  IPackageJSONService,
-  IPackageTypingDescriptor,
-  IPackageFile,
-  IPackageSource,
-  IPackageInfo,
-  IConfigService,
-  ISyncOptions,
-} from '../types'
+import type { IGlobber } from '../globber'
 import { createTypeSyncer } from '../type-syncer'
-import { IGlobber } from '../globber'
+import {
+  type IConfigService,
+  IDependencySection,
+  type IPackageFile,
+  type IPackageInfo,
+  type IPackageJSONService,
+  type IPackageSource,
+  type IPackageTypingDescriptor,
+} from '../types'
 
 const descriptors: IPackageTypingDescriptor[] = [
   {
@@ -201,7 +201,7 @@ function buildSyncer() {
           return {}
         case 'package-ignore-dev.json':
         case 'package-ignore-dev-synced.json':
-          return { ignoreDeps: ['dev'] } as ISyncOptions
+          return { ignoreDeps: [IDependencySection.dev] }
         case 'package-ignore-package1.json':
           return { ignorePackages: ['package1'] }
         default:
@@ -321,11 +321,13 @@ describe('type syncer', () => {
   it('does not write packages if options.dry is specified', async () => {
     const { syncer, packageService } = buildSyncer()
     await syncer.sync('package.json', { dry: true })
-    expect(packageService.writePackageFile as jest.Mock<any>).not.toBeCalled()
+    expect(
+      packageService.writePackageFile as jest.Mock<any>,
+    ).not.toHaveBeenCalled()
   })
 
   it('does not detect diff when already synced', async () => {
-    const { syncer, packageService } = buildSyncer()
+    const { syncer } = buildSyncer()
     const { syncedFiles } = await syncer.sync(
       'package-ignore-dev-synced.json',
       {},

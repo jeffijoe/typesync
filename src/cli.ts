@@ -1,13 +1,17 @@
-import { createContainer, InjectionMode, asFunction } from 'awilix'
-import chalk from 'chalk'
 import * as path from 'node:path'
+import { asFunction, createContainer, InjectionMode } from 'awilix'
+import chalk from 'chalk'
 import * as C from './cli-util'
-import { ITypeSyncer, IPackageTypingDescriptor, ISyncedFile } from './types'
-import { createTypeSyncer } from './type-syncer'
-import { createPackageJSONFileService } from './package-json-file-service'
 import { createConfigService } from './config-service'
 import { createGlobber } from './globber'
+import { createPackageJSONFileService } from './package-json-file-service'
 import { createPackageSource } from './package-source'
+import { createTypeSyncer } from './type-syncer'
+import type {
+  IPackageTypingDescriptor,
+  ISyncedFile,
+  ITypeSyncer,
+} from './types'
 
 /**
  * Starts the TypeSync CLI.

@@ -1,14 +1,13 @@
 import {
-  uniq,
+  ensureWorkspacesArray,
   filterMap,
-  shrinkObject,
+  memoizeAsync,
   mergeObjects,
   orderObject,
-  promisify,
-  memoizeAsync,
-  ensureWorkspacesArray,
-  untyped,
+  shrinkObject,
   typed,
+  uniq,
+  untyped,
 } from '../util'
 
 describe('util', () => {
@@ -55,39 +54,6 @@ describe('util', () => {
     })
   })
 
-  describe('promisify', () => {
-    it('resolves when the callback is successful', async () => {
-      const original = (arg1: any, arg2: any, cb: Function) =>
-        cb(null, arg1 + arg2)
-      const promisified = promisify(original)
-      const result = await promisified(2, 2)
-      expect(result).toBe(4)
-    })
-
-    it('resolves when the callback is invoked with a single bool argument', async () => {
-      const original = (arg1: any, cb: Function) => cb(arg1)
-      const promisified = promisify(original)
-      const result = await promisified(true)
-      expect(result).toBe(true)
-    })
-
-    it('rejects when the callback is not successful', async () => {
-      const original = (arg1: any, arg2: any, cb: Function) =>
-        cb(new Error('oh shit'), null)
-      const promisified = promisify(original)
-      const err = await promisified(2, 2).catch((err) => err)
-      expect(err.message).toBe('oh shit')
-    })
-
-    it('rejects when the callback is not successful even if only passed 1 param', async () => {
-      const original = (arg1: any, arg2: any, cb: Function) =>
-        cb(new Error('oh shit'))
-      const promisified = promisify(original)
-      const err = await promisified(2, 2).catch((err) => err)
-      expect(err.message).toBe('oh shit')
-    })
-  })
-
   describe('memoizeAsync', () => {
     it('memoizes promises', async () => {
       let i = 0
@@ -126,6 +92,15 @@ describe('util', () => {
       expect(ensureWorkspacesArray({ packages: ['lol'] } as any)).toEqual([
         'lol',
       ])
+    })
+    it("handles Yarn's weird format", () => {
+      expect(ensureWorkspacesArray({ packages: [] })).toEqual([])
+    })
+    it('handles an array of globs', () => {
+      expect(ensureWorkspacesArray(['packages/*'])).toEqual(['packages/*'])
+    })
+    it('handles no workspaces', () => {
+      expect(ensureWorkspacesArray(undefined)).toEqual([])
     })
   })
 

@@ -1,4 +1,4 @@
-import { IWorkspacesSection, IYarnPnpmWorkspacesConfig } from './types'
+import type { IWorkspacesSection, IYarnPnpmWorkspacesConfig } from './types'
 
 /**
  * Returns unique items.
@@ -6,15 +6,7 @@ import { IWorkspacesSection, IYarnPnpmWorkspacesConfig } from './types'
  * @param source The source to filter
  */
 export function uniq<T>(source: Array<T>): Array<T> {
-  const seen: T[] = []
-  for (const s of source) {
-    if (seen.includes(s)) {
-      continue
-    }
-    seen.push(s)
-  }
-
-  return seen
+  return [...new Set(source)]
 }
 
 /**
@@ -109,40 +101,6 @@ export function orderObject<
   }
 
   return result as T
-}
-
-/**
- * Promisifies the specified function.
- *
- * @param fn
- */
-export function promisify(fn: (...args: any[]) => void) {
-  return function promisified(...args: any[]) {
-    return new Promise<any>((resolve, reject) => {
-      fn(...args, function callback(err: any, result: any) {
-        // Edge case with `fs.exists`.
-        if (arguments.length === 1 && typeof err === 'boolean') {
-          return resolve(err)
-        }
-        return !err ? resolve(result) : reject(err)
-      })
-    })
-  }
-}
-
-/**
- * Flattens a 2-dimensional array.
- *
- * @param source
- */
-export function flatten<T>(source: Array<Array<T>>): Array<T> {
-  const result: Array<T> = []
-  for (const items of source) {
-    for (const item of items) {
-      result.push(item)
-    }
-  }
-  return result
 }
 
 /**

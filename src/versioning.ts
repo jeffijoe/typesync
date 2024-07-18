@@ -1,5 +1,5 @@
-import { IPackageVersionInfo } from './types'
 import { parse } from 'semver'
+import type { IPackageVersionInfo } from './types'
 
 /**
  * Gets the closest matching package version info.

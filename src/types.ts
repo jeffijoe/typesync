@@ -117,7 +117,7 @@ export type IWorkspacesSection = Array<string>
  * So is PNPM.
  */
 export interface IYarnPnpmWorkspacesConfig {
-  packages: IWorkspacesSection & 'yarn'
+  packages: IWorkspacesSection
   [key: string]: unknown
 }
 
