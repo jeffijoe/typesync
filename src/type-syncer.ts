@@ -14,9 +14,9 @@ import {
   type ISyncResult,
   type ISyncedFile,
   type ITypeSyncer,
+  type IWorkspaceResolverService,
 } from './types'
 import {
-  ensureWorkspacesArray,
   filterMap,
   memoizeAsync,
   mergeObjects,
@@ -34,6 +34,7 @@ import { getClosestMatchingVersion } from './versioning'
  */
 export function createTypeSyncer(
   packageJSONService: IPackageJSONService,
+  workspaceResolverService: IWorkspaceResolverService,
   packageSource: IPackageSource,
   configService: IConfigService,
   globber: IGlobber,
@@ -51,28 +52,12 @@ export function createTypeSyncer(
     filePath: string,
     flags: ICLIArguments['flags'],
   ): Promise<ISyncResult> {
-    const pnpmWorkspaceFilename = path.relative(
-      path.dirname(filePath),
-      'pnpm-workspace.yaml',
-    )
     const dryRun = !!flags.dry
-    const [file, pnpmWorkspaces, syncOpts] = await Promise.all([
+    const [file, subPackages, syncOpts] = await Promise.all([
       packageJSONService.readPackageFile(filePath),
-      packageJSONService.readPnpmWorkspaceFile(pnpmWorkspaceFilename),
+      workspaceResolverService.getWorkspaces(path.dirname(filePath), globber),
       configService.readConfig(filePath, flags),
     ])
-
-    const subPackages = await Promise.all(
-      [
-        ...ensureWorkspacesArray(file.packages),
-        ...ensureWorkspacesArray(file.workspaces),
-        ...(pnpmWorkspaces.hasWorkspacesConfig === true
-          ? ensureWorkspacesArray(pnpmWorkspaces.contents)
-          : []),
-      ].map(globber.globPackageFiles),
-    )
-      .then((arr) => arr.flat())
-      .then(uniq)
 
     const syncedFiles: Array<ISyncedFile> = await Promise.all([
       syncFile(filePath, file, syncOpts, dryRun),

@@ -8,6 +8,8 @@ import {
   type IPackageJSONService,
   type IPackageSource,
   type IPackageTypingDescriptor,
+  type IWorkspaceResolverService,
+  type IWorkspacesArray,
 } from '../types'
 
 const descriptors: IPackageTypingDescriptor[] = [
@@ -69,8 +71,12 @@ const descriptors: IPackageTypingDescriptor[] = [
   },
 ]
 
+interface ITestPackageFile extends IPackageFile {
+  workspaces?: IWorkspacesArray
+}
+
 function buildSyncer() {
-  const rootPackageFile: IPackageFile = {
+  const rootPackageFile: ITestPackageFile = {
     name: 'consumer',
     dependencies: {
       package1: '^1.0.0',
@@ -97,7 +103,7 @@ function buildSyncer() {
   }
 
   // synced package file with ignoreDeps: dev
-  const syncedPackageFile: IPackageFile = {
+  const syncedPackageFile: ITestPackageFile = {
     ...rootPackageFile,
     devDependencies: {
       '@types/package1': '^1.0.0',
@@ -111,14 +117,14 @@ function buildSyncer() {
     },
   }
 
-  const package1File: IPackageFile = {
+  const package1File: ITestPackageFile = {
     name: 'package-1',
     dependencies: {
       package1: '^1.0.0',
     },
   }
 
-  const package2File: IPackageFile = {
+  const package2File: ITestPackageFile = {
     name: 'package-1',
     dependencies: {
       package3: '^1.0.0',
@@ -139,16 +145,39 @@ function buildSyncer() {
         case 'packages/package-2/package.json':
           return package2File
         default:
-          throw new Error('What?!')
+          throw new Error(`Who?! ${filepath}`)
       }
     }),
     writePackageFile: jest.fn(() => Promise.resolve()),
-    readPnpmWorkspaceFile: jest.fn(
-      async () =>
-        ({
-          hasWorkspacesConfig: false,
-        }) as const,
-    ),
+  }
+
+  const workspaceResolverService: IWorkspaceResolverService = {
+    getWorkspaces: jest.fn(async (root, globber) => {
+      let workspaces: IWorkspacesArray | undefined
+
+      switch (root) {
+        case '.': {
+          workspaces = rootPackageFile.workspaces
+          break
+        }
+        case 'packages/package-1/': {
+          workspaces = package1File.workspaces
+          break
+        }
+        case 'packages/package-2/': {
+          workspaces = package2File.workspaces
+          break
+        }
+        default:
+          throw new Error('What?!')
+      }
+
+      workspaces ??= []
+      const globPromises = workspaces.map((w) => globber.globPackageFiles(w))
+      const globbed = await Promise.all(globPromises)
+
+      return globbed.flat()
+    }),
   }
 
   const globber: IGlobber = {
@@ -217,6 +246,7 @@ function buildSyncer() {
     configService,
     syncer: createTypeSyncer(
       packageService,
+      workspaceResolverService,
       packageSource,
       configService,
       globber,
@@ -243,6 +273,7 @@ describe('type syncer', () => {
       package4: '^1.0.0',
       package5: '^1.0.0',
     })
+
     expect(result.syncedFiles).toHaveLength(3)
 
     expect(result.syncedFiles[0].filePath).toEqual('package.json')

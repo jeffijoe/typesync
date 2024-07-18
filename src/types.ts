@@ -1,3 +1,5 @@
+import type { IGlobber } from './globber'
+
 /**
  * The guts of the program.
  */
@@ -56,16 +58,6 @@ export interface IPackageJSONService {
    * Writes the JSON to the specified file.
    */
   writePackageFile(filePath: string, fileContents: IPackageFile): Promise<void>
-
-  /**
-   * Reads and parses YAML from the specified file. Path is relative to the current working directory.
-   */
-  readPnpmWorkspaceFile(
-    filePath: string,
-  ): Promise<
-    | { hasWorkspacesConfig: true; contents: IYarnPnpmWorkspacesConfig }
-    | { hasWorkspacesConfig: false }
-  >
 }
 
 /**
@@ -95,8 +87,7 @@ export interface IPackageFile {
   devDependencies?: IDependenciesSection
   peerDependencies?: IDependenciesSection
   optionalDependencies?: IDependenciesSection
-  packages?: IWorkspacesSection
-  workspaces?: IWorkspacesSection | IYarnPnpmWorkspacesConfig
+  workspaces?: IWorkspacesSection
   [key: string]: unknown
 }
 
@@ -108,17 +99,85 @@ export interface IDependenciesSection {
 }
 
 /**
- * Section in package.json representing workspaces (yarn/lerna).
+ * @example
+ * ```json
+ * "workspaces": [
+ *  "packages/*",
+ * ]
+ * ```
  */
-export type IWorkspacesSection = Array<string>
+export type IWorkspacesArray = Array<string>
+
+/**
+ * @example
+ * ```yaml
+ * projects:
+ * - 'packages/*'
+ * ```
+ */
+export type IWorkspacesObject = {
+  packages: IWorkspacesArray
+}
+
+/**
+ * @see {@link IWorkspacesArray}
+ */
+type NpmWorkspacesConfig = IWorkspacesArray
 
 /**
  * Yarn is a special snowflake.
- * So is PNPM.
+ *
+ * @example
+ * ```json
+ * "workspaces": {
+ *   "packages": [
+ *     "packages/*",
+ *   ],
+ *   "nohoist": []
+ * }
+ * ```
  */
-export interface IYarnPnpmWorkspacesConfig {
-  packages: IWorkspacesSection
-  [key: string]: unknown
+type YarnWorkspacesConfig =
+  | IWorkspacesArray
+  | (IWorkspacesObject & { nohoist?: string[] })
+
+/**
+ * The contents of a `pnpm-workspace.yaml` file.
+ *
+ * @example
+ * ```yaml
+ * packages:
+ * - 'packages/*'
+ * ```
+ */
+export type PnpmWorkspacesConfig = IWorkspacesObject
+
+/**
+ * @see {@link IWorkspacesArray}
+ */
+type BunWorkspacesConfig = IWorkspacesArray
+
+/**
+ * Section in `package.json` representing workspaces.
+ */
+export type IWorkspacesSection =
+  | NpmWorkspacesConfig
+  | YarnWorkspacesConfig
+  | BunWorkspacesConfig
+
+/**
+ * Files service.
+ */
+export interface IWorkspaceResolverService {
+  /**
+   * Reads, parses, and normalizes a workspaces configuration from the following files, in this order:
+   * - `package.json` `workspaces` field, as an array of globs.
+   * - `package.json` `workspaces` field, as an object with a `projects` field, which is an array of globs.
+   * - `pnpm-workspace.yaml` `packages` field, as an array of globs.
+   *
+   * Path is relative to the current working directory.
+   */
+  getWorkspaces(root: string, globber: IGlobber): Promise<IWorkspacesArray>
 }
 
 /**

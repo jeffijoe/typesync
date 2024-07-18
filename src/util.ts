@@ -1,4 +1,4 @@
-import type { IWorkspacesSection, IYarnPnpmWorkspacesConfig } from './types'
+import type { IWorkspacesSection, IWorkspacesArray } from './types'
 
 /**
  * Returns unique items.
@@ -140,8 +140,8 @@ export function memoizeAsync<U extends any[], V>(
  * @param data
  */
 export function ensureWorkspacesArray(
-  data?: IWorkspacesSection | IYarnPnpmWorkspacesConfig,
-): IWorkspacesSection {
+  data?: IWorkspacesSection,
+): IWorkspacesArray {
   if (!data) {
     return []
   }

@@ -12,6 +12,7 @@ import type {
   ISyncedFile,
   ITypeSyncer,
 } from './types'
+import { createWorkspaceResolverService } from './workspace-resolver'
 
 /**
  * Starts the TypeSync CLI.
@@ -23,6 +24,9 @@ export async function startCli() {
       injectionMode: InjectionMode.CLASSIC,
     }).register({
       packageJSONService: asFunction(createPackageJSONFileService).singleton(),
+      workspaceResolverService: asFunction(
+        createWorkspaceResolverService,
+      ).singleton(),
       packageSource: asFunction(createPackageSource).singleton(),
       configService: asFunction(createConfigService).singleton(),
       globber: asFunction(createGlobber).singleton(),
@@ -79,7 +83,7 @@ async function run(syncer: ITypeSyncer) {
       ? `No new typings to add, looks like you're all synced up!`
       : flags.dry
         ? chalk`${totals.newTypings.toString()} new typings can be added.\n\n${syncedFilesOutput}\n\n✨  Run {green typesync} again without the {gray --dry} flag to update your {gray package.json}.`
-        : chalk`${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`,
+        : chalk`${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install}, {green yarn}, or {green pnpm i} to install the packages that were added.`,
   )
 }
 

@@ -1,12 +1,7 @@
 import * as fsp from 'node:fs/promises'
 import detectIndent from 'detect-indent'
-import yaml from 'js-yaml'
 import { readFileContents } from './fs-utils'
-import type {
-  IPackageFile,
-  IPackageJSONService,
-  IYarnPnpmWorkspacesConfig,
-} from './types'
+import { IPackageJSONService, IPackageFile } from './types'
 
 export function createPackageJSONFileService(): IPackageJSONService {
   return {
@@ -26,18 +21,6 @@ export function createPackageJSONFileService(): IPackageJSONService {
         indent /* istanbul ignore next */ || '  ',
       )
       await fsp.writeFile(filePath, data + (trailingNewline ? '\n' : ''))
-    },
-    readPnpmWorkspaceFile: async (filePath) => {
-      try {
-        const contents = await readFileContents(filePath)
-
-        return {
-          hasWorkspacesConfig: true,
-          contents: yaml.load(contents) as IYarnPnpmWorkspacesConfig,
-        }
-      } catch (err) {
-        return { hasWorkspacesConfig: false }
-      }
     },
   }
 }
