@@ -1,5 +1,12 @@
 import { parse } from 'semver'
-import type { IPackageVersionInfo } from './types'
+
+/**
+ * Version descriptor for versions returned in remote package info.
+ */
+export interface IPackageVersionInfo {
+  version: string
+  containsInternalTypings: boolean
+}
 
 /**
  * Gets the closest matching package version info.

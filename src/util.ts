@@ -1,4 +1,4 @@
-import type { IWorkspacesSection, IWorkspacesArray } from './types'
+import type { IWorkspacesArray, IWorkspacesSection } from './workspace-resolver'
 
 /**
  * Returns unique items.

@@ -1,7 +1,21 @@
 import * as fsp from 'node:fs/promises'
 import detectIndent from 'detect-indent'
 import { readFileContents } from './fs-utils'
-import { IPackageJSONService, IPackageFile } from './types'
+import { IPackageFile } from './types'
+
+/**
+ * File service.
+ */
+export interface IPackageJSONService {
+  /**
+   * Reads and parses JSON from the specified file. Path is relative to the current working directory.
+   */
+  readPackageFile(filePath: string): Promise<IPackageFile>
+  /**
+   * Writes the JSON to the specified file.
+   */
+  writePackageFile(filePath: string, fileContents: IPackageFile): Promise<void>
+}
 
 export function createPackageJSONFileService(): IPackageJSONService {
   return {

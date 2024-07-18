@@ -1,20 +1,19 @@
 import * as path from 'node:path'
+import type { IConfigService } from './config-service'
 import type { IGlobber } from './globber'
+import type { IPackageJSONService } from './package-json-file-service'
+import type { IPackageSource } from './package-source'
 import {
   type ICLIArguments,
-  type IConfigService,
   type IDependenciesSection,
   IDependencySection,
   type IPackageFile,
-  type IPackageJSONService,
-  type IPackageSource,
   type IPackageTypingDescriptor,
   type IPackageVersion,
   type ISyncOptions,
   type ISyncResult,
   type ISyncedFile,
   type ITypeSyncer,
-  type IWorkspaceResolverService,
 } from './types'
 import {
   filterMap,
@@ -25,6 +24,7 @@ import {
   uniq,
 } from './util'
 import { getClosestMatchingVersion } from './versioning'
+import type { IWorkspaceResolverService } from './workspace-resolver'
 
 /**
  * Creates a type syncer.

@@ -1,16 +1,17 @@
+import type { IConfigService } from '../config-service'
 import type { IGlobber } from '../globber'
+import type { IPackageJSONService } from '../package-json-file-service'
+import type { IPackageSource, IPackageInfo } from '../package-source'
 import { createTypeSyncer } from '../type-syncer'
 import {
-  type IConfigService,
   IDependencySection,
   type IPackageFile,
-  type IPackageInfo,
-  type IPackageJSONService,
-  type IPackageSource,
   type IPackageTypingDescriptor,
-  type IWorkspaceResolverService,
-  type IWorkspacesArray,
 } from '../types'
+import type {
+  IWorkspacesArray,
+  IWorkspaceResolverService,
+} from '../workspace-resolver'
 
 const descriptors: IPackageTypingDescriptor[] = [
   {

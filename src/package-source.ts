@@ -1,6 +1,28 @@
 import fetch from 'npm-registry-fetch'
 import { compare } from 'semver'
-import type { IPackageSource, IPackageVersionInfo } from './types'
+import type { IPackageVersionInfo } from './versioning'
+
+/**
+ * Fetches info about a package.
+ */
+export interface IPackageSource {
+  /**
+   * Fetches package info from an external source.
+   *
+   * @param packageName
+   */
+  fetch(packageName: string): Promise<IPackageInfo | null>
+}
+
+/**
+ * Interface for the Package Info structure.
+ */
+export interface IPackageInfo {
+  name: string
+  latestVersion: string
+  deprecated: boolean
+  versions: Array<IPackageVersionInfo>
+}
 
 /**
  * Creates a package source.

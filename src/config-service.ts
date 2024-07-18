@@ -2,11 +2,23 @@ import * as path from 'node:path'
 import { cosmiconfig } from 'cosmiconfig'
 import {
   type ICLIArguments,
-  type IConfigService,
   IDependencySection,
   type ISyncOptions,
 } from './types'
 import { shrinkObject } from './util'
+
+/**
+ * Config Service.
+ */
+export interface IConfigService {
+  /**
+   * Get typesync config.
+   */
+  readConfig(
+    filePath: string,
+    flags: ICLIArguments['flags'],
+  ): Promise<ISyncOptions>
+}
 
 const explorer = cosmiconfig('typesync')
 
