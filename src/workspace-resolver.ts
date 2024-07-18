@@ -1,6 +1,6 @@
 import path from 'node:path'
 import yaml from 'js-yaml'
-import { readFileContents } from './fs-utils'
+import * as fsUtils from './fs-utils'
 import { IGlobber } from './globber'
 import { ensureWorkspacesArray, uniq } from './util'
 import type { IPackageFile } from './types'
@@ -49,7 +49,7 @@ export interface IWorkspacesObject {
 /**
  * @see {@link IWorkspacesArray}
  */
-type NpmWorkspacesConfig = IWorkspacesArray
+export type NpmWorkspacesConfig = IWorkspacesArray
 
 /**
  * Yarn is a special snowflake.
@@ -64,7 +64,7 @@ type NpmWorkspacesConfig = IWorkspacesArray
  * }
  * ```
  */
-type YarnWorkspacesConfig =
+export type YarnWorkspacesConfig =
   | IWorkspacesArray
   | (IWorkspacesObject & { nohoist?: Array<string> })
 
@@ -82,7 +82,7 @@ export type PnpmWorkspacesConfig = IWorkspacesObject
 /**
  * @see {@link IWorkspacesArray}
  */
-type BunWorkspacesConfig = IWorkspacesArray
+export type BunWorkspacesConfig = IWorkspacesArray
 
 /**
  * Section in `package.json` representing workspaces.
@@ -92,7 +92,11 @@ export type IWorkspacesSection =
   | YarnWorkspacesConfig
   | BunWorkspacesConfig
 
-export function createWorkspaceResolverService(): IWorkspaceResolverService {
+export function createWorkspaceResolverService({
+  readFileContents,
+}: {
+  readFileContents: typeof fsUtils.readFileContents
+} = fsUtils): IWorkspaceResolverService {
   return {
     getWorkspaces: async (packageJson, root, globber) => {
       const workspaces = await getWorkspaces(packageJson, root)
@@ -107,30 +111,30 @@ export function createWorkspaceResolverService(): IWorkspaceResolverService {
       return uniq(manifests.flat())
     },
   }
-}
 
-async function getWorkspaces(
-  packageJson: IPackageFile,
-  root: string,
-): Promise<IWorkspacesSection | undefined> {
-  const packageJsonWorkspaces = packageJson.workspaces
-  if (packageJsonWorkspaces !== undefined) {
-    return packageJsonWorkspaces
+  async function getWorkspaces(
+    packageJson: IPackageFile,
+    root: string,
+  ): Promise<IWorkspacesSection | undefined> {
+    const packageJsonWorkspaces = packageJson.workspaces
+    if (packageJsonWorkspaces !== undefined) {
+      return packageJsonWorkspaces
+    }
+
+    return await getPnpmWorkspaces(root)
   }
 
-  return await getPnpmWorkspaces(root)
-}
+  async function getPnpmWorkspaces(
+    root: string,
+  ): Promise<IWorkspacesArray | undefined> {
+    try {
+      const filePath = path.relative(root, 'pnpm-workspace.yaml')
+      const contents = await readFileContents(filePath)
+      const pnpmWorkspaces = yaml.load(contents) as PnpmWorkspacesConfig
 
-async function getPnpmWorkspaces(
-  root: string,
-): Promise<IWorkspacesArray | undefined> {
-  try {
-    const filePath = path.relative(root, 'pnpm-workspace.yaml')
-    const contents = await readFileContents(filePath)
-    const pnpmWorkspaces = yaml.load(contents) as PnpmWorkspacesConfig
-
-    return pnpmWorkspaces.packages
-  } catch {
-    return undefined
+      return pnpmWorkspaces.packages
+    } catch {
+      return undefined
+    }
   }
 }
