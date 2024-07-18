@@ -86,7 +86,7 @@ export function createTypeSyncer(
     const { ignoreDeps, ignorePackages } = opts
 
     const packageFile =
-      file || (await packageJSONService.readPackageFile(filePath))
+      file ?? (await packageJSONService.readPackageFile(filePath))
     const allLocalPackages = Object.values(IDependencySection)
       .map((dep) => {
         const section = getDependenciesBySection(packageFile, dep)
@@ -241,14 +241,15 @@ function getPackageScope(packageName: string): [string, string] | null {
 function getPackagesFromSection(
   section: IDependenciesSection,
   ignoredSection?: boolean,
-  ignorePackages?: string[],
-): IPackageVersion[] {
+  ignorePackages?: Array<string>,
+): Array<IPackageVersion> {
   return filterMap(Object.keys(section), (name) => {
     const isTyping = name.startsWith('@types/')
 
     // Never ignore `@types` packages.
     if (!isTyping) {
       // If it's not a `@types` package, check whether the section or package is ignored.
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- We want to check for false as well.
       if (ignoredSection || ignorePackages?.includes(name)) {
         return false
       }

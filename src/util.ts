@@ -53,7 +53,7 @@ export function shrinkObject<T extends object>(source: T): Required<T> {
  * @param source An array of objects to merge.
  */
 export function mergeObjects<T>(source: Array<T>): T {
-  return source.reduce((accum: any, next: any) => ({ ...accum, ...next }), {})
+  return source.reduce((accum, next) => ({ ...accum, ...next }), {} as T)
 }
 
 /**
@@ -91,13 +91,14 @@ export function untyped(name: string): string {
  * Orders an object.
  * @param source
  */
-export function orderObject<
-  T extends Record<string | number | symbol, unknown>,
->(source: T, comparer?: (a: string, b: string) => number): T {
+export function orderObject<T extends Record<string | number | symbol, U>, U>(
+  source: T,
+  comparer?: (a: string, b: string) => number,
+): T {
   const keys = Object.keys(source).sort(comparer)
-  const result: any = {}
+  const result: Record<string, U> = {}
   for (const key of keys) {
-    result[key] = (source as any)[key]
+    result[key] = source[key]
   }
 
   return result as T
@@ -108,10 +109,10 @@ export function orderObject<
  *
  * @param fn
  */
-export function memoizeAsync<U extends any[], V>(
+export function memoizeAsync<U extends Array<W>, V, W>(
   fn: (...args: U) => Promise<V>,
 ) {
-  const cache = new Map<any, Promise<V>>()
+  const cache = new Map<W, Promise<V>>()
 
   async function run(...args: U): Promise<V> {
     try {

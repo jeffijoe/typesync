@@ -12,14 +12,15 @@ async function assertFile(filePath: string) {
 }
 
 async function existsAsync(filePath: string): Promise<boolean> {
-  return stat(filePath)
-    .then(() => true)
-    .catch((err) => {
-      /* istanbul ignore else */
-      if (err.code === 'ENOENT') {
-        return false
-      }
-      /* istanbul ignore next */
-      throw err
-    })
+  try {
+    await stat(filePath)
+    return true
+  } catch (err) {
+    /* istanbul ignore else */
+    if ((err as { code: string }).code === 'ENOENT') {
+      return false
+    }
+    /* istanbul ignore next */
+    throw err
+  }
 }

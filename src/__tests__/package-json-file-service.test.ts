@@ -91,6 +91,6 @@ async function _writeFixture(withTrailingNewline = false): Promise<string> {
   return file
 }
 
-function cleanup(...files: string[]): Promise<any> {
-  return Promise.all(files.map((f) => fsp.unlink(f)))
+async function cleanup(...files: Array<string>): Promise<void> {
+  await Promise.all(files.map((f) => fsp.unlink(f)))
 }

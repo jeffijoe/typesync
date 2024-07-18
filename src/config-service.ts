@@ -40,7 +40,7 @@ function readCliConfig(flags: ICLIArguments['flags']): ISyncOptions {
   const readValues = <T extends string>(
     key: string,
     validator?: (value: string) => boolean,
-  ): T[] | undefined => {
+  ): Array<T> | undefined => {
     const values = flags[key]
     return typeof values === 'string'
       ? values

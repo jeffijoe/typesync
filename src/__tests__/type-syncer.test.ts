@@ -13,7 +13,7 @@ import type {
   IWorkspaceResolverService,
 } from '../workspace-resolver'
 
-const descriptors: IPackageTypingDescriptor[] = [
+const descriptors: Array<IPackageTypingDescriptor> = [
   {
     typingsName: 'package1',
     codePackageName: 'package1',

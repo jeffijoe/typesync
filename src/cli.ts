@@ -33,8 +33,8 @@ export async function startCli() {
       typeSyncer: asFunction(createTypeSyncer),
     })
     await run(container.resolve<ITypeSyncer>('typeSyncer'))
-  } catch (err: any) {
-    C.error(err)
+  } catch (err) {
+    C.error(err as any)
     process.exitCode = 1
   }
 }
@@ -109,7 +109,7 @@ function renderSyncedFile(file: ISyncedFile) {
       : chalk`{green.bold (${file.newTypings.length.toString()} new typings added)}`
 
   const dirName = path.basename(path.dirname(path.resolve(file.filePath)))
-  const title = chalk`📦 ${file.package.name || dirName} {gray.italic — ${
+  const title = chalk`📦 ${file.package.name ?? dirName} {gray.italic — ${
     file.filePath
   }} ${badge}`
 

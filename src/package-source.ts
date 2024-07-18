@@ -11,7 +11,7 @@ export interface IPackageSource {
    *
    * @param packageName
    */
-  fetch(packageName: string): Promise<IPackageInfo | null>
+  fetch(this: void, packageName: string): Promise<IPackageInfo | null>
 }
 
 /**
@@ -33,7 +33,7 @@ export function createPackageSource(): IPackageSource {
      * Fetches info about a package, or `null` if not found.
      */
     fetch: async (name) => {
-      const response = await fetch(encodeURI(name)).catch((err: any) => {
+      const response = await fetch(encodeURI(name)).catch((err) => {
         if (err.statusCode === 404) {
           return null
         }

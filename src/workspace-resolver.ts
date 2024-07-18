@@ -38,7 +38,7 @@ export type IWorkspacesArray = Array<string>
  * - 'packages/*'
  * ```
  */
-export type IWorkspacesObject = {
+export interface IWorkspacesObject {
   packages: IWorkspacesArray
 }
 
@@ -62,7 +62,7 @@ type NpmWorkspacesConfig = IWorkspacesArray
  */
 type YarnWorkspacesConfig =
   | IWorkspacesArray
-  | (IWorkspacesObject & { nohoist?: string[] })
+  | (IWorkspacesObject & { nohoist?: Array<string> })
 
 /**
  * The contents of a `pnpm-workspace.yaml` file.

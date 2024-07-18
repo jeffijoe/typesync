@@ -14,11 +14,11 @@ export interface ISyncOptions {
   /**
    * Ignore certain deps.
    */
-  ignoreDeps?: IDependencySection[]
+  ignoreDeps?: Array<IDependencySection>
   /**
    * Ignore certain packages.
    */
-  ignorePackages?: string[]
+  ignorePackages?: Array<string>
 }
 
 /**
@@ -37,9 +37,7 @@ export interface IPackageFile {
 /**
  * Section in package.json representing dependencies.
  */
-export interface IDependenciesSection {
-  [packageName: string]: string
-}
+export type IDependenciesSection = Record<string, string>
 
 /**
  * Package + version record, collected from the {"package": "^1.2.3"} sections.
@@ -107,6 +105,6 @@ export enum IDependencySection {
  * CLI arguments.
  */
 export interface ICLIArguments {
-  flags: { [key: string]: boolean | string | undefined }
+  flags: Record<string, boolean | string | undefined>
   args: Array<string>
 }
