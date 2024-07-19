@@ -13,6 +13,7 @@ import type {
   ITypeSyncer,
 } from './types'
 import { createWorkspaceResolverService } from './workspace-resolver'
+import * as fsUtils from './fs-utils'
 
 /**
  * Starts the TypeSync CLI.
@@ -24,8 +25,8 @@ export async function startCli() {
       injectionMode: InjectionMode.CLASSIC,
     }).register({
       packageJSONService: asFunction(createPackageJSONFileService).singleton(),
-      workspaceResolverService: asFunction(
-        createWorkspaceResolverService,
+      workspaceResolverService: asFunction(() =>
+        createWorkspaceResolverService(fsUtils),
       ).singleton(),
       packageSource: asFunction(createPackageSource).singleton(),
       configService: asFunction(createConfigService).singleton(),

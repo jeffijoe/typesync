@@ -1,6 +1,6 @@
 import path from 'node:path'
 import yaml from 'js-yaml'
-import * as fsUtils from './fs-utils'
+import type * as fsUtils from './fs-utils'
 import { IGlobber } from './globber'
 import { ensureWorkspacesArray, uniq } from './util'
 import type { IPackageFile } from './types'
@@ -96,7 +96,7 @@ export function createWorkspaceResolverService({
   readFileContents,
 }: {
   readFileContents: typeof fsUtils.readFileContents
-} = fsUtils): IWorkspaceResolverService {
+}): IWorkspaceResolverService {
   return {
     getWorkspaces: async (packageJson, root, globber) => {
       const workspaces = await getWorkspaces(packageJson, root)
