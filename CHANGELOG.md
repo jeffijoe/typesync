@@ -1,3 +1,8 @@
+# v0.13.0
+
+- [#117](https://github.com/jeffijoe/typesync/pull/117): Fix issue with unpublished package names, [@lishaduck](https://github.com/lishaduck)
+- [#119](https://github.com/jeffijoe/typesync/pull/119): Support `pnpm` monorepos, [@lishaduck](https://github.com/lishaduck)
+
 # v0.12.2
 
 - [#114](https://github.com/jeffijoe/typesync/issues/114): Fix check for deprecated packages.
