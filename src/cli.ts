@@ -1,13 +1,19 @@
-import { createContainer, InjectionMode, asFunction } from 'awilix'
+import * as path from 'node:path'
+import { asFunction, createContainer, InjectionMode } from 'awilix'
 import chalk from 'chalk'
-import * as path from 'path'
 import * as C from './cli-util'
-import { ITypeSyncer, IPackageTypingDescriptor, ISyncedFile } from './types'
-import { createTypeSyncer } from './type-syncer'
-import { createPackageJSONFileService } from './package-json-file-service'
 import { createConfigService } from './config-service'
 import { createGlobber } from './globber'
+import { createPackageJSONFileService } from './package-json-file-service'
 import { createPackageSource } from './package-source'
+import { createTypeSyncer } from './type-syncer'
+import type {
+  IPackageTypingDescriptor,
+  ISyncedFile,
+  ITypeSyncer,
+} from './types'
+import { createWorkspaceResolverService } from './workspace-resolver'
+import * as fsUtils from './fs-utils'
 
 /**
  * Starts the TypeSync CLI.
@@ -19,14 +25,17 @@ export async function startCli() {
       injectionMode: InjectionMode.CLASSIC,
     }).register({
       packageJSONService: asFunction(createPackageJSONFileService).singleton(),
+      workspaceResolverService: asFunction(() =>
+        createWorkspaceResolverService(fsUtils),
+      ).singleton(),
       packageSource: asFunction(createPackageSource).singleton(),
       configService: asFunction(createConfigService).singleton(),
       globber: asFunction(createGlobber).singleton(),
       typeSyncer: asFunction(createTypeSyncer),
     })
     await run(container.resolve<ITypeSyncer>('typeSyncer'))
-  } catch (err: any) {
-    C.error(err)
+  } catch (err) {
+    C.error(err as any)
     process.exitCode = 1
   }
 }
@@ -75,7 +84,7 @@ async function run(syncer: ITypeSyncer) {
       ? `No new typings to add, looks like you're all synced up!`
       : flags.dry
         ? chalk`${totals.newTypings.toString()} new typings can be added.\n\n${syncedFilesOutput}\n\n✨  Run {green typesync} again without the {gray --dry} flag to update your {gray package.json}.`
-        : chalk`${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install} or {green yarn} to install the packages that were added.`,
+        : chalk`${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install}, {green yarn}, or {green pnpm i} to install the packages that were added.`,
   )
 }
 
@@ -101,7 +110,7 @@ function renderSyncedFile(file: ISyncedFile) {
       : chalk`{green.bold (${file.newTypings.length.toString()} new typings added)}`
 
   const dirName = path.basename(path.dirname(path.resolve(file.filePath)))
-  const title = chalk`📦 ${file.package.name || dirName} {gray.italic — ${
+  const title = chalk`📦 ${file.package.name ?? dirName} {gray.italic — ${
     file.filePath
   }} ${badge}`
 

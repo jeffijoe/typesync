@@ -1,9 +1,11 @@
-import { IPackageVersionInfo } from '../types'
-import { getClosestMatchingVersion } from '../versioning'
+import {
+  getClosestMatchingVersion,
+  type IPackageVersionInfo,
+} from '../versioning'
 
 describe('getClosestMatchingVersion', () => {
   it('returns the closest matching version', () => {
-    const inputVersions: IPackageVersionInfo[] = [
+    const inputVersions: Array<IPackageVersionInfo> = [
       {
         containsInternalTypings: false,
         version: '1.16.0',

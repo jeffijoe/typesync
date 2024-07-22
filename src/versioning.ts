@@ -1,5 +1,12 @@
-import { IPackageVersionInfo } from './types'
 import { parse } from 'semver'
+
+/**
+ * Version descriptor for versions returned in remote package info.
+ */
+export interface IPackageVersionInfo {
+  version: string
+  containsInternalTypings: boolean
+}
 
 /**
  * Gets the closest matching package version info.
@@ -8,7 +15,7 @@ import { parse } from 'semver'
  * @param version
  */
 export function getClosestMatchingVersion(
-  availableVersions: IPackageVersionInfo[],
+  availableVersions: Array<IPackageVersionInfo>,
   version: string,
 ) {
   const parsedVersion = parseVersion(version)
@@ -33,7 +40,7 @@ export function getClosestMatchingVersion(
     return true
   })
 
-  return bestMatch || availableVersions[0]
+  return bestMatch ?? availableVersions[0]
 }
 
 /**

@@ -4,6 +4,7 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/stylistic-type-checked',
     'prettier',
   ],
   overrides: [
@@ -25,6 +26,7 @@ module.exports = {
           'error',
           { allow: ['/package\\.json$'] },
         ],
+        '@typescript-eslint/array-type': ['error', { default: 'generic' }],
       },
     },
     // Tests

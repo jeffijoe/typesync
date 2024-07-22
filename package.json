@@ -52,13 +52,15 @@
     "cosmiconfig": "^9.0.0",
     "detect-indent": "^6.0.0",
     "glob": "^10.4.2",
+    "js-yaml": "^4.1.0",
     "npm-registry-fetch": "^17.1.0",
     "ora": "^5.1.0",
     "semver": "^7.6.2"
   },
   "devDependencies": {
-    "@types/glob": "^8.1.0",
     "@types/jest": "^29.5.12",
+    "@types/js-yaml": "~4.0.9 || ~4.1.0",
+    "@types/node": "~16.18.102",
     "@types/npm-registry-fetch": "^8.0.7",
     "@types/semver": "^7.5.8",
     "@typescript-eslint/eslint-plugin": "^7.15.0",

@@ -1,3 +1,5 @@
+import type { IWorkspacesSection } from './workspace-resolver'
+
 /**
  * The guts of the program.
  */
@@ -12,68 +14,11 @@ export interface ISyncOptions {
   /**
    * Ignore certain deps.
    */
-  ignoreDeps?: IDependencySection[]
+  ignoreDeps?: Array<IDependencySection>
   /**
    * Ignore certain packages.
    */
-  ignorePackages?: string[]
-}
-
-/**
- * Config Service.
- */
-export interface IConfigService {
-  /**
-   * Get typesync config.
-   */
-  readConfig(
-    filePath: string,
-    flags: ICLIArguments['flags'],
-  ): Promise<ISyncOptions>
-}
-
-/**
- * Fetches info about a package.
- */
-export interface IPackageSource {
-  /**
-   * Fetches package info from an external source.
-   *
-   * @param packageName
-   */
-  fetch(packageName: string): Promise<IPackageInfo | null>
-}
-
-/**
- * File service.
- */
-export interface IPackageJSONService {
-  /**
-   * Reads and parses JSON from the specified file. Path is relative to the current working directory.
-   */
-  readPackageFile(filePath: string): Promise<IPackageFile>
-  /**
-   * Writes the JSON to the specified file.
-   */
-  writePackageFile(filePath: string, fileContents: IPackageFile): Promise<void>
-}
-
-/**
- * Interface for the Package Info structure.
- */
-export interface IPackageInfo {
-  name: string
-  latestVersion: string
-  deprecated: boolean
-  versions: Array<IPackageVersionInfo>
-}
-
-/**
- * Version descriptor for versions returned in remote package info.
- */
-export interface IPackageVersionInfo {
-  version: string
-  containsInternalTypings: boolean
+  ignorePackages?: Array<string>
 }
 
 /**
@@ -85,29 +30,14 @@ export interface IPackageFile {
   devDependencies?: IDependenciesSection
   peerDependencies?: IDependenciesSection
   optionalDependencies?: IDependenciesSection
-  packages?: IWorkspacesSection
-  workspaces?: IWorkspacesSection | IYarnWorkspacesConfig
-  [key: string]: any
+  workspaces?: IWorkspacesSection
+  [key: string]: unknown
 }
 
 /**
  * Section in package.json representing dependencies.
  */
-export interface IDependenciesSection {
-  [packageName: string]: string
-}
-
-/**
- * Section in package.json representing workspaces (yarn/lerna).
- */
-export type IWorkspacesSection = Array<string>
-
-/**
- * Yarn is a special snowflake.
- */
-export interface IYarnWorkspacesConfig {
-  packages: IWorkspacesSection
-}
+export type IDependenciesSection = Record<string, string>
 
 /**
  * Package + version record, collected from the {"package": "^1.2.3"} sections.
@@ -175,6 +105,6 @@ export enum IDependencySection {
  * CLI arguments.
  */
 export interface ICLIArguments {
-  flags: { [key: string]: boolean | string | undefined }
+  flags: Record<string, boolean | string | undefined>
   args: Array<string>
 }

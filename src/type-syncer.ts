@@ -1,30 +1,30 @@
+import * as path from 'node:path'
+import type { IConfigService } from './config-service'
+import type { IGlobber } from './globber'
+import type { IPackageJSONService } from './package-json-file-service'
+import type { IPackageSource } from './package-source'
 import {
-  ITypeSyncer,
-  IPackageJSONService,
-  IPackageTypingDescriptor,
-  IPackageFile,
-  ISyncOptions,
-  IDependenciesSection,
-  IPackageVersion,
-  ISyncResult,
-  ISyncedFile,
-  IPackageSource,
-  IConfigService,
+  type ICLIArguments,
+  type IDependenciesSection,
   IDependencySection,
-  ICLIArguments,
+  type IPackageFile,
+  type IPackageTypingDescriptor,
+  type IPackageVersion,
+  type ISyncOptions,
+  type ISyncResult,
+  type ISyncedFile,
+  type ITypeSyncer,
 } from './types'
 import {
   filterMap,
-  mergeObjects,
-  typed,
-  orderObject,
-  uniq,
-  flatten,
   memoizeAsync,
-  ensureWorkspacesArray,
+  mergeObjects,
+  orderObject,
+  typed,
+  uniq,
 } from './util'
-import { IGlobber } from './globber'
 import { getClosestMatchingVersion } from './versioning'
+import type { IWorkspaceResolverService } from './workspace-resolver'
 
 /**
  * Creates a type syncer.
@@ -34,6 +34,7 @@ import { getClosestMatchingVersion } from './versioning'
  */
 export function createTypeSyncer(
   packageJSONService: IPackageJSONService,
+  workspaceResolverService: IWorkspaceResolverService,
   packageSource: IPackageSource,
   configService: IConfigService,
   globber: IGlobber,
@@ -52,19 +53,10 @@ export function createTypeSyncer(
     flags: ICLIArguments['flags'],
   ): Promise<ISyncResult> {
     const dryRun = !!flags.dry
-    const [file, syncOpts] = await Promise.all([
-      packageJSONService.readPackageFile(filePath),
+    const [{ file, subPackages }, syncOpts] = await Promise.all([
+      getManifests(filePath, globber),
       configService.readConfig(filePath, flags),
     ])
-
-    const subPackages = await Promise.all(
-      [
-        ...ensureWorkspacesArray(file.packages),
-        ...ensureWorkspacesArray(file.workspaces),
-      ].map(globber.globPackageFiles),
-    )
-      .then(flatten)
-      .then(uniq)
 
     const syncedFiles: Array<ISyncedFile> = await Promise.all([
       syncFile(filePath, file, syncOpts, dryRun),
@@ -73,6 +65,26 @@ export function createTypeSyncer(
 
     return {
       syncedFiles,
+    }
+  }
+
+  /**
+   * Get the `package.json` files and sub-packages.
+   *
+   * @param filePath
+   * @param globber
+   */
+  async function getManifests(filePath: string, globber: IGlobber) {
+    const file = await packageJSONService.readPackageFile(filePath)
+    const subPackages = await workspaceResolverService.getWorkspaces(
+      file,
+      path.dirname(filePath),
+      globber,
+    )
+
+    return {
+      file,
+      subPackages,
     }
   }
 
@@ -93,20 +105,21 @@ export function createTypeSyncer(
     const { ignoreDeps, ignorePackages } = opts
 
     const packageFile =
-      file || (await packageJSONService.readPackageFile(filePath))
-    const allLocalPackages = flatten(
-      Object.values(IDependencySection).map((dep) => {
+      file ?? (await packageJSONService.readPackageFile(filePath))
+    const allLocalPackages = Object.values(IDependencySection)
+      .map((dep) => {
         const section = getDependenciesBySection(packageFile, dep)
         const ignoredSection = ignoreDeps?.includes(dep)
         return getPackagesFromSection(section, ignoredSection, ignorePackages)
-      }),
-    )
+      })
+      .flat()
     const allPackageNames = uniq(allLocalPackages.map((p) => p.name))
     const potentiallyUntypedPackages =
       getPotentiallyUntypedPackages(allPackageNames)
+
     // This is pushed to in the inner `map`, because packages that have DT-typings
     // *as well* as internal typings should be excluded.
-    const used: Array<ReturnType<typeof getPotentiallyUntypedPackages>[0]> = []
+    const used: ReturnType<typeof getPotentiallyUntypedPackages> = []
     const devDepsToAdd = await Promise.all(
       potentiallyUntypedPackages.map(async (t) => {
         // Fetch the code package from the source.
@@ -247,14 +260,15 @@ function getPackageScope(packageName: string): [string, string] | null {
 function getPackagesFromSection(
   section: IDependenciesSection,
   ignoredSection?: boolean,
-  ignorePackages?: string[],
-): IPackageVersion[] {
+  ignorePackages?: Array<string>,
+): Array<IPackageVersion> {
   return filterMap(Object.keys(section), (name) => {
     const isTyping = name.startsWith('@types/')
 
     // Never ignore `@types` packages.
     if (!isTyping) {
       // If it's not a `@types` package, check whether the section or package is ignored.
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- We want to check for false as well.
       if (ignoredSection || ignorePackages?.includes(name)) {
         return false
       }

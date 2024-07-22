@@ -1,4 +1,4 @@
-import { IWorkspacesSection, IYarnWorkspacesConfig } from './types'
+import type { IWorkspacesArray, IWorkspacesSection } from './workspace-resolver'
 
 /**
  * Returns unique items.
@@ -6,15 +6,7 @@ import { IWorkspacesSection, IYarnWorkspacesConfig } from './types'
  * @param source The source to filter
  */
 export function uniq<T>(source: Array<T>): Array<T> {
-  const seen: T[] = []
-  for (const s of source) {
-    if (seen.includes(s)) {
-      continue
-    }
-    seen.push(s)
-  }
-
-  return seen
+  return [...new Set(source)]
 }
 
 /**
@@ -61,7 +53,7 @@ export function shrinkObject<T extends object>(source: T): Required<T> {
  * @param source An array of objects to merge.
  */
 export function mergeObjects<T>(source: Array<T>): T {
-  return source.reduce((accum: any, next: any) => ({ ...accum, ...next }), {})
+  return source.reduce((accum, next) => ({ ...accum, ...next }), {} as T)
 }
 
 /**
@@ -99,50 +91,17 @@ export function untyped(name: string): string {
  * Orders an object.
  * @param source
  */
-export function orderObject<
-  T extends Record<string | number | symbol, unknown>,
->(source: T, comparer?: (a: string, b: string) => number): T {
+export function orderObject<T extends Record<string | number | symbol, U>, U>(
+  source: T,
+  comparer?: (a: string, b: string) => number,
+): T {
   const keys = Object.keys(source).sort(comparer)
-  const result: any = {}
+  const result: Record<string, U> = {}
   for (const key of keys) {
-    result[key] = (source as any)[key]
+    result[key] = source[key]
   }
 
   return result as T
-}
-
-/**
- * Promisifies the specified function.
- *
- * @param fn
- */
-export function promisify(fn: (...args: any[]) => void) {
-  return function promisified(...args: any[]) {
-    return new Promise<any>((resolve, reject) => {
-      fn(...args, function callback(err: any, result: any) {
-        // Edge case with `fs.exists`.
-        if (arguments.length === 1 && typeof err === 'boolean') {
-          return resolve(err)
-        }
-        return !err ? resolve(result) : reject(err)
-      })
-    })
-  }
-}
-
-/**
- * Flattens a 2-dimensional array.
- *
- * @param source
- */
-export function flatten<T>(source: Array<Array<T>>): Array<T> {
-  const result: Array<T> = []
-  for (const items of source) {
-    for (const item of items) {
-      result.push(item)
-    }
-  }
-  return result
 }
 
 /**
@@ -150,10 +109,10 @@ export function flatten<T>(source: Array<Array<T>>): Array<T> {
  *
  * @param fn
  */
-export function memoizeAsync<U extends any[], V>(
+export function memoizeAsync<U extends Array<W>, V, W>(
   fn: (...args: U) => Promise<V>,
 ) {
-  const cache = new Map<any, Promise<V>>()
+  const cache = new Map<W, Promise<V>>()
 
   async function run(...args: U): Promise<V> {
     try {
@@ -182,8 +141,8 @@ export function memoizeAsync<U extends any[], V>(
  * @param data
  */
 export function ensureWorkspacesArray(
-  data?: IWorkspacesSection | IYarnWorkspacesConfig,
-): IWorkspacesSection {
+  data?: IWorkspacesSection,
+): IWorkspacesArray {
   if (!data) {
     return []
   }

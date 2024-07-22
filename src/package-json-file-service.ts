@@ -1,11 +1,21 @@
-import { IPackageJSONService, IPackageFile } from './types'
-import * as fs from 'fs'
-import { promisify } from './util'
+import * as fsp from 'node:fs/promises'
 import detectIndent from 'detect-indent'
+import { readFileContents } from './fs-utils'
+import { IPackageFile } from './types'
 
-const statAsync = promisify(fs.stat)
-const readFileAsync = promisify(fs.readFile)
-const writeFileAsync = promisify(fs.writeFile)
+/**
+ * File service.
+ */
+export interface IPackageJSONService {
+  /**
+   * Reads and parses JSON from the specified file. Path is relative to the current working directory.
+   */
+  readPackageFile(filePath: string): Promise<IPackageFile>
+  /**
+   * Writes the JSON to the specified file.
+   */
+  writePackageFile(filePath: string, fileContents: IPackageFile): Promise<void>
+}
 
 export function createPackageJSONFileService(): IPackageJSONService {
   return {
@@ -16,39 +26,13 @@ export function createPackageJSONFileService(): IPackageJSONService {
     writePackageFile: async (filePath, fileContent) => {
       const contents = await readFileContents(filePath)
       const { indent } = detectIndent(contents)
-      const trailingNewline = contents.length
-        ? contents[contents.length - 1] === '\n'
-        : false
+      const trailingNewline = contents.length ? contents.endsWith('\n') : false
       const data = JSON.stringify(
         fileContent,
         null,
         indent /* istanbul ignore next */ || '  ',
       )
-      await writeFileAsync(filePath, data + (trailingNewline ? '\n' : ''))
+      await fsp.writeFile(filePath, data + (trailingNewline ? '\n' : ''))
     },
   }
-}
-
-async function readFileContents(filePath: string) {
-  await assertFile(filePath)
-  return readFileAsync(filePath, 'utf-8').then((x: Buffer) => x.toString())
-}
-
-async function assertFile(filePath: string) {
-  if (!(await existsAsync(filePath))) {
-    throw new Error(`${filePath} does not exist.`)
-  }
-}
-
-async function existsAsync(filePath: string): Promise<boolean> {
-  return statAsync(filePath)
-    .then(() => true)
-    .catch((err) => {
-      /* istanbul ignore else */
-      if (err.code === 'ENOENT') {
-        return false
-      }
-      /* istanbul ignore next */
-      throw err
-    })
 }

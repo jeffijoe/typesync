@@ -1,12 +1,24 @@
-import path from 'path'
+import * as path from 'node:path'
 import { cosmiconfig } from 'cosmiconfig'
 import {
-  IConfigService,
-  ISyncOptions,
+  type ICLIArguments,
   IDependencySection,
-  ICLIArguments,
+  type ISyncOptions,
 } from './types'
 import { shrinkObject } from './util'
+
+/**
+ * Config Service.
+ */
+export interface IConfigService {
+  /**
+   * Get typesync config.
+   */
+  readConfig(
+    filePath: string,
+    flags: ICLIArguments['flags'],
+  ): Promise<ISyncOptions>
+}
 
 const explorer = cosmiconfig('typesync')
 
@@ -28,7 +40,7 @@ function readCliConfig(flags: ICLIArguments['flags']): ISyncOptions {
   const readValues = <T extends string>(
     key: string,
     validator?: (value: string) => boolean,
-  ): T[] | undefined => {
+  ): Array<T> | undefined => {
     const values = flags[key]
     return typeof values === 'string'
       ? values
