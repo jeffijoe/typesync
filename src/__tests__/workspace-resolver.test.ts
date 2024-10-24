@@ -9,15 +9,23 @@ import {
 
 describe('workspace resolver', () => {
   const globber: IGlobber = {
-    globPackageFiles: jest.fn(async (_root: string) => {
-      return ['packages/package1', 'packages/package2']
+    glob: jest.fn(async (_root, filename) => {
+      if (filename === 'packages/*') {
+        return ['packages/package1', 'packages/package2', 'packages/package3']
+      }
+
+      if (filename === 'packages/package3') {
+        return ['packages/package3']
+      }
+
+      return []
     }),
   }
 
   describe('getWorkspaces', () => {
     describe('returns workspaces for all package managers', () => {
       const subject = createWorkspaceResolverService({
-        readFileContents: jest.fn(async (_filePath: string) => {
+        readFileContents: jest.fn(async (_filePath) => {
           return JSON.stringify({
             packages: ['packages/*'],
           } satisfies PnpmWorkspacesConfig)
@@ -58,11 +66,12 @@ describe('workspace resolver', () => {
             },
           },
         },
-      ])(`returns $pm workspaces`, async ({ pm, files }) => {
+      ])(`returns $pm workspaces`, async ({ files }) => {
         const workspaces = await subject.getWorkspaces(
           files['package.json'],
           '/',
           globber,
+          ['packages/package3'],
         )
 
         expect(workspaces).toEqual(['packages/package1', 'packages/package2'])
@@ -75,7 +84,7 @@ describe('workspace resolver', () => {
           }),
         })
 
-        expect(await subject.getWorkspaces({}, '/', globber)).toEqual([])
+        expect(await subject.getWorkspaces({}, '/', globber, [])).toEqual([])
       })
     })
   })

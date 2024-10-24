@@ -7,23 +7,20 @@ import { uniq } from './util'
  */
 export interface IGlobber {
   /**
-   * Globs for `package.json` files.
+   * Globs for a filename.
    *
    * @param root
    */
-  globPackageFiles(root: string): Promise<Array<string>>
+  glob(root: string, filename: string): Promise<Array<string>>
 }
 
 /**
  * Creates a globber.
  */
-export function createGlobber() {
+export function createGlobber(): IGlobber {
   return {
-    async globPackageFiles(
-      root: string,
-      file = 'package.json',
-    ): Promise<Array<string>> {
-      const source = await glob(path.join(root, file), {
+    async glob(root: string, filename): Promise<Array<string>> {
+      const source = await glob(path.join(root, filename), {
         ignore: '**/node_modules/**',
       })
 

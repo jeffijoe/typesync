@@ -24,7 +24,10 @@ import {
   uniq,
 } from './util'
 import { getClosestMatchingVersion } from './versioning'
-import type { IWorkspaceResolverService } from './workspace-resolver'
+import type {
+  IWorkspaceResolverService,
+  IWorkspacesArray,
+} from './workspace-resolver'
 
 /**
  * Creates a type syncer.
@@ -53,10 +56,12 @@ export function createTypeSyncer(
     flags: ICLIArguments['flags'],
   ): Promise<ISyncResult> {
     const dryRun = !!flags.dry
-    const [{ file, subPackages }, syncOpts] = await Promise.all([
-      getManifests(filePath, globber),
-      configService.readConfig(filePath, flags),
-    ])
+    const syncOpts = await configService.readConfig(filePath, flags)
+    const { file, subPackages } = await getManifests(
+      filePath,
+      globber,
+      syncOpts.ignoreProjects ?? [],
+    )
 
     const syncedFiles: Array<ISyncedFile> = await Promise.all([
       syncFile(filePath, file, syncOpts, dryRun),
@@ -74,12 +79,17 @@ export function createTypeSyncer(
    * @param filePath
    * @param globber
    */
-  async function getManifests(filePath: string, globber: IGlobber) {
+  async function getManifests(
+    filePath: string,
+    globber: IGlobber,
+    ignoredWorkspaces: IWorkspacesArray,
+  ) {
     const file = await packageJSONService.readPackageFile(filePath)
     const subPackages = await workspaceResolverService.getWorkspaces(
       file,
       path.dirname(filePath),
       globber,
+      ignoredWorkspaces,
     )
 
     return {

@@ -1,4 +1,4 @@
-import type { IWorkspacesSection } from './workspace-resolver'
+import type { IWorkspacesArray, IWorkspacesSection } from './workspace-resolver'
 
 /**
  * The guts of the program.
@@ -15,10 +15,16 @@ export interface ISyncOptions {
    * Ignore certain deps.
    */
   ignoreDeps?: Array<IDependencySection>
+
   /**
    * Ignore certain packages.
    */
   ignorePackages?: Array<string>
+
+  /**
+   * Skip resolution of certain projects in the workspace.
+   */
+  ignoreProjects?: IWorkspacesArray
 }
 
 /**
