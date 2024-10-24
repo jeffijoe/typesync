@@ -1,7 +1,8 @@
+import { join } from 'node:path'
 import { createGlobber } from '../globber'
 
 test('returns the current directory as a match', async () => {
-  const result = await createGlobber().globPackageFiles(process.cwd())
+  const result = await createGlobber().glob(process.cwd(), 'package.json')
   expect(result).toHaveLength(1)
-  expect(result[0]).toBe(process.cwd() + '/package.json')
+  expect(result[0]).toBe(join(process.cwd(), 'package.json'))
 })

@@ -22,6 +22,7 @@ export interface IWorkspaceResolverService {
     packageJson: IPackageFile,
     root: string,
     globber: IGlobber,
+    ignored: IWorkspacesArray,
   ): Promise<IWorkspacesArray>
 }
 
@@ -98,17 +99,34 @@ export function createWorkspaceResolverService({
   readFileContents: typeof fsUtils.readFileContents
 }): IWorkspaceResolverService {
   return {
-    getWorkspaces: async (packageJson, root, globber) => {
-      const workspaces = await getWorkspaces(packageJson, root)
-      const workspacesArray = ensureWorkspacesArray(workspaces)
+    getWorkspaces: async (packageJson, root, globber, ignored) => {
+      const [manifests, ignoredWorkspaces] = await Promise.all([
+        (async () => {
+          const workspaces = await getWorkspaces(packageJson, root)
+          const workspacesArray = ensureWorkspacesArray(workspaces)
+          const globbedArrays = await Promise.all(
+            workspacesArray.map(
+              async (workspace) => await globber.glob(root, workspace),
+            ),
+          )
 
-      const manifests = await Promise.all(
-        workspacesArray.map(
-          async (workspace) => await globber.globPackageFiles(workspace),
-        ),
+          return uniq(globbedArrays.flat())
+        })(),
+        (async () => {
+          const ignoredWorkspacesArrays = await Promise.all(
+            ignored.map(
+              async (ignoredWorkspace) =>
+                await globber.glob(root, ignoredWorkspace),
+            ),
+          )
+
+          return uniq(ignoredWorkspacesArrays.flat())
+        })(),
+      ])
+
+      return manifests.filter(
+        (manifest) => !ignoredWorkspaces.includes(manifest),
       )
-
-      return uniq(manifests.flat())
     },
   }
 

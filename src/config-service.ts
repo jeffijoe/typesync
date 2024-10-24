@@ -52,6 +52,7 @@ function readCliConfig(flags: ICLIArguments['flags']): ISyncOptions {
   return {
     ignoreDeps: readValues('ignoredeps', isIgnoreDepConfigValue),
     ignorePackages: readValues('ignorepackages'),
+    ignoreProjects: readValues('ignoreprojects'),
   }
 }
 

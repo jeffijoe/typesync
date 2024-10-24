@@ -174,7 +174,9 @@ function buildSyncer() {
       }
 
       workspaces ??= []
-      const globPromises = workspaces.map((w) => globber.globPackageFiles(w))
+      const globPromises = workspaces.map((w) =>
+        globber.glob(w, 'package.json'),
+      )
       const globbed = await Promise.all(globPromises)
 
       return globbed.flat()
@@ -182,7 +184,7 @@ function buildSyncer() {
   }
 
   const globber: IGlobber = {
-    globPackageFiles: jest.fn(async (pattern) => {
+    glob: jest.fn(async (pattern, _filename) => {
       switch (pattern) {
         case 'packages/*':
           return [
