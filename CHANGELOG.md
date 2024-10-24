@@ -1,3 +1,7 @@
+# v0.13.2
+
+- [#127](https://github.com/jeffijoe/typesync/pull/127): Show dependencies on `--dry` failure, [@Benjamin-Frost](https://github.com/Benjamin-Frost)
+
 # v0.13.1
 
 - [#126](https://github.com/jeffijoe/typesync/pull/126): Allow ignoring workspace members, [@lishaduck](https://github.com/lishaduck)
