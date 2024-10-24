@@ -1,3 +1,7 @@
+# v0.13.1
+
+- [#126](https://github.com/jeffijoe/typesync/pull/126): Allow ignoring workspace members, [@lishaduck](https://github.com/lishaduck)
+
 # v0.13.0
 
 - [#117](https://github.com/jeffijoe/typesync/pull/117): Fix issue with unpublished package names, [@lishaduck](https://github.com/lishaduck)
