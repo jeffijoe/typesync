@@ -74,8 +74,11 @@ async function run(syncer: ITypeSyncer) {
       }),
       { newTypings: 0 },
     )
+
+  const syncMessage = chalk`\n\n${syncedFilesOutput}\n\n✨  Run {green typesync} again without the {gray --dry} flag to update your {gray package.json}.`
   if (flags.dry === 'fail' && totals.newTypings > 0) {
     C.error('Typings changed; check failed.')
+    C.log(syncMessage)
     process.exitCode = 1
     return
   }
@@ -83,7 +86,7 @@ async function run(syncer: ITypeSyncer) {
     totals.newTypings === 0
       ? `No new typings to add, looks like you're all synced up!`
       : flags.dry
-        ? chalk`${totals.newTypings.toString()} new typings can be added.\n\n${syncedFilesOutput}\n\n✨  Run {green typesync} again without the {gray --dry} flag to update your {gray package.json}.`
+        ? chalk`${totals.newTypings.toString()} new typings can be added.${syncMessage}`
         : chalk`${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run {green npm install}, {green yarn}, or {green pnpm i} to install the packages that were added.`,
   )
 }
