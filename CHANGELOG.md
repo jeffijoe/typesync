@@ -1,3 +1,7 @@
+# v0.13.3
+
+- [#129](https://github.com/jeffijoe/typesync/pull/129): Fix manifest reads, [@lishaduck](https://github.com/lishaduck)
+
 # v0.13.2
 
 - [#127](https://github.com/jeffijoe/typesync/pull/127): Show dependencies on `--dry` failure, [@Benjamin-Frost](https://github.com/Benjamin-Frost)
