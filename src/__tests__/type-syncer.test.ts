@@ -187,10 +187,7 @@ function buildSyncer() {
     glob: jest.fn(async (pattern, _filename) => {
       switch (pattern) {
         case 'packages/*':
-          return [
-            'packages/package-1/package.json',
-            'packages/package-2/package.json',
-          ]
+          return ['packages/package-1/', 'packages/package-2/']
         default:
           return []
       }

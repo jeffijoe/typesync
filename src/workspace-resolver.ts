@@ -1,4 +1,4 @@
-import path from 'node:path'
+import * as path from 'node:path'
 import yaml from 'js-yaml'
 import type * as fsUtils from './fs-utils'
 import { IGlobber } from './globber'
@@ -17,6 +17,7 @@ export interface IWorkspaceResolverService {
    * - `pnpm-workspace.yaml` `packages` field, as an array of globs.
    *
    * Path is relative to the current working directory.
+   * Note that this returns a list of directories, not paths to the manifests themselves.
    */
   getWorkspaces(
     packageJson: IPackageFile,

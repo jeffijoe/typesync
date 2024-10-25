@@ -57,7 +57,7 @@ export function createTypeSyncer(
   ): Promise<ISyncResult> {
     const dryRun = !!flags.dry
     const syncOpts = await configService.readConfig(filePath, flags)
-    const { file, subPackages } = await getManifests(
+    const { file, subManifests } = await getManifests(
       filePath,
       globber,
       syncOpts.ignoreProjects ?? [],
@@ -65,7 +65,7 @@ export function createTypeSyncer(
 
     const syncedFiles: Array<ISyncedFile> = await Promise.all([
       syncFile(filePath, file, syncOpts, dryRun),
-      ...subPackages.map((p) => syncFile(p, null, syncOpts, dryRun)),
+      ...subManifests.map((p) => syncFile(p, null, syncOpts, dryRun)),
     ])
 
     return {
@@ -91,10 +91,11 @@ export function createTypeSyncer(
       globber,
       ignoredWorkspaces,
     )
+    const subManifests = subPackages.map((p) => path.join(p, 'package.json'))
 
     return {
       file,
-      subPackages,
+      subManifests,
     }
   }
 
