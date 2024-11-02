@@ -65,7 +65,14 @@ export function createTypeSyncer(
 
     const syncedFiles: Array<ISyncedFile> = await Promise.all([
       syncFile(filePath, file, syncOpts, dryRun),
-      ...subManifests.map((p) => syncFile(p, null, syncOpts, dryRun)),
+      ...subManifests.map(async (p) =>
+        syncFile(
+          p,
+          await packageJSONService.readPackageFile(p),
+          syncOpts,
+          dryRun,
+        ),
+      ),
     ])
 
     return {
@@ -109,17 +116,18 @@ export function createTypeSyncer(
    */
   async function syncFile(
     filePath: string,
-    file: IPackageFile | null,
+    file: IPackageFile,
     opts: ISyncOptions,
     dryRun: boolean,
   ): Promise<ISyncedFile> {
     const { ignoreDeps, ignorePackages } = opts
 
-    const packageFile =
-      file ?? (await packageJSONService.readPackageFile(filePath))
+    const packageFile = file
     const allLocalPackages = Object.values(IDependencySection)
       .map((dep) => {
         const section = getDependenciesBySection(packageFile, dep)
+        if (!section) return []
+
         const ignoredSection = ignoreDeps?.includes(dep)
         return getPackagesFromSection(section, ignoredSection, ignorePackages)
       })
@@ -298,7 +306,7 @@ function getPackagesFromSection(
 function getDependenciesBySection(
   file: IPackageFile,
   section: IDependencySection,
-): IDependenciesSection {
+): IDependenciesSection | undefined {
   const dependenciesSection = (() => {
     switch (section) {
       case IDependencySection.deps:
@@ -311,5 +319,5 @@ function getDependenciesBySection(
         return file.peerDependencies
     }
   })()
-  return dependenciesSection ?? {}
+  return dependenciesSection
 }
