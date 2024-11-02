@@ -189,13 +189,16 @@ export function createTypeSyncer(
     ).then(mergeObjects)
     const devDeps = packageFile.devDependencies
     if (!dryRun) {
-      await packageJSONService.writePackageFile(filePath, {
-        ...packageFile,
-        devDependencies: orderObject({
+      const newPackageFile: IPackageFile = { ...packageFile }
+
+      if (Object.keys(devDepsToAdd).length > 0) {
+        newPackageFile.devDependencies = orderObject({
           ...devDepsToAdd,
           ...devDeps,
-        }),
-      } as IPackageFile)
+        })
+      }
+
+      await packageJSONService.writePackageFile(filePath, newPackageFile)
     }
 
     return {
