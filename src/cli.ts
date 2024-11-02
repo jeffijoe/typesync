@@ -64,16 +64,12 @@ async function run(syncer: ITypeSyncer) {
   const syncedFilesOutput = result.syncedFiles
     .map(renderSyncedFile)
     .join('\n\n')
-  const totals = result.syncedFiles
-    .map((f) => ({
-      newTypings: f.newTypings.length,
-    }))
-    .reduce(
-      (accum, next) => ({
-        newTypings: accum.newTypings + next.newTypings,
-      }),
-      { newTypings: 0 },
-    )
+  const totals = result.syncedFiles.reduce(
+    (accum, f) => ({
+      newTypings: accum.newTypings + f.newTypings.length,
+    }),
+    { newTypings: 0 },
+  )
 
   const syncMessage = chalk`\n\n${syncedFilesOutput}\n\n✨  Run {green typesync} again without the {gray --dry} flag to update your {gray package.json}.`
   if (flags.dry === 'fail' && totals.newTypings > 0) {
