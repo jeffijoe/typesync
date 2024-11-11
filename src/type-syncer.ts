@@ -122,10 +122,9 @@ export function createTypeSyncer(
   ): Promise<ISyncedFile> {
     const { ignoreDeps, ignorePackages } = opts
 
-    const packageFile = file
     const allLocalPackages = Object.values(IDependencySection)
       .map((dep) => {
-        const section = getDependenciesBySection(packageFile, dep)
+        const section = getDependenciesBySection(file, dep)
         if (!section) return []
 
         const ignoredSection = ignoreDeps?.includes(dep)
@@ -187,9 +186,9 @@ export function createTypeSyncer(
         }
       }),
     ).then(mergeObjects)
-    const devDeps = packageFile.devDependencies
+    const devDeps = file.devDependencies
     if (!dryRun) {
-      const newPackageFile: IPackageFile = { ...packageFile }
+      const newPackageFile: IPackageFile = { ...file }
 
       if (Object.keys(devDepsToAdd).length > 0) {
         newPackageFile.devDependencies = orderObject({
@@ -204,7 +203,7 @@ export function createTypeSyncer(
     return {
       filePath,
       newTypings: used,
-      package: packageFile,
+      package: file,
     }
   }
 }

@@ -311,7 +311,7 @@ describe('type syncer', () => {
       result.syncedFiles[2].newTypings.map((x) => x.typingsName).sort(),
     ).toEqual(['package3'])
     expect(result.syncedFiles[3].package.devDependencies).toStrictEqual(
-      undefined, // Why does this work!? In practice, it's `{}`.
+      undefined,
     )
   })
 
