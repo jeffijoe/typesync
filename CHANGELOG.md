@@ -1,3 +1,7 @@
+# v0.13.4
+
+- [#132](https://github.com/jeffijoe/typesync/pull/132): Fix addition of extraneous fields, [@lishaduck](https://github.com/lishaduck)
+
 # v0.13.3
 
 - [#129](https://github.com/jeffijoe/typesync/pull/129): Fix manifest reads, [@lishaduck](https://github.com/lishaduck)
