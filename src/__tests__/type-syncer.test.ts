@@ -126,10 +126,15 @@ function buildSyncer() {
   }
 
   const package2File: ITestPackageFile = {
-    name: 'package-1',
+    name: 'package-2',
     dependencies: {
       package3: '^1.0.0',
     },
+  }
+
+  const package3File: ITestPackageFile = {
+    name: 'package-3',
+    dependencies: {},
   }
 
   const packageService: IPackageJSONService = {
@@ -145,6 +150,8 @@ function buildSyncer() {
           return package1File
         case 'packages/package-2/package.json':
           return package2File
+        case 'packages/package-3/package.json':
+          return package3File
         default:
           throw new Error(`Who?! ${filepath}`)
       }
@@ -161,20 +168,11 @@ function buildSyncer() {
           workspaces = rootPackageFile.workspaces
           break
         }
-        case 'packages/package-1/': {
-          workspaces = package1File.workspaces
-          break
-        }
-        case 'packages/package-2/': {
-          workspaces = package2File.workspaces
-          break
-        }
         default:
           throw new Error('What?!')
       }
 
-      workspaces ??= []
-      const globPromises = workspaces.map((w) =>
+      const globPromises = workspaces!.map((w) =>
         globber.glob(w, 'package.json'),
       )
       const globbed = await Promise.all(globPromises)
@@ -187,7 +185,11 @@ function buildSyncer() {
     glob: jest.fn(async (pattern, _filename) => {
       switch (pattern) {
         case 'packages/*':
-          return ['packages/package-1/', 'packages/package-2/']
+          return [
+            'packages/package-1/',
+            'packages/package-2/',
+            'packages/package-3/',
+          ]
         default:
           return []
       }
@@ -254,13 +256,19 @@ function buildSyncer() {
   }
 }
 
+type WritePackageFileMock = jest.Mock<
+  Promise<void>,
+  [filePath: string, fileContents: IPackageFile],
+  never
+>
+
 describe('type syncer', () => {
   it('adds new packages to package.json', async () => {
     const { syncer, packageService } = buildSyncer()
     const result = await syncer.sync('package.json', {})
     const writtenPackage = (
-      packageService.writePackageFile as jest.Mock<any>
-    ).mock.calls.find((c) => c[0] === 'package.json')[1] as IPackageFile
+      packageService.writePackageFile as WritePackageFileMock
+    ).mock.calls.find((c) => c[0] === 'package.json')![1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package1': '~1.0.0',
       '@types/package3': '~1.0.0',
@@ -274,7 +282,7 @@ describe('type syncer', () => {
       package5: '^1.0.0',
     })
 
-    expect(result.syncedFiles).toHaveLength(3)
+    expect(result.syncedFiles).toHaveLength(4)
 
     expect(result.syncedFiles[0].filePath).toEqual('package.json')
     expect(
@@ -302,16 +310,19 @@ describe('type syncer', () => {
     expect(
       result.syncedFiles[2].newTypings.map((x) => x.typingsName).sort(),
     ).toEqual(['package3'])
+    expect(result.syncedFiles[3].package.devDependencies).toStrictEqual(
+      undefined,
+    )
   })
 
   it('ignores deps when asked to', async () => {
     const { syncer, packageService } = buildSyncer()
     await syncer.sync('package-ignore-dev.json', {})
     const writtenPackage = (
-      packageService.writePackageFile as jest.Mock<any>
+      packageService.writePackageFile as WritePackageFileMock
     ).mock.calls.find(
       (c) => c[0] === 'package-ignore-dev.json',
-    )[1] as IPackageFile
+    )![1] as IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package1': '~1.0.0',
       '@types/package3': '~1.0.0',
@@ -332,10 +343,11 @@ describe('type syncer', () => {
     const { syncer, packageService } = buildSyncer()
     await syncer.sync('package-ignore-package1.json', {})
     const writtenPackage = (
-      packageService.writePackageFile as jest.Mock<any>
+      packageService.writePackageFile as WritePackageFileMock
     ).mock.calls.find(
       (c) => c[0] === 'package-ignore-package1.json',
-    )[1] as IPackageFile
+    )![1] as IPackageFile
+
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package3': '~1.0.0',
       '@types/package4': '^1.0.0',
@@ -353,7 +365,7 @@ describe('type syncer', () => {
     const { syncer, packageService } = buildSyncer()
     await syncer.sync('package.json', { dry: true })
     expect(
-      packageService.writePackageFile as jest.Mock<any>,
+      packageService.writePackageFile as WritePackageFileMock,
     ).not.toHaveBeenCalled()
   })
 

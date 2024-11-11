@@ -65,7 +65,14 @@ export function createTypeSyncer(
 
     const syncedFiles: Array<ISyncedFile> = await Promise.all([
       syncFile(filePath, file, syncOpts, dryRun),
-      ...subManifests.map((p) => syncFile(p, null, syncOpts, dryRun)),
+      ...subManifests.map(async (p) =>
+        syncFile(
+          p,
+          await packageJSONService.readPackageFile(p),
+          syncOpts,
+          dryRun,
+        ),
+      ),
     ])
 
     return {
@@ -109,17 +116,17 @@ export function createTypeSyncer(
    */
   async function syncFile(
     filePath: string,
-    file: IPackageFile | null,
+    file: IPackageFile,
     opts: ISyncOptions,
     dryRun: boolean,
   ): Promise<ISyncedFile> {
     const { ignoreDeps, ignorePackages } = opts
 
-    const packageFile =
-      file ?? (await packageJSONService.readPackageFile(filePath))
     const allLocalPackages = Object.values(IDependencySection)
       .map((dep) => {
-        const section = getDependenciesBySection(packageFile, dep)
+        const section = getDependenciesBySection(file, dep)
+        if (!section) return []
+
         const ignoredSection = ignoreDeps?.includes(dep)
         return getPackagesFromSection(section, ignoredSection, ignorePackages)
       })
@@ -179,21 +186,24 @@ export function createTypeSyncer(
         }
       }),
     ).then(mergeObjects)
-    const devDeps = packageFile.devDependencies
+    const devDeps = file.devDependencies
     if (!dryRun) {
-      await packageJSONService.writePackageFile(filePath, {
-        ...packageFile,
-        devDependencies: orderObject({
+      const newPackageFile: IPackageFile = { ...file }
+
+      if (Object.keys(devDepsToAdd).length > 0) {
+        newPackageFile.devDependencies = orderObject({
           ...devDepsToAdd,
           ...devDeps,
-        }),
-      } as IPackageFile)
+        })
+      }
+
+      await packageJSONService.writePackageFile(filePath, newPackageFile)
     }
 
     return {
       filePath,
       newTypings: used,
-      package: packageFile,
+      package: file,
     }
   }
 }
@@ -298,7 +308,7 @@ function getPackagesFromSection(
 function getDependenciesBySection(
   file: IPackageFile,
   section: IDependencySection,
-): IDependenciesSection {
+): IDependenciesSection | undefined {
   const dependenciesSection = (() => {
     switch (section) {
       case IDependencySection.deps:
@@ -311,5 +321,5 @@ function getDependenciesBySection(
         return file.peerDependencies
     }
   })()
-  return dependenciesSection ?? {}
+  return dependenciesSection
 }

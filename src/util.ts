@@ -35,11 +35,11 @@ export function filterMap<T, R>(
  *
  * @param source
  */
-export function shrinkObject<T extends object>(source: T): Required<T> {
-  const object: any = {}
+export function shrinkObject<T extends object>(source: T): Partial<T> {
+  const object: Partial<T> = {}
 
   for (const key in source) {
-    if (typeof source[key] !== 'undefined') {
+    if (source[key] !== undefined) {
       object[key] = source[key]
     }
   }
