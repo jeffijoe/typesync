@@ -18,6 +18,7 @@ jobs:
         version:
           - 18
           - 20
+          - 22
           - current
     steps:
       - name: Checkout
