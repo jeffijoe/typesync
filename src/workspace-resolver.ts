@@ -20,6 +20,7 @@ export interface IWorkspaceResolverService {
    * Note that this returns a list of directories, not paths to the manifests themselves.
    */
   getWorkspaces(
+    this: void,
     packageJson: IPackageFile,
     root: string,
     globber: IGlobber,

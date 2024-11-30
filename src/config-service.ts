@@ -15,6 +15,7 @@ export interface IConfigService {
    * Get typesync config.
    */
   readConfig(
+    this: void,
     filePath: string,
     flags: ICLIArguments['flags'],
   ): Promise<ISyncOptions>

@@ -11,7 +11,7 @@ export interface IGlobber {
    *
    * @param root
    */
-  glob(root: string, filename: string): Promise<Array<string>>
+  glob(this: void, root: string, filename: string): Promise<Array<string>>
 }
 
 /**
