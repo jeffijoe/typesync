@@ -23,7 +23,7 @@ describe('package json file service', () => {
 
   describe('writePackageFile', () => {
     it('writes the file to JSON', async ({ expect }) => {
-      const file = await _writeFixture()
+      const file = await writeFixture()
       const data = {
         name: 'fony-package',
         dependencies: {
@@ -39,8 +39,8 @@ describe('package json file service', () => {
 
     it('preserves trailing newline when writing', async ({ expect }) => {
       const [noNewline, withNewline] = await Promise.all([
-        _writeFixture(false),
-        _writeFixture(true),
+        writeFixture(false),
+        writeFixture(true),
       ])
       const data = {
         name: 'fony-package',
@@ -75,7 +75,7 @@ describe('package json file service', () => {
   })
 })
 
-async function _writeFixture(withTrailingNewline = false): Promise<string> {
+async function writeFixture(withTrailingNewline = false): Promise<string> {
   const file = path.join(os.tmpdir(), `package-${Math.random()}.json`)
   await fsp.writeFile(
     file,
