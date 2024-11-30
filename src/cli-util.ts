@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import ora from 'ora'
+import { oraPromise } from 'ora'
 import type { ICLIArguments } from './types'
 
 /**
@@ -37,12 +37,9 @@ export async function spinWhile<T>(
   text: string,
   fn: () => Promise<T>,
 ): Promise<T> {
-  const spinner = ora(' ' + chalk.gray(text)).start()
-  try {
-    return await fn()
-  } finally {
-    spinner.stop()
-  }
+  return await oraPromise(fn(), {
+    text: ` ${chalk.gray(text)}`,
+  })
 }
 
 /**
