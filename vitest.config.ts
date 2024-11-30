@@ -21,6 +21,9 @@ export default defineConfig({
         tests: true,
       },
     },
+    expect: {
+      requireAssertions: true,
+    },
     mockReset: true,
   },
 })

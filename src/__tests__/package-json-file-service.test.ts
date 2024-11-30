@@ -65,10 +65,12 @@ describe('package json file service', () => {
       await cleanup(noNewline, withNewline)
     })
 
-    it('does not fail when writing to an empty file', async () => {
+    it('does not fail when writing to an empty file', async ({ expect }) => {
       const file = path.join(os.tmpdir(), `package-${Math.random()}.json`)
       await fsp.writeFile(file, '')
-      await subject.writePackageFile(file, { name: 'test' })
+      await expect(
+        subject.writePackageFile(file, { name: 'test' }),
+      ).resolves.toBe(undefined)
     })
   })
 })
