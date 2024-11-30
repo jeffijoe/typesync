@@ -5,14 +5,7 @@ export default defineConfig({
     coverage: {
       enabled: true,
       provider: 'v8',
-      include: [
-        'src/**',
-        '!src/cli-util.ts',
-        '!src/index.ts',
-        '!src/cli.ts',
-        '!src/fakes.ts',
-        '!src/types.ts',
-      ],
+      include: ['src/**', '!src/cli-util.ts', '!src/index.ts', '!src/cli.ts'],
     },
     sequence: {
       concurrent: true,
