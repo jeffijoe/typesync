@@ -21,7 +21,7 @@
   },
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest",
+    "test:watch": "vitest --ui",
     "lint": "eslint --fix && tsc && npm run format",
     "format": "prettier --write 'src/**/*.ts'",
     "lint:watch": "nodemon --exec npm run lint -e ts,js",
