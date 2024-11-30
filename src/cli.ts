@@ -14,6 +14,7 @@ import type {
 } from './types'
 import { createWorkspaceResolverService } from './workspace-resolver'
 import * as fsUtils from './fs-utils'
+import packageJson from '../package.json' with { type: 'json' }
 
 /**
  * Starts the TypeSync CLI.
@@ -52,7 +53,7 @@ async function run(syncer: ITypeSyncer) {
     return
   }
 
-  C.log(chalk`TypeSync v{white ${require('../package.json').version}}`)
+  C.log(chalk`TypeSync v{white ${packageJson.version}}`)
   if (flags.dry) {
     C.log('—— DRY RUN — will not modify file ——')
   }

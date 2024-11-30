@@ -40,11 +40,6 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
-      // We use `require` for loading the `package.json` file.
-      '@typescript-eslint/no-require-imports': [
-        'error',
-        { allow: ['/package\\.json$'] },
-      ],
       // We prefer generic arrays.
       '@typescript-eslint/array-type': ['error', { default: 'generic' }],
       // We should ignore unused vars with underscores.
