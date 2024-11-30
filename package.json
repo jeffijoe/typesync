@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Install missing TypeScript typings for your dependencies.",
   "engines": {
-    "node": "^18.14.0 || >=20.0.0"
+    "node": "^18.18.0 || ^20.9.0 || >=22.0.0"
   },
   "files": [
     "dist",
