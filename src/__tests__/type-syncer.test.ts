@@ -139,7 +139,7 @@ function buildSyncer() {
   }
 
   const packageService: IPackageJSONService = {
-    readPackageFile: vi.fn(async (filepath: string) => {
+    readPackageFile: async (filepath: string) => {
       switch (filepath) {
         case 'package.json':
         case 'package-ignore-dev.json':
@@ -156,41 +156,39 @@ function buildSyncer() {
         default:
           throw new Error(`Who?! ${filepath}`)
       }
-    }),
+    },
     writePackageFile: vi.fn(() => Promise.resolve()),
   }
 
   const workspaceResolverService: IWorkspaceResolverService = {
-    getWorkspaces: vi.fn(
-      async (
-        _packageJson: IPackageFile,
-        root: string,
-        globber: IGlobber,
-        _ignored: IWorkspacesArray,
-      ) => {
-        let workspaces: IWorkspacesArray | undefined
+    getWorkspaces: async (
+      _packageJson: IPackageFile,
+      root: string,
+      globber: IGlobber,
+      _ignored: IWorkspacesArray,
+    ) => {
+      let workspaces: IWorkspacesArray | undefined
 
-        switch (root) {
-          case '.': {
-            workspaces = rootPackageFile.workspaces
-            break
-          }
-          default:
-            throw new Error('What?!')
+      switch (root) {
+        case '.': {
+          workspaces = rootPackageFile.workspaces
+          break
         }
+        default:
+          throw new Error('What?!')
+      }
 
-        const globPromises = workspaces!.map((w) =>
-          globber.glob(w, 'package.json'),
-        )
-        const globbed = await Promise.all(globPromises)
+      const globPromises = workspaces!.map((w) =>
+        globber.glob(w, 'package.json'),
+      )
+      const globbed = await Promise.all(globPromises)
 
-        return globbed.flat()
-      },
-    ),
+      return globbed.flat()
+    },
   }
 
   const globber: IGlobber = {
-    glob: vi.fn(async (pattern, _filename) => {
+    glob: async (pattern, _filename) => {
       switch (pattern) {
         case 'packages/*':
           return [
@@ -201,11 +199,11 @@ function buildSyncer() {
         default:
           return []
       }
-    }),
+    },
   }
 
   const packageSource: IPackageSource = {
-    fetch: vi.fn(async (name) => {
+    fetch: async (name) => {
       const found = descriptors.find(
         (t) => t.codePackageName === name || t.typesPackageName === name,
       )
@@ -230,11 +228,11 @@ function buildSyncer() {
         ],
       }
       return info
-    }),
+    },
   }
 
   const configService: IConfigService = {
-    readConfig: vi.fn(async (filePath: string) => {
+    readConfig: async (filePath: string) => {
       switch (filePath) {
         case 'package.json':
           return {}
@@ -246,7 +244,7 @@ function buildSyncer() {
         default:
           return {}
       }
-    }),
+    },
   }
 
   return {
