@@ -21,5 +21,6 @@ export default defineConfig({
         tests: true,
       },
     },
+    mockReset: true,
   },
 })
