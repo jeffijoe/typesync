@@ -6,7 +6,7 @@ import { ensureWorkspacesArray, uniq } from './util'
 import type { IPackageFile } from './types'
 
 /**
- * Service for fetching monorepo workspaces in a standardized format in package-manager-agnostic way.
+ * Service for fetching monorepo workspaces in a standardized format agnostic of the package manager used.
  * It is used to allow syncing all types in a workspace when run from the root of a monorepo.
  */
 export interface IWorkspaceResolverService {
