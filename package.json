@@ -56,11 +56,11 @@
     "chalk": "^4.1.2",
     "cosmiconfig": "^9.0.0",
     "detect-indent": "^6.0.0",
-    "glob": "^10.4.2",
     "js-yaml": "^4.1.0",
     "npm-registry-fetch": "^17.1.0",
     "ora": "^5.1.0",
-    "semver": "^7.6.2"
+    "semver": "^7.6.2",
+    "tinyglobby": "^0.2.10"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",

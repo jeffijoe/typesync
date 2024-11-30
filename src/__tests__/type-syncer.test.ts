@@ -181,7 +181,7 @@ function buildSyncer() {
       }
 
       const globPromises = workspaces!.map((w) =>
-        globber.glob(w, 'package.json'),
+        globber.glob(w, ['package.json']),
       )
       const globbed = await Promise.all(globPromises)
 

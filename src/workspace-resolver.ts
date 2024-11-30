@@ -2,7 +2,7 @@ import * as path from 'node:path'
 import yaml from 'js-yaml'
 import type * as fsUtils from './fs-utils'
 import type { IGlobber } from './globber'
-import { ensureWorkspacesArray, uniq } from './util'
+import { ensureWorkspacesArray } from './util'
 import type { IPackageFile } from './types'
 
 /**
@@ -103,32 +103,15 @@ export function createWorkspaceResolverService({
 }): IWorkspaceResolverService {
   return {
     getWorkspaces: async (packageJson, root, globber, ignored) => {
-      const [manifests, ignoredWorkspaces] = await Promise.all([
-        (async () => {
-          const workspaces = await getWorkspaces(packageJson, root)
-          const workspacesArray = ensureWorkspacesArray(workspaces)
-          const globbedArrays = await Promise.all(
-            workspacesArray.map(
-              async (workspace) => await globber.glob(root, workspace),
-            ),
-          )
-
-          return uniq(globbedArrays.flat())
-        })(),
-        (async () => {
-          const ignoredWorkspacesArrays = await Promise.all(
-            ignored.map(
-              async (ignoredWorkspace) =>
-                await globber.glob(root, ignoredWorkspace),
-            ),
-          )
-
-          return uniq(ignoredWorkspacesArrays.flat())
-        })(),
+      const [workspaces, ignoredWorkspaces] = await Promise.all([
+        getWorkspaces(packageJson, root),
+        globber.glob(root, ignored),
       ])
 
-      return manifests.filter(
-        (manifest) => !ignoredWorkspaces.includes(manifest),
+      return await globber.glob(
+        root,
+        ensureWorkspacesArray(workspaces),
+        ignoredWorkspaces,
       )
     },
   }

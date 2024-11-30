@@ -1,4 +1,4 @@
-import { glob } from 'glob'
+import { glob } from 'tinyglobby'
 import { uniq } from './util'
 
 /**
@@ -6,11 +6,16 @@ import { uniq } from './util'
  */
 export interface IGlobber {
   /**
-   * Globs for a filename.
+   * Globs for filenames.
    *
    * @param root
    */
-  glob(this: void, root: string, filename: string): Promise<Array<string>>
+  glob(
+    this: void,
+    root: string,
+    filenames: Array<string>,
+    ignore?: Array<string>,
+  ): Promise<Array<string>>
 }
 
 /**
@@ -18,10 +23,10 @@ export interface IGlobber {
  */
 export function createGlobber(): IGlobber {
   return {
-    async glob(root: string, filename): Promise<Array<string>> {
-      const source = await glob(filename, {
-        root,
-        ignore: '**/node_modules/**',
+    async glob(root, filenames, ignore = []): Promise<Array<string>> {
+      const source = await glob(filenames, {
+        cwd: root,
+        ignore: ['**/node_modules/**', ...ignore],
       })
 
       return uniq(source)

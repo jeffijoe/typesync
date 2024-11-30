@@ -7,20 +7,27 @@ import {
   type PnpmWorkspacesConfig,
   type YarnWorkspacesConfig,
 } from '../workspace-resolver'
-import type { readFileContents } from '../fs-utils'
 
 describe('workspace resolver', () => {
   const globber: IGlobber = {
-    glob: async (_root, filename) => {
-      if (filename === 'packages/*') {
-        return ['packages/package1', 'packages/package2', 'packages/package3']
-      }
+    glob: async (_root, filenames, ignore = []) => {
+      return filenames
+        .flatMap((filename) => {
+          if (filename === 'packages/*') {
+            return [
+              'packages/package1',
+              'packages/package2',
+              'packages/package3',
+            ]
+          }
 
-      if (filename === 'packages/package3') {
-        return ['packages/package3']
-      }
+          if (filename === 'packages/package3') {
+            return ['packages/package3']
+          }
 
-      return []
+          return []
+        })
+        .filter((filename) => !ignore.includes(filename))
     },
   }
 
