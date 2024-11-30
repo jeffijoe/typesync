@@ -195,9 +195,9 @@ export function createTypeSyncer(
           ...devDepsToAdd,
           ...devDeps,
         })
-      }
 
-      await packageJSONService.writePackageFile(filePath, newPackageFile)
+        await packageJSONService.writePackageFile(filePath, newPackageFile)
+      }
     }
 
     return {

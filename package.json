@@ -1,30 +1,35 @@
 {
   "name": "typesync",
   "version": "0.13.4",
+  "type": "module",
   "description": "Install missing TypeScript typings for your dependencies.",
   "engines": {
     "node": ">=16.0.0"
   },
   "files": [
-    "lib",
+    "dist",
     "bin"
   ],
   "bin": {
     "typesync": "./bin/typesync"
   },
-  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "clean": "rimraf lib",
-    "test": "jest",
-    "lint": "eslint --fix 'src/**/*.ts' && tsc --noEmit && npm run format",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint --fix && tsc && npm run format",
     "format": "prettier --write 'src/**/*.ts'",
     "lint:watch": "nodemon --exec npm run lint -e ts,js",
-    "cover": "jest --coverage",
-    "build": "npm run clean && tsc -p tsconfig.build.json --sourceMap --declaration",
+    "build": "tsdown",
     "run-cli": "npm run build && node bin/typesync",
     "run-cli:dry": "npm run run-cli -- --dry",
     "precommit": "lint-staged",
-    "do:publish": "npm run lint && npm run cover && npm run build && npm publish",
+    "do:publish": "npm run lint && npm run test && npm run build && npm publish",
     "release:patch": "npm version patch && npm run do:publish && git push --follow-tags",
     "release:minor": "npm version minor && npm run do:publish && git push --follow-tags",
     "release:prerelease": "npm version prerelease && npm run do:publish && git push --follow-tags"
@@ -58,47 +63,22 @@
     "semver": "^7.6.2"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
+    "@eslint/js": "^9.16.0",
     "@types/js-yaml": "~4.0.9 || ~4.1.0",
-    "@types/node": "~16.18.102",
+    "@types/node": "^18.19.67",
     "@types/npm-registry-fetch": "^8.0.7",
     "@types/semver": "^7.5.8",
-    "@typescript-eslint/eslint-plugin": "^7.15.0",
-    "@typescript-eslint/parser": "^7.15.0",
-    "eslint": "^8.51.0",
-    "eslint-config-prettier": "^9.0.0",
-    "jest": "^29.7.0",
+    "@vitest/coverage-v8": "^2.1.6",
+    "@vitest/ui": "^2.1.6",
+    "eslint": "^9.16.0",
+    "globals": "^15.12.0",
     "nodemon": "^3.1.4",
+    "oxc-transform": "^0.38.0",
     "prettier": "^3.3.2",
-    "rimraf": "^5.0.7",
-    "ts-jest": "^29.1.5",
-    "typescript": "^5.5.3"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "collectCoverageFrom": [
-      "src/**",
-      "!src/cli-util.ts",
-      "!src/index.ts",
-      "!src/cli.ts",
-      "!src/fakes.ts",
-      "!src/types.ts"
-    ],
-    "coveragePathIgnorePatterns": [
-      "/node_modules/"
-    ],
-    "transform": {
-      ".(ts|tsx)": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*\\.(test|spec))\\.(ts|tsx|js)$",
-    "testPathIgnorePatterns": [
-      "/lib/"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ]
+    "tsdown": "^0.3.1",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.16.0",
+    "vitest": "^2.1.6"
   },
   "packageManager": "npm@8.19.4"
 }

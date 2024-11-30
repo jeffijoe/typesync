@@ -18,7 +18,7 @@ import * as fsUtils from './fs-utils'
 /**
  * Starts the TypeSync CLI.
  */
-export async function startCli() {
+export async function startCli(): Promise<void> {
   try {
     // Awilix is a dependency injection container.
     const container = createContainer({

@@ -1,6 +1,6 @@
 import { readFile, stat } from 'node:fs/promises'
 
-export async function readFileContents(filePath: string) {
+export async function readFileContents(filePath: string): Promise<string> {
   await assertFile(filePath)
   return readFile(filePath, 'utf-8')
 }
@@ -16,11 +16,10 @@ async function existsAsync(filePath: string): Promise<boolean> {
     await stat(filePath)
     return true
   } catch (err) {
-    /* istanbul ignore else */
+    /* v8 ignore next 5 */
     if ((err as { code: string }).code === 'ENOENT') {
       return false
     }
-    /* istanbul ignore next */
     throw err
   }
 }

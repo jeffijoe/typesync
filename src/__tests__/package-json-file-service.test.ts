@@ -2,17 +2,18 @@ import { createPackageJSONFileService } from '../package-json-file-service'
 import * as os from 'node:os'
 import * as path from 'node:path'
 import * as fsp from 'node:fs/promises'
+import { describe, it } from 'vitest'
 
 describe('package json file service', () => {
   const subject = createPackageJSONFileService()
 
   describe('readPackageFile', () => {
-    it('reads the package JSON file from the cwd', async () => {
+    it('reads the package JSON file from the cwd', async ({ expect }) => {
       const result = await subject.readPackageFile('package.json')
       expect(result.name).toBe('typesync')
     })
 
-    it('throws when file does not exist', async () => {
+    it('throws when file does not exist', async ({ expect }) => {
       expect.assertions(1)
       await subject
         .readPackageFile('nonexistent.json')
@@ -21,7 +22,7 @@ describe('package json file service', () => {
   })
 
   describe('writePackageFile', () => {
-    it('writes the file to JSON', async () => {
+    it('writes the file to JSON', async ({ expect }) => {
       const file = await _writeFixture()
       const data = {
         name: 'fony-package',
@@ -36,7 +37,7 @@ describe('package json file service', () => {
       await cleanup(file)
     })
 
-    it('preserves trailing newline when writing', async () => {
+    it('preserves trailing newline when writing', async ({ expect }) => {
       const [noNewline, withNewline] = await Promise.all([
         _writeFixture(false),
         _writeFixture(true),

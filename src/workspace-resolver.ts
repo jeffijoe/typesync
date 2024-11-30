@@ -1,7 +1,7 @@
 import * as path from 'node:path'
 import yaml from 'js-yaml'
 import type * as fsUtils from './fs-utils'
-import { IGlobber } from './globber'
+import type { IGlobber } from './globber'
 import { ensureWorkspacesArray, uniq } from './util'
 import type { IPackageFile } from './types'
 
@@ -13,7 +13,7 @@ export interface IWorkspaceResolverService {
   /**
    * Reads, parses, and normalizes a workspaces configuration from the following files, in this order:
    * - `package.json` `workspaces` field, as an array of globs.
-   * - `package.json` `workspaces` field, as an object with a `projects` field, which is an array of globs.
+   * - `package.json` `workspaces` field, as an object with a `packages` field, which is an array of globs.
    * - `pnpm-workspace.yaml` `packages` field, as an array of globs.
    *
    * Path is relative to the current working directory.
@@ -40,12 +40,12 @@ export type IWorkspacesArray = Array<string>
 /**
  * @example
  * ```yaml
- * projects:
+ * packages:
  * - 'packages/*'
  * ```
  */
 export interface IWorkspacesObject {
-  packages: IWorkspacesArray
+  packages?: IWorkspacesArray
 }
 
 /**
@@ -92,6 +92,7 @@ export type BunWorkspacesConfig = IWorkspacesArray
 export type IWorkspacesSection =
   | NpmWorkspacesConfig
   | YarnWorkspacesConfig
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents -- We want to explicitly enumerate each package manager's options.
   | BunWorkspacesConfig
 
 export function createWorkspaceResolverService({

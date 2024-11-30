@@ -2,10 +2,7 @@ ignorePackages:
   # These packages are dev tools and we don't need their typings.
   - nodemon
   - prettier
-  - rimraf
-  - eslint
   # Can't upgrade these libraries yet since they require ESM.
   - chalk
   - detect-indent
   - ora
-  - eslint-config-prettier

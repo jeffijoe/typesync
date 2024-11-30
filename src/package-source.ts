@@ -36,9 +36,10 @@ export function createPackageSource(): IPackageSource {
       const response = await fetch(encodeURI(name)).catch((err) => {
         if (err.statusCode === 404) {
           return null
+          /* v8 ignore next */
         }
 
-        /* istanbul ignore next */
+        /* v8 ignore next */
         throw err
       })
 

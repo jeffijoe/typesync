@@ -1,7 +1,7 @@
 import * as fsp from 'node:fs/promises'
 import detectIndent from 'detect-indent'
 import { readFileContents } from './fs-utils'
-import { IPackageFile } from './types'
+import type { IPackageFile } from './types'
 
 /**
  * File service.
@@ -10,11 +10,15 @@ export interface IPackageJSONService {
   /**
    * Reads and parses JSON from the specified file. Path is relative to the current working directory.
    */
-  readPackageFile(filePath: string): Promise<IPackageFile>
+  readPackageFile(this: void, filePath: string): Promise<IPackageFile>
   /**
    * Writes the JSON to the specified file.
    */
-  writePackageFile(filePath: string, fileContents: IPackageFile): Promise<void>
+  writePackageFile(
+    this: void,
+    filePath: string,
+    fileContents: IPackageFile,
+  ): Promise<void>
 }
 
 export function createPackageJSONFileService(): IPackageJSONService {
@@ -30,7 +34,7 @@ export function createPackageJSONFileService(): IPackageJSONService {
       const data = JSON.stringify(
         fileContent,
         null,
-        indent /* istanbul ignore next */ || '  ',
+        indent /* v8 ignore next */ || '  ',
       )
       await fsp.writeFile(filePath, data + (trailingNewline ? '\n' : ''))
     },
