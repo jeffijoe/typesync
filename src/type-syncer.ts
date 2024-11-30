@@ -15,14 +15,7 @@ import {
   type ISyncedFile,
   type ITypeSyncer,
 } from './types'
-import {
-  filterMap,
-  memoizeAsync,
-  mergeObjects,
-  orderObject,
-  typed,
-  uniq,
-} from './util'
+import { memoizeAsync, mergeObjects, orderObject, typed, uniq } from './util'
 import { getClosestMatchingVersion } from './versioning'
 import type {
   IWorkspaceResolverService,
@@ -218,26 +211,27 @@ function getPotentiallyUntypedPackages(
   allPackageNames: Array<string>,
 ): Array<IPackageTypingDescriptor> {
   const existingTypings = allPackageNames.filter((x) => x.startsWith('@types/'))
-  return filterMap(allPackageNames, (p) => {
+
+  return allPackageNames.flatMap((p) => {
     // Ignore typings packages themselves.
     if (p.startsWith('@types/')) {
-      return false
+      return []
     }
 
     const typingsName = getTypingsName(p)
     const fullTypingsPackage = typed(p)
-    const alreadyHasTyping = existingTypings.some(
-      (t) => t === fullTypingsPackage,
-    )
+    const alreadyHasTyping = existingTypings.includes(fullTypingsPackage)
     if (alreadyHasTyping) {
-      return false
+      return []
     }
 
-    return {
-      typingsName: typingsName,
-      typesPackageName: fullTypingsPackage,
-      codePackageName: p,
-    }
+    return [
+      {
+        typingsName: typingsName,
+        typesPackageName: fullTypingsPackage,
+        codePackageName: p,
+      },
+    ]
   })
 }
 
@@ -249,11 +243,10 @@ function getPotentiallyUntypedPackages(
  */
 function getTypingsName(packageName: string) {
   const scopeInfo = getPackageScope(packageName)
-  let typingsName = packageName
-  if (scopeInfo && scopeInfo[0] !== 'types') {
-    typingsName = `${scopeInfo[0]}__${scopeInfo[1]}`
-  }
-  return typingsName
+
+  return scopeInfo && scopeInfo[0] !== 'types'
+    ? `${scopeInfo[0]}__${scopeInfo[1]}`
+    : packageName
 }
 
 /**
@@ -283,7 +276,7 @@ function getPackagesFromSection(
   ignoredSection?: boolean,
   ignorePackages?: Array<string>,
 ): Array<IPackageVersion> {
-  return filterMap(Object.keys(section), (name) => {
+  return Object.keys(section).flatMap((name) => {
     const isTyping = name.startsWith('@types/')
 
     // Never ignore `@types` packages.
@@ -291,11 +284,11 @@ function getPackagesFromSection(
       // If it's not a `@types` package, check whether the section or package is ignored.
       // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- We want to check for false as well.
       if (ignoredSection || ignorePackages?.includes(name)) {
-        return false
+        return []
       }
     }
 
-    return { name, version: section[name] }
+    return [{ name, version: section[name] }]
   })
 }
 

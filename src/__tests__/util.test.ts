@@ -1,7 +1,6 @@
 import { describe, it } from 'vitest'
 import {
   ensureWorkspacesArray,
-  filterMap,
   memoizeAsync,
   mergeObjects,
   orderObject,
@@ -15,14 +14,6 @@ describe('util', () => {
   describe('uniq', () => {
     it('returns unique items', ({ expect }) => {
       expect(uniq([1, 2, 2, 1, 3, 4, 3, 2, 5])).toEqual([1, 2, 3, 4, 5])
-    })
-  })
-
-  describe('filterMap', () => {
-    it('filters out false values', ({ expect }) => {
-      expect(
-        filterMap([1, 2, 3, 4], (item) => (item % 2 === 0 ? false : item + 1)),
-      ).toEqual([2, 4])
     })
   })
 

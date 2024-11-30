@@ -10,27 +10,6 @@ export function uniq<T>(source: Array<T>): Array<T> {
 }
 
 /**
- * Does a `map` and a `filter` in one pass.
- *
- * @param source The source to filter and map
- * @param iteratee The iteratee.
- */
-export function filterMap<T, R>(
-  source: Array<T>,
-  iteratee: (item: T, index: number) => R | false,
-): Array<R> {
-  const result: Array<R> = []
-  let index = 0
-  for (const item of source) {
-    const mapped = iteratee(item, index++)
-    if (mapped === false) continue
-    result.push(mapped)
-  }
-
-  return result
-}
-
-/**
  * Remove blank attributes in a object.
  *
  * @param source
