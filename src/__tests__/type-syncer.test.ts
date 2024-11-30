@@ -157,7 +157,9 @@ function buildSyncer() {
           throw new Error(`Who?! ${filepath}`)
       }
     },
-    writePackageFile: vi.fn(() => Promise.resolve()),
+    writePackageFile: vi.fn<IPackageJSONService['writePackageFile']>(() =>
+      Promise.resolve(),
+    ),
   }
 
   const workspaceResolverService: IWorkspaceResolverService = {

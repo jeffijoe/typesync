@@ -7,6 +7,7 @@ import {
   type PnpmWorkspacesConfig,
   type YarnWorkspacesConfig,
 } from '../workspace-resolver'
+import type { readFileContents } from '../fs-utils'
 
 describe('workspace resolver', () => {
   const globber: IGlobber = {
