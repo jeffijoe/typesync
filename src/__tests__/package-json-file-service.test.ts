@@ -50,14 +50,17 @@ describe('package json file service', () => {
         },
       }
 
-      await Promise.all([
-        subject.writePackageFile(noNewline, data),
-        subject.writePackageFile(withNewline, data),
-      ])
-
       const [noNewlineContent, withNewlineContent] = await Promise.all([
-        fsp.readFile(noNewline).then((x) => x.toString()),
-        fsp.readFile(withNewline).then((x) => x.toString()),
+        (async () => {
+          await subject.writePackageFile(noNewline, data)
+          const x = await fsp.readFile(noNewline)
+          return x.toString()
+        })(),
+        (async () => {
+          await subject.writePackageFile(withNewline, data)
+          const x = await fsp.readFile(withNewline)
+          return x.toString()
+        })(),
       ])
 
       expect(noNewlineContent[noNewlineContent.length - 1]).not.toBe('\n')
