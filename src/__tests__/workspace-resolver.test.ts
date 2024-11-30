@@ -34,7 +34,7 @@ describe('workspace resolver', () => {
   describe('getWorkspaces', () => {
     describe('returns workspaces for all package managers', () => {
       const subject = createWorkspaceResolverService({
-        readFileContents: async (_filePath) => {
+        readFileContents: async () => {
           return JSON.stringify({
             packages: ['packages/*'],
           } satisfies PnpmWorkspacesConfig)
@@ -90,7 +90,7 @@ describe('workspace resolver', () => {
         expect,
       }) => {
         const subject = createWorkspaceResolverService({
-          readFileContents: async (_filePath) => {
+          readFileContents: async () => {
             throw new Error('Nothing here, move along.')
           },
         })
