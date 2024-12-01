@@ -27,6 +27,7 @@ export function createGlobber(): IGlobber {
       const source = await glob(filenames, {
         cwd: root,
         ignore: ['**/node_modules/**', ...ignore],
+        onlyDirectories: true,
       })
 
       return uniq(source)
