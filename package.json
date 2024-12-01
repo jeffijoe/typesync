@@ -26,6 +26,7 @@
     "format": "prettier --write 'src/**/*.ts'",
     "lint:watch": "nodemon --exec npm run lint -e ts,js",
     "build": "tsdown",
+    "build:watch": "tsdown --watch",
     "run-cli": "npm run build && node bin/typesync",
     "run-cli:dry": "npm run run-cli -- --dry",
     "precommit": "lint-staged",
