@@ -1,8 +1,8 @@
 import { createGlobber } from '../globber'
 import { test } from 'vitest'
 
-test('returns the current directory as a match', async ({ expect }) => {
-  const result = await createGlobber().glob(process.cwd(), ['package.json'])
+test('returns the source directory as a match', async ({ expect }) => {
+  const result = await createGlobber().glob(process.cwd(), ['src*/'])
   expect(result).toHaveLength(1)
-  expect(result[0]).toBe('package.json')
+  expect(result[0]).toBe('src/')
 })
