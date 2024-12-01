@@ -29,18 +29,10 @@
     "build:watch": "tsdown --watch",
     "run-cli": "npm run build && node bin/typesync",
     "run-cli:dry": "npm run run-cli -- --dry",
-    "precommit": "lint-staged",
     "do:publish": "npm run lint && npm run test && npm run build && npm publish",
     "release:patch": "npm version patch && npm run do:publish && git push --follow-tags",
     "release:minor": "npm version minor && npm run do:publish && git push --follow-tags",
     "release:prerelease": "npm version prerelease && npm run do:publish && git push --follow-tags"
-  },
-  "lint-staged": {
-    "*.ts": [
-      "eslint --fix",
-      "prettier --write",
-      "git add"
-    ]
   },
   "repository": {
     "type": "git",
