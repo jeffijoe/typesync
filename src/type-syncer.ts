@@ -58,13 +58,14 @@ export function createTypeSyncer(
 
     const syncedFiles: Array<ISyncedFile> = await Promise.all([
       syncFile(filePath, file, syncOpts, dryRun),
-      ...subManifests.map(async (p) =>
-        syncFile(
-          p,
-          await packageJSONService.readPackageFile(p),
-          syncOpts,
-          dryRun,
-        ),
+      ...subManifests.map(
+        async (p) =>
+          await syncFile(
+            p,
+            await packageJSONService.readPackageFile(p),
+            syncOpts,
+            dryRun,
+          ),
       ),
     ])
 
@@ -84,14 +85,17 @@ export function createTypeSyncer(
     globber: IGlobber,
     ignoredWorkspaces: IWorkspacesArray,
   ) {
+    const root = path.dirname(filePath)
     const file = await packageJSONService.readPackageFile(filePath)
     const subPackages = await workspaceResolverService.getWorkspaces(
       file,
-      path.dirname(filePath),
+      root,
       globber,
       ignoredWorkspaces,
     )
-    const subManifests = subPackages.map((p) => path.join(p, 'package.json'))
+    const subManifests = subPackages.map((p) =>
+      path.join(root, p, 'package.json'),
+    )
 
     return {
       file,

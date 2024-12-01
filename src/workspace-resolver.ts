@@ -131,7 +131,7 @@ export function createWorkspaceResolverService({
     root: string,
   ): Promise<IWorkspacesArray | undefined> {
     try {
-      const filePath = path.relative(root, 'pnpm-workspace.yaml')
+      const filePath = path.join(root, 'pnpm-workspace.yaml')
       const contents = await readFileContents(filePath)
       const pnpmWorkspaces = yaml.load(contents) as PnpmWorkspacesConfig
 
