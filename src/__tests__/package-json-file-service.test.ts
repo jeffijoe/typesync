@@ -14,10 +14,9 @@ describe('package json file service', () => {
     })
 
     it('throws when file does not exist', async ({ expect }) => {
-      expect.assertions(1)
-      await subject.readPackageFile('nonexistent.json').catch((err) => {
-        expect(err.message).toMatch(/exist/i)
-      })
+      await expect(subject.readPackageFile('nonexistent.json')).rejects.toThrow(
+        'nonexistent.json does not exist.',
+      )
     })
   })
 
