@@ -181,7 +181,7 @@ function buildSyncer() {
       }
 
       const globPromises = workspaces!.map((w) =>
-        globber.glob(w, ['package.json']),
+        globber.globDirs(w, ['package.json']),
       )
       const globbed = await Promise.all(globPromises)
 
@@ -190,7 +190,7 @@ function buildSyncer() {
   }
 
   const globber: IGlobber = {
-    glob: async (pattern, _filename) => {
+    globDirs: async (pattern, _filename) => {
       switch (pattern) {
         case 'packages/*':
           return [

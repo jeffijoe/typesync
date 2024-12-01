@@ -105,10 +105,10 @@ export function createWorkspaceResolverService({
     getWorkspaces: async (packageJson, root, globber, ignored) => {
       const [workspaces, ignoredWorkspaces] = await Promise.all([
         getWorkspaces(packageJson, root),
-        globber.glob(root, ignored),
+        globber.globDirs(root, ignored),
       ])
 
-      return await globber.glob(
+      return await globber.globDirs(
         root,
         ensureWorkspacesArray(workspaces),
         ignoredWorkspaces,

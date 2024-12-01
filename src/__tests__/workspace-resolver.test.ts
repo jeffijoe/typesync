@@ -10,10 +10,10 @@ import {
 
 describe('workspace resolver', () => {
   const globber: IGlobber = {
-    glob: async (_root, filenames, ignore = []) => {
-      return filenames
-        .flatMap((filename) => {
-          if (filename === 'packages/*') {
+    globDirs: async (_root, patterns, ignore = []) => {
+      return patterns
+        .flatMap((pattern) => {
+          if (pattern === 'packages/*') {
             return [
               'packages/package1',
               'packages/package2',
@@ -21,13 +21,13 @@ describe('workspace resolver', () => {
             ]
           }
 
-          if (filename === 'packages/package3') {
+          if (pattern === 'packages/package3') {
             return ['packages/package3']
           }
 
           return []
         })
-        .filter((filename) => !ignore.includes(filename))
+        .filter((folder) => !ignore.includes(folder))
     },
   }
 

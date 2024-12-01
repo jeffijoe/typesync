@@ -6,14 +6,14 @@ import { uniq } from './util'
  */
 export interface IGlobber {
   /**
-   * Globs for filenames.
+   * Globs for directory names.
    *
    * @param root
    */
-  glob(
+  globDirs(
     this: void,
     root: string,
-    filenames: Array<string>,
+    patterns: Array<string>,
     ignore?: Array<string>,
   ): Promise<Array<string>>
 }
@@ -23,8 +23,8 @@ export interface IGlobber {
  */
 export function createGlobber(): IGlobber {
   return {
-    async glob(root, filenames, ignore = []): Promise<Array<string>> {
-      const source = await glob(filenames, {
+    async globDirs(root, patterns, ignore = []): Promise<Array<string>> {
+      const source = await glob(patterns, {
         cwd: root,
         ignore: ['**/node_modules/**', ...ignore],
         onlyDirectories: true,
