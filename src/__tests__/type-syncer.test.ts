@@ -157,8 +157,8 @@ function buildSyncer() {
           throw new Error(`Who?! ${filepath}`)
       }
     },
-    writePackageFile: vi.fn<IPackageJSONService['writePackageFile']>(() =>
-      Promise.resolve(),
+    writePackageFile: vi.fn<IPackageJSONService['writePackageFile']>(
+      async () => {},
     ),
   }
 
@@ -180,8 +180,8 @@ function buildSyncer() {
           throw new Error('What?!')
       }
 
-      const globPromises = workspaces!.map((w) =>
-        globber.globDirs(w, ['package.json']),
+      const globPromises = workspaces!.map(
+        async (w) => await globber.globDirs(w, ['package.json']),
       )
       const globbed = await Promise.all(globPromises)
 

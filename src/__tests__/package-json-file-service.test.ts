@@ -15,9 +15,9 @@ describe('package json file service', () => {
 
     it('throws when file does not exist', async ({ expect }) => {
       expect.assertions(1)
-      await subject
-        .readPackageFile('nonexistent.json')
-        .catch((err) => expect(err.message).toMatch(/exist/i))
+      await subject.readPackageFile('nonexistent.json').catch((err) => {
+        expect(err.message).toMatch(/exist/i)
+      })
     })
   })
 
@@ -98,5 +98,9 @@ async function writeFixture(withTrailingNewline = false): Promise<string> {
 }
 
 async function cleanup(...files: Array<string>): Promise<void> {
-  await Promise.all(files.map((f) => fsp.unlink(f)))
+  await Promise.all(
+    files.map(async (f) => {
+      await fsp.unlink(f)
+    }),
+  )
 }

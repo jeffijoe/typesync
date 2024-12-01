@@ -103,11 +103,11 @@ export function memoizeAsync<U extends Array<W>, V, W>(
   return async function (...args: U): Promise<V> {
     const key = args[0]
     if (cache.has(key)) {
-      return cache.get(key)!
+      return await (cache.get(key)!)
     }
 
     const p = run(...args)
     cache.set(key, p)
-    return p
+    return await p
   }
 }

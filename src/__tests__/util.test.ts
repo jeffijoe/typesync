@@ -49,9 +49,7 @@ describe('util', () => {
     it('memoizes promises', async ({ expect }) => {
       let i = 0
 
-      const m = memoizeAsync((k: string) =>
-        Promise.resolve(k + (++i).toString()),
-      )
+      const m = memoizeAsync(async (k: string) => `${k}${++i}`)
       expect([await m('hello'), await m('hello')]).toEqual(['hello1', 'hello1'])
       expect([await m('goodbye'), await m('goodbye')]).toEqual([
         'goodbye2',
@@ -62,9 +60,9 @@ describe('util', () => {
     it('removes entry on fail', async ({ expect }) => {
       let i = 0
 
-      const m = memoizeAsync((k: string) =>
-        Promise.reject(new Error(k + (++i).toString())),
-      )
+      const m = memoizeAsync(async (k: string) => {
+        throw new Error(`${k}${++i}`)
+      })
       expect([
         await m('hello').catch((err) => err.message),
         await m('hello').catch((err) => err.message),

@@ -59,7 +59,7 @@ async function run(syncer: ITypeSyncer) {
   }
   const result = await C.spinWhile(
     `Syncing type definitions in ${chalk.cyan(filePath)}...`,
-    () => syncer.sync(filePath, flags),
+    async () => await syncer.sync(filePath, flags),
   )
 
   const syncedFilesOutput = result.syncedFiles

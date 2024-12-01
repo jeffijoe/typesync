@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 
 export async function readFileContents(filePath: string): Promise<string> {
   try {
-    return readFile(filePath, 'utf-8')
+    return await readFile(filePath, 'utf-8')
     /* v8 ignore next */
   } catch (err) {
     /* v8 ignore next 3 */

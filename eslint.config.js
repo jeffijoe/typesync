@@ -40,6 +40,12 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
+
+      '@typescript-eslint/return-await': ['error', 'always'],
+      '@typescript-eslint/promise-function-async': 'error',
+      '@typescript-eslint/no-confusing-void-expression': 'error',
+      '@typescript-eslint/switch-exhaustiveness-check': 'error',
+
       // We prefer generic arrays.
       '@typescript-eslint/array-type': ['error', { default: 'generic' }],
       // We should ignore unused vars with underscores.
@@ -66,6 +72,7 @@ export default tseslint.config(
     rules: {
       // In tests, sometimes we need to make things asynchronous.
       '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
     },
   },
 )
