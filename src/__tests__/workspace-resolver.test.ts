@@ -6,6 +6,7 @@ import {
   type NpmWorkspacesConfig,
   type PnpmWorkspacesConfig,
   type YarnWorkspacesConfig,
+  ensureWorkspacesArray,
 } from '../workspace-resolver'
 
 describe('workspace resolver', () => {
@@ -98,5 +99,24 @@ describe('workspace resolver', () => {
         expect(await subject.getWorkspaces({}, '/', globber, [])).toEqual([])
       })
     })
+  })
+})
+
+describe('ensureWorkspacesArray', () => {
+  it('handles bad cases', ({ expect }) => {
+    expect(ensureWorkspacesArray(null as any)).toEqual([])
+    expect(ensureWorkspacesArray({} as any)).toEqual([])
+    expect(ensureWorkspacesArray({ packages: {} } as any)).toEqual([])
+    expect(ensureWorkspacesArray({ packages: [1, 2, '3'] } as any)).toEqual([])
+    expect(ensureWorkspacesArray({ packages: ['lol'] } as any)).toEqual(['lol'])
+  })
+  it("handles Yarn's weird format", ({ expect }) => {
+    expect(ensureWorkspacesArray({ packages: [] })).toEqual([])
+  })
+  it('handles an array of globs', ({ expect }) => {
+    expect(ensureWorkspacesArray(['packages/*'])).toEqual(['packages/*'])
+  })
+  it('handles no workspaces', ({ expect }) => {
+    expect(ensureWorkspacesArray(undefined)).toEqual([])
   })
 })

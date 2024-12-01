@@ -1,6 +1,5 @@
 import { describe, it } from 'vitest'
 import {
-  ensureWorkspacesArray,
   memoizeAsync,
   mergeObjects,
   orderObject,
@@ -70,29 +69,6 @@ describe('util', () => {
         await m('hello').catch((err) => err.message),
         await m('hello').catch((err) => err.message),
       ]).toEqual(['hello1', 'hello2'])
-    })
-  })
-
-  describe('ensureWorkspacesArray', () => {
-    it('handles bad cases', ({ expect }) => {
-      expect(ensureWorkspacesArray(null as any)).toEqual([])
-      expect(ensureWorkspacesArray({} as any)).toEqual([])
-      expect(ensureWorkspacesArray({ packages: {} } as any)).toEqual([])
-      expect(ensureWorkspacesArray({ packages: [1, 2, '3'] } as any)).toEqual(
-        [],
-      )
-      expect(ensureWorkspacesArray({ packages: ['lol'] } as any)).toEqual([
-        'lol',
-      ])
-    })
-    it("handles Yarn's weird format", ({ expect }) => {
-      expect(ensureWorkspacesArray({ packages: [] })).toEqual([])
-    })
-    it('handles an array of globs', ({ expect }) => {
-      expect(ensureWorkspacesArray(['packages/*'])).toEqual(['packages/*'])
-    })
-    it('handles no workspaces', ({ expect }) => {
-      expect(ensureWorkspacesArray(undefined)).toEqual([])
     })
   })
 

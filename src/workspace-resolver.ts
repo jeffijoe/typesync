@@ -2,7 +2,6 @@ import * as path from 'node:path'
 import yaml from 'js-yaml'
 import type * as fsUtils from './fs-utils'
 import type { IGlobber } from './globber'
-import { ensureWorkspacesArray } from './util'
 import type { IPackageFile } from './types'
 
 /**
@@ -141,4 +140,27 @@ export function createWorkspaceResolverService({
       return undefined
     }
   }
+}
+
+/**
+ * Ensures that we have a valid workspaces array.
+ *
+ * @param data
+ */
+export function ensureWorkspacesArray(
+  data?: IWorkspacesSection,
+): IWorkspacesArray {
+  if (!data) {
+    return []
+  }
+
+  if (!Array.isArray(data)) {
+    return ensureWorkspacesArray(data.packages)
+  }
+
+  if (!data.every((s) => typeof s === 'string')) {
+    return []
+  }
+
+  return data
 }

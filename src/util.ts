@@ -1,5 +1,3 @@
-import type { IWorkspacesArray, IWorkspacesSection } from './workspace-resolver'
-
 /**
  * Returns unique items.
  *
@@ -112,27 +110,4 @@ export function memoizeAsync<U extends Array<W>, V, W>(
     cache.set(key, p)
     return p
   }
-}
-
-/**
- * Ensures that we have a valid workspaces array.
- *
- * @param data
- */
-export function ensureWorkspacesArray(
-  data?: IWorkspacesSection,
-): IWorkspacesArray {
-  if (!data) {
-    return []
-  }
-
-  if (!Array.isArray(data)) {
-    return ensureWorkspacesArray(data.packages)
-  }
-
-  if (!data.every((s) => typeof s === 'string')) {
-    return []
-  }
-
-  return data
 }
