@@ -22,9 +22,11 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest --ui",
-    "lint": "eslint --fix && tsc && npm run format",
+    "fix": "eslint --fix && npm run format",
+    "lint": "eslint && tsc && npm run format:check",
     "format": "prettier --write 'src/**/*.ts'",
-    "lint:watch": "nodemon --exec npm run lint -e ts,js",
+    "format:check": "prettier --check 'src/**/*.ts'",
+    "lint:watch": "nodemon --exec npm run lint",
     "build": "tsdown",
     "build:watch": "tsdown --watch",
     "run-cli": "npm run build && node bin/typesync",
