@@ -1,3 +1,8 @@
+# v0.14.0
+
+- [#134](https://github.com/jeffijoe/typesync/pull/134): Modernize codebase with improved workspace handling, better glob functionality, and various fixes, [@lishaduck](https://github.com/lishaduck)
+- [#135](https://github.com/jeffijoe/typesync/pull/135): Upgrade packages, [@jeffijoe](https://github.com/jeffijoe)
+
 # v0.13.4
 
 - [#132](https://github.com/jeffijoe/typesync/pull/132): Fix addition of extraneous fields, [@lishaduck](https://github.com/lishaduck)
