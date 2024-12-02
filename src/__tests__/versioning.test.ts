@@ -1,10 +1,11 @@
+import { describe, it } from 'vitest'
 import {
   getClosestMatchingVersion,
   type IPackageVersionInfo,
 } from '../versioning'
 
 describe('getClosestMatchingVersion', () => {
-  it('returns the closest matching version', () => {
+  it('returns the closest matching version', ({ expect }) => {
     const inputVersions: Array<IPackageVersionInfo> = [
       {
         containsInternalTypings: false,
@@ -66,7 +67,9 @@ describe('getClosestMatchingVersion', () => {
     )
   })
 
-  it('returns the latest version when unable to parse version', () => {
+  it('returns the latest version when unable to parse version', ({
+    expect,
+  }) => {
     const notVersions = [
       {
         containsInternalTypings: false,

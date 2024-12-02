@@ -17,7 +17,7 @@ export interface IPackageVersionInfo {
 export function getClosestMatchingVersion(
   availableVersions: Array<IPackageVersionInfo>,
   version: string,
-) {
+): IPackageVersionInfo {
   const parsedVersion = parseVersion(version)
   if (!parsedVersion) {
     return availableVersions[0]

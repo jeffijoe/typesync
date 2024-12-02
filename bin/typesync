@@ -1,4 +1,4 @@
 #!/usr/bin/env node
-const { startCli } = require('../lib/cli')
+import { startCli } from '../dist/cli.js'
 
-startCli()
+await startCli()

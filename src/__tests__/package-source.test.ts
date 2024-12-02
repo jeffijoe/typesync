@@ -1,6 +1,7 @@
+import { test } from 'vitest'
 import { createPackageSource } from '../package-source'
 
-test('package source', async () => {
+test('package source', async ({ expect }) => {
   const source = createPackageSource()
   const result = (await source.fetch('awilix'))!
 
@@ -24,13 +25,13 @@ test('package source', async () => {
   })
 })
 
-test('not found', async () => {
+test('not found', async ({ expect }) => {
   const source = createPackageSource()
   const result = await source.fetch(`some-nonexistent-package-${Date.now()}`)
   expect(result).toBeNull()
 })
 
-test('deprecated', async () => {
+test('deprecated', async ({ expect }) => {
   const source = createPackageSource()
   const result = await source.fetch(`@types/escape-goat`)
   expect(result).not.toBeNull()

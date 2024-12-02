@@ -1,6 +1,7 @@
+import { test } from 'vitest'
 import { parseArguments } from '../cli-util'
 
-test('parseArguments', () => {
+test('parseArguments', ({ expect }) => {
   expect(parseArguments(['--dry', '--ignoredeps=dev,peer', 'haha']))
     .toMatchInlineSnapshot(`
     {

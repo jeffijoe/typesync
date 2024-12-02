@@ -1,5 +1,3 @@
-import type { IWorkspacesArray, IWorkspacesSection } from './workspace-resolver'
-
 /**
  * Returns unique items.
  *
@@ -7,27 +5,6 @@ import type { IWorkspacesArray, IWorkspacesSection } from './workspace-resolver'
  */
 export function uniq<T>(source: Array<T>): Array<T> {
   return [...new Set(source)]
-}
-
-/**
- * Does a `map` and a `filter` in one pass.
- *
- * @param source The source to filter and map
- * @param iteratee The iteratee.
- */
-export function filterMap<T, R>(
-  source: Array<T>,
-  iteratee: (item: T, index: number) => R | false,
-): Array<R> {
-  const result: Array<R> = []
-  let index = 0
-  for (const item of source) {
-    const mapped = iteratee(item, index++)
-    if (mapped === false) continue
-    result.push(mapped)
-  }
-
-  return result
 }
 
 /**
@@ -126,34 +103,11 @@ export function memoizeAsync<U extends Array<W>, V, W>(
   return async function (...args: U): Promise<V> {
     const key = args[0]
     if (cache.has(key)) {
-      return cache.get(key)!
+      return await cache.get(key)!
     }
 
     const p = run(...args)
     cache.set(key, p)
-    return p
+    return await p
   }
-}
-
-/**
- * Ensures that we have a valid workspaces array.
- *
- * @param data
- */
-export function ensureWorkspacesArray(
-  data?: IWorkspacesSection,
-): IWorkspacesArray {
-  if (!data) {
-    return []
-  }
-
-  if (!Array.isArray(data)) {
-    return ensureWorkspacesArray(data.packages)
-  }
-
-  if (!data.every((s) => typeof s === 'string')) {
-    return []
-  }
-
-  return data
 }

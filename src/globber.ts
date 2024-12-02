@@ -1,5 +1,4 @@
-import * as path from 'node:path'
-import { glob } from 'glob'
+import { glob } from 'tinyglobby'
 import { uniq } from './util'
 
 /**
@@ -7,11 +6,16 @@ import { uniq } from './util'
  */
 export interface IGlobber {
   /**
-   * Globs for a filename.
+   * Globs for directory names.
    *
    * @param root
    */
-  glob(root: string, filename: string): Promise<Array<string>>
+  globDirs(
+    this: void,
+    root: string,
+    patterns: Array<string>,
+    ignore?: Array<string>,
+  ): Promise<Array<string>>
 }
 
 /**
@@ -19,9 +23,11 @@ export interface IGlobber {
  */
 export function createGlobber(): IGlobber {
   return {
-    async glob(root: string, filename): Promise<Array<string>> {
-      const source = await glob(path.join(root, filename), {
-        ignore: '**/node_modules/**',
+    async globDirs(root, patterns, ignore = []): Promise<Array<string>> {
+      const source = await glob(patterns, {
+        cwd: root,
+        ignore: ['**/node_modules/**', ...ignore],
+        onlyDirectories: true,
       })
 
       return uniq(source)

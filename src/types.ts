@@ -4,7 +4,11 @@ import type { IWorkspacesArray, IWorkspacesSection } from './workspace-resolver'
  * The guts of the program.
  */
 export interface ITypeSyncer {
-  sync(filePath: string, flags: ICLIArguments['flags']): Promise<ISyncResult>
+  sync(
+    this: void,
+    filePath: string,
+    flags: ICLIArguments['flags'],
+  ): Promise<ISyncResult>
 }
 
 /**

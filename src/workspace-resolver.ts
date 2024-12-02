@@ -1,25 +1,25 @@
 import * as path from 'node:path'
 import yaml from 'js-yaml'
 import type * as fsUtils from './fs-utils'
-import { IGlobber } from './globber'
-import { ensureWorkspacesArray, uniq } from './util'
+import type { IGlobber } from './globber'
 import type { IPackageFile } from './types'
 
 /**
- * Service for fetching monorepo workspaces in a standardized format in package-manager-agnostic way.
+ * Service for fetching monorepo workspaces in a standardized format agnostic of the package manager used.
  * It is used to allow syncing all types in a workspace when run from the root of a monorepo.
  */
 export interface IWorkspaceResolverService {
   /**
    * Reads, parses, and normalizes a workspaces configuration from the following files, in this order:
    * - `package.json` `workspaces` field, as an array of globs.
-   * - `package.json` `workspaces` field, as an object with a `projects` field, which is an array of globs.
+   * - `package.json` `workspaces` field, as an object with a `packages` field, which is an array of globs.
    * - `pnpm-workspace.yaml` `packages` field, as an array of globs.
    *
    * Path is relative to the current working directory.
    * Note that this returns a list of directories, not paths to the manifests themselves.
    */
   getWorkspaces(
+    this: void,
     packageJson: IPackageFile,
     root: string,
     globber: IGlobber,
@@ -40,12 +40,12 @@ export type IWorkspacesArray = Array<string>
 /**
  * @example
  * ```yaml
- * projects:
+ * packages:
  * - 'packages/*'
  * ```
  */
 export interface IWorkspacesObject {
-  packages: IWorkspacesArray
+  packages?: IWorkspacesArray
 }
 
 /**
@@ -92,6 +92,7 @@ export type BunWorkspacesConfig = IWorkspacesArray
 export type IWorkspacesSection =
   | NpmWorkspacesConfig
   | YarnWorkspacesConfig
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents -- We want to explicitly enumerate each package manager's options.
   | BunWorkspacesConfig
 
 export function createWorkspaceResolverService({
@@ -101,32 +102,12 @@ export function createWorkspaceResolverService({
 }): IWorkspaceResolverService {
   return {
     getWorkspaces: async (packageJson, root, globber, ignored) => {
-      const [manifests, ignoredWorkspaces] = await Promise.all([
-        (async () => {
-          const workspaces = await getWorkspaces(packageJson, root)
-          const workspacesArray = ensureWorkspacesArray(workspaces)
-          const globbedArrays = await Promise.all(
-            workspacesArray.map(
-              async (workspace) => await globber.glob(root, workspace),
-            ),
-          )
+      const workspaces = await getWorkspaces(packageJson, root)
 
-          return uniq(globbedArrays.flat())
-        })(),
-        (async () => {
-          const ignoredWorkspacesArrays = await Promise.all(
-            ignored.map(
-              async (ignoredWorkspace) =>
-                await globber.glob(root, ignoredWorkspace),
-            ),
-          )
-
-          return uniq(ignoredWorkspacesArrays.flat())
-        })(),
-      ])
-
-      return manifests.filter(
-        (manifest) => !ignoredWorkspaces.includes(manifest),
+      return await globber.globDirs(
+        root,
+        ensureWorkspacesArray(workspaces),
+        ignored,
       )
     },
   }
@@ -147,7 +128,7 @@ export function createWorkspaceResolverService({
     root: string,
   ): Promise<IWorkspacesArray | undefined> {
     try {
-      const filePath = path.relative(root, 'pnpm-workspace.yaml')
+      const filePath = path.join(root, 'pnpm-workspace.yaml')
       const contents = await readFileContents(filePath)
       const pnpmWorkspaces = yaml.load(contents) as PnpmWorkspacesConfig
 
@@ -156,4 +137,27 @@ export function createWorkspaceResolverService({
       return undefined
     }
   }
+}
+
+/**
+ * Ensures that we have a valid workspaces array.
+ *
+ * @param data
+ */
+export function ensureWorkspacesArray(
+  data?: IWorkspacesSection,
+): IWorkspacesArray {
+  if (!data) {
+    return []
+  }
+
+  if (!Array.isArray(data)) {
+    return ensureWorkspacesArray(data.packages)
+  }
+
+  if (!data.every((s) => typeof s === 'string')) {
+    return []
+  }
+
+  return data
 }

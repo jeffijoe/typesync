@@ -1,12 +1,12 @@
 import chalk from 'chalk'
-import ora from 'ora'
+import { oraPromise } from 'ora'
 import type { ICLIArguments } from './types'
 
 /**
  * Like regular console.log, but better.
  * @param message
  */
-export function log(message: string) {
+export function log(message: string): void {
   console.log(`${chalk.white('»')}  ${chalk.gray(message)}`)
 }
 
@@ -14,7 +14,7 @@ export function log(message: string) {
  * Makes success feel even sweeter.
  * @param text
  */
-export function success(text: string) {
+export function success(text: string): void {
   console.log(`${chalk.green('✔')}  ${chalk.white(text)}`)
 }
 
@@ -22,7 +22,7 @@ export function success(text: string) {
  * Logs an error all pretty.
  * @param err
  */
-export function error(err: Error | string) {
+export function error(err: Error | string): void {
   const msg = err instanceof Error ? err.message : err
   const stack = err instanceof Error ? `\nStack:\n${err.stack}` : ''
   console.log(`${chalk.red('✖')}  ${chalk.bgRed(chalk.white(msg))}${stack}`)
@@ -33,13 +33,13 @@ export function error(err: Error | string) {
  * @param text
  * @param fn
  */
-export async function spinWhile<T>(text: string, fn: () => Promise<T>) {
-  const spinner = ora(' ' + chalk.gray(text)).start()
-  try {
-    return await fn()
-  } finally {
-    spinner.stop()
-  }
+export async function spinWhile<T>(
+  text: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  return await oraPromise(fn(), {
+    text: ` ${chalk.gray(text)}`,
+  })
 }
 
 /**

@@ -1,3 +1,4 @@
+import { vi, type Mock, describe, it } from 'vitest'
 import type { IConfigService } from '../config-service'
 import type { IGlobber } from '../globber'
 import type { IPackageJSONService } from '../package-json-file-service'
@@ -138,7 +139,7 @@ function buildSyncer() {
   }
 
   const packageService: IPackageJSONService = {
-    readPackageFile: jest.fn(async (filepath: string) => {
+    readPackageFile: async (filepath: string) => {
       switch (filepath) {
         case 'package.json':
         case 'package-ignore-dev.json':
@@ -155,12 +156,19 @@ function buildSyncer() {
         default:
           throw new Error(`Who?! ${filepath}`)
       }
-    }),
-    writePackageFile: jest.fn(() => Promise.resolve()),
+    },
+    writePackageFile: vi.fn<IPackageJSONService['writePackageFile']>(
+      async () => {},
+    ),
   }
 
   const workspaceResolverService: IWorkspaceResolverService = {
-    getWorkspaces: jest.fn(async (_, root, globber) => {
+    getWorkspaces: async (
+      _packageJson: IPackageFile,
+      root: string,
+      globber: IGlobber,
+      _ignored: IWorkspacesArray,
+    ) => {
       let workspaces: IWorkspacesArray | undefined
 
       switch (root) {
@@ -172,17 +180,17 @@ function buildSyncer() {
           throw new Error('What?!')
       }
 
-      const globPromises = workspaces!.map((w) =>
-        globber.glob(w, 'package.json'),
+      const globPromises = workspaces!.map(
+        async (w) => await globber.globDirs(w, ['package.json']),
       )
       const globbed = await Promise.all(globPromises)
 
       return globbed.flat()
-    }),
+    },
   }
 
   const globber: IGlobber = {
-    glob: jest.fn(async (pattern, _filename) => {
+    globDirs: async (pattern, _filename) => {
       switch (pattern) {
         case 'packages/*':
           return [
@@ -193,11 +201,11 @@ function buildSyncer() {
         default:
           return []
       }
-    }),
+    },
   }
 
   const packageSource: IPackageSource = {
-    fetch: jest.fn(async (name) => {
+    fetch: async (name) => {
       const found = descriptors.find(
         (t) => t.codePackageName === name || t.typesPackageName === name,
       )
@@ -222,11 +230,11 @@ function buildSyncer() {
         ],
       }
       return info
-    }),
+    },
   }
 
   const configService: IConfigService = {
-    readConfig: jest.fn(async (filePath: string) => {
+    readConfig: async (filePath: string) => {
       switch (filePath) {
         case 'package.json':
           return {}
@@ -238,7 +246,7 @@ function buildSyncer() {
         default:
           return {}
       }
-    }),
+    },
   }
 
   return {
@@ -256,19 +264,17 @@ function buildSyncer() {
   }
 }
 
-type WritePackageFileMock = jest.Mock<
-  Promise<void>,
-  [filePath: string, fileContents: IPackageFile],
-  never
+type WritePackageFileMock = Mock<
+  (filePath: string, fileContents: IPackageFile) => Promise<void>
 >
 
 describe('type syncer', () => {
-  it('adds new packages to package.json', async () => {
+  it('adds new packages to package.json', async ({ expect }) => {
     const { syncer, packageService } = buildSyncer()
     const result = await syncer.sync('package.json', {})
     const writtenPackage = (
       packageService.writePackageFile as WritePackageFileMock
-    ).mock.calls.find((c) => c[0] === 'package.json')![1] as IPackageFile
+    ).mock.calls.find((c) => c[0] === 'package.json')![1] satisfies IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package1': '~1.0.0',
       '@types/package3': '~1.0.0',
@@ -315,14 +321,14 @@ describe('type syncer', () => {
     )
   })
 
-  it('ignores deps when asked to', async () => {
+  it('ignores deps when asked to', async ({ expect }) => {
     const { syncer, packageService } = buildSyncer()
     await syncer.sync('package-ignore-dev.json', {})
     const writtenPackage = (
       packageService.writePackageFile as WritePackageFileMock
     ).mock.calls.find(
       (c) => c[0] === 'package-ignore-dev.json',
-    )![1] as IPackageFile
+    )![1] satisfies IPackageFile
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package1': '~1.0.0',
       '@types/package3': '~1.0.0',
@@ -339,14 +345,14 @@ describe('type syncer', () => {
     })
   })
 
-  it('ignores packages when asked to', async () => {
+  it('ignores packages when asked to', async ({ expect }) => {
     const { syncer, packageService } = buildSyncer()
     await syncer.sync('package-ignore-package1.json', {})
     const writtenPackage = (
       packageService.writePackageFile as WritePackageFileMock
     ).mock.calls.find(
       (c) => c[0] === 'package-ignore-package1.json',
-    )![1] as IPackageFile
+    )![1] satisfies IPackageFile
 
     expect(writtenPackage.devDependencies).toEqual({
       '@types/package3': '~1.0.0',
@@ -361,7 +367,9 @@ describe('type syncer', () => {
     })
   })
 
-  it('does not write packages if options.dry is specified', async () => {
+  it('does not write packages if options.dry is specified', async ({
+    expect,
+  }) => {
     const { syncer, packageService } = buildSyncer()
     await syncer.sync('package.json', { dry: true })
     expect(
@@ -369,7 +377,7 @@ describe('type syncer', () => {
     ).not.toHaveBeenCalled()
   })
 
-  it('does not detect diff when already synced', async () => {
+  it('does not detect diff when already synced', async ({ expect }) => {
     const { syncer } = buildSyncer()
     const { syncedFiles } = await syncer.sync(
       'package-ignore-dev-synced.json',

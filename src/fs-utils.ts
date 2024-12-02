@@ -1,26 +1,16 @@
-import { readFile, stat } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 
-export async function readFileContents(filePath: string) {
-  await assertFile(filePath)
-  return readFile(filePath, 'utf-8')
-}
-
-async function assertFile(filePath: string) {
-  if (!(await existsAsync(filePath))) {
-    throw new Error(`${filePath} does not exist.`)
-  }
-}
-
-async function existsAsync(filePath: string): Promise<boolean> {
+export async function readFileContents(filePath: string): Promise<string> {
   try {
-    await stat(filePath)
-    return true
+    return await readFile(filePath, 'utf-8')
+    /* v8 ignore next */
   } catch (err) {
-    /* istanbul ignore else */
-    if ((err as { code: string }).code === 'ENOENT') {
-      return false
+    /* v8 ignore next 3 */
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new Error(`${filePath} does not exist.`)
     }
-    /* istanbul ignore next */
+
+    /* v8 ignore next 2 */
     throw err
   }
 }
