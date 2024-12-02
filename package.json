@@ -47,33 +47,33 @@
   },
   "homepage": "https://github.com/jeffijoe/typesync#readme",
   "dependencies": {
-    "awilix": "^10.0.2",
+    "awilix": "^12.0.3",
     "chalk": "^5.3.0",
     "cosmiconfig": "^9.0.0",
     "detect-indent": "^7.0.1",
     "js-yaml": "^4.1.0",
-    "npm-registry-fetch": "^17.1.0",
+    "npm-registry-fetch": "^18.0.2",
     "ora": "^8.1.1",
-    "semver": "^7.6.2",
+    "semver": "^7.6.3",
     "tinyglobby": "^0.2.10"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
     "@types/js-yaml": "~4.0.9 || ~4.1.0",
-    "@types/node": "~18.19.67",
+    "@types/node": "^22.10.1",
     "@types/npm-registry-fetch": "^8.0.7 || ~17.1.0",
     "@types/semver": "~7.5.8 || ~7.6.0",
-    "@vitest/coverage-v8": "^2.1.6",
-    "@vitest/ui": "^2.1.6",
+    "@vitest/coverage-v8": "^2.1.7",
+    "@vitest/ui": "^2.1.7",
     "eslint": "^9.16.0",
-    "globals": "^15.12.0",
-    "nodemon": "^3.1.4",
+    "globals": "^15.13.0",
+    "nodemon": "^3.1.7",
     "oxc-transform": "^0.38.0",
-    "prettier": "^3.3.2",
+    "prettier": "^3.4.1",
     "tsdown": "^0.3.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.16.0",
-    "vitest": "^2.1.6"
+    "vitest": "^2.1.7"
   },
   "packageManager": "npm@8.19.4"
 }
