@@ -9,7 +9,7 @@ export default defineConfig({
   skipNodeModulesBundle: true,
   dts: {
     transformer: 'oxc',
-    autoAddExts: true,
+    sourceMap: true,
   },
   unused: { level: 'error' },
 })
