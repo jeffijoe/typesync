@@ -11,5 +11,6 @@ export default defineConfig({
     transformer: 'oxc',
     sourceMap: true,
   },
+  publint: { strict: true },
   unused: { level: 'error' },
 })
