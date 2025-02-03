@@ -1,3 +1,7 @@
+# v0.14.1
+
+- [#138](https://github.com/jeffijoe/typesync/pull/138): Update packages, [@lishaduck](https://github.com/lishaduck)
+
 # v0.14.0
 
 - [#134](https://github.com/jeffijoe/typesync/pull/134): Modernize codebase with improved workspace handling, better glob functionality, and various fixes, [@lishaduck](https://github.com/lishaduck)
