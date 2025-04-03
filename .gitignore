@@ -16,3 +16,6 @@ lib
 
 # Dependency directory
 node_modules
+
+# VS Code
+.vscode/*.code-workspace

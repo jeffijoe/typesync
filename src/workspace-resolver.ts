@@ -1,5 +1,5 @@
 import * as path from 'node:path'
-import yaml from 'js-yaml'
+import * as yaml from 'yaml'
 import type * as fsUtils from './fs-utils'
 import type { IGlobber } from './globber'
 import type { IPackageFile } from './types'
@@ -130,7 +130,9 @@ export function createWorkspaceResolverService({
     try {
       const filePath = path.join(root, 'pnpm-workspace.yaml')
       const contents = await readFileContents(filePath)
-      const pnpmWorkspaces = yaml.load(contents) as PnpmWorkspacesConfig
+      const pnpmWorkspaces = yaml.parse(
+        contents,
+      ) as unknown as PnpmWorkspacesConfig
 
       return pnpmWorkspaces.packages
     } catch {

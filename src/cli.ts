@@ -1,6 +1,6 @@
 import * as path from 'node:path'
 import { asFunction, createContainer, InjectionMode } from 'awilix'
-import chalk from 'chalk'
+import { blue, bold, cyan, gray, green, magenta, white } from 'ansis'
 import * as C from './cli-util'
 import { createConfigService } from './config-service'
 import { createGlobber } from './globber'
@@ -53,12 +53,12 @@ async function run(syncer: ITypeSyncer) {
     return
   }
 
-  C.log(`TypeSync v${chalk.white(packageJson.version)}`)
+  C.log(`TypeSync v${white(packageJson.version)}`)
   if (flags.dry) {
     C.log('—— DRY RUN — will not modify file ——')
   }
   const result = await C.spinWhile(
-    `Syncing type definitions in ${chalk.cyan(filePath)}...`,
+    `Syncing type definitions in ${cyan(filePath)}...`,
     async () => await syncer.sync(filePath, flags),
   )
 
@@ -72,7 +72,7 @@ async function run(syncer: ITypeSyncer) {
     { newTypings: 0 },
   )
 
-  const syncMessage = `\n\n${syncedFilesOutput}\n\n✨  Run ${chalk.green('typesync')} again without the ${chalk.gray('--dry')} flag to update your ${chalk.gray('package.json')}.`
+  const syncMessage = `\n\n${syncedFilesOutput}\n\n✨  Run ${green`typesync`} again without the ${gray`--dry`} flag to update your ${gray`package.json`}.`
   if (flags.dry === 'fail' && totals.newTypings > 0) {
     C.error('Typings changed; check failed.')
     C.log(syncMessage)
@@ -84,7 +84,7 @@ async function run(syncer: ITypeSyncer) {
       ? `No new typings to add, looks like you're all synced up!`
       : flags.dry
         ? `${totals.newTypings.toString()} new typings can be added.${syncMessage}`
-        : `${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run ${chalk.green('npm install')}, ${chalk.green('yarn')}, or ${chalk.green('pnpm i')} to install the packages that were added.`,
+        : `${totals.newTypings.toString()} new typings added.\n\n${syncedFilesOutput}\n\n✨  Go ahead and run ${green`npm install`}, ${green`yarn`}, or ${green`pnpm i`} to install the packages that were added.`,
   )
 }
 
@@ -95,7 +95,7 @@ async function run(syncer: ITypeSyncer) {
  */
 function renderTypeDef(typeDef: IPackageTypingDescriptor, isLast: boolean) {
   const treeNode = isLast ? '└─' : '├─'
-  return `${treeNode} ${chalk.green.bold('+')} ${chalk.gray('@types/')}${chalk.bold.blue(typeDef.typingsName)}`
+  return `${treeNode} ${green.bold`+`} ${gray`@types/`}${bold.blue(typeDef.typingsName)}`
 }
 
 /**
@@ -106,15 +106,11 @@ function renderTypeDef(typeDef: IPackageTypingDescriptor, isLast: boolean) {
 function renderSyncedFile(file: ISyncedFile) {
   const badge =
     file.newTypings.length === 0
-      ? chalk.blue.bold('(no new typings added)')
-      : chalk.green.bold(
-          `(${file.newTypings.length.toString()} new typings added)`,
-        )
+      ? blue.bold`(no new typings added)`
+      : green.bold`(${file.newTypings.length.toString()} new typings added)`
 
   const dirName = path.basename(path.dirname(path.resolve(file.filePath)))
-  const title = `📦 ${file.package.name ?? dirName} ${chalk.gray.italic(
-    `— ${file.filePath}`,
-  )} ${badge}`
+  const title = `📦 ${file.package.name ?? dirName} ${gray.italic`— ${file.filePath}`} ${badge}`
 
   const nl = '\n'
   const combined = [...file.newTypings.map((t) => ({ ...t, action: 'add' }))]
@@ -134,12 +130,12 @@ function renderSyncedFile(file: ISyncedFile) {
 function printHelp() {
   console.log(
     `
-${chalk.blue.bold('typesync')} - adds missing TypeScript definitions to package.json
+${blue.bold`typesync`} - adds missing TypeScript definitions to package.json
 
 Options
-  ${chalk.magenta.bold('--dry')}                                   dry run, won't save the package.json
-  ${chalk.magenta.bold('--ignoredeps=<deps|dev|peer|optional>')}   ignores dependencies in the specified sections (comma separate for multiple). Example: ${chalk.magenta('ignoredeps=dev,peer')}
-  ${chalk.magenta.bold('--help')}                                  shows this help menu
+  ${magenta.bold`--dry`}                                   dry run, won't save the package.json
+  ${magenta.bold`--ignoredeps=<deps|dev|peer|optional>`}   ignores dependencies in the specified sections (comma separate for multiple). Example: ${magenta`ignoredeps=dev,peer`}
+  ${magenta.bold`--help`}                                  shows this help menu
   `.trim(),
   )
 }

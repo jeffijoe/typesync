@@ -1,5 +1,5 @@
-import chalk from 'chalk'
-import { oraPromise } from 'ora'
+import { white, gray, green, red, blue } from 'ansis'
+import { Spinner } from 'picospinner'
 import type { ICLIArguments } from './types'
 
 /**
@@ -7,7 +7,7 @@ import type { ICLIArguments } from './types'
  * @param message
  */
 export function log(message: string): void {
-  console.log(`${chalk.white('»')}  ${chalk.gray(message)}`)
+  console.log(`${white`»`}  ${gray(message)}`)
 }
 
 /**
@@ -15,7 +15,7 @@ export function log(message: string): void {
  * @param text
  */
 export function success(text: string): void {
-  console.log(`${chalk.green('✔')}  ${chalk.white(text)}`)
+  console.log(`${green`✔`}  ${white(text)}`)
 }
 
 /**
@@ -25,7 +25,7 @@ export function success(text: string): void {
 export function error(err: Error | string): void {
   const msg = err instanceof Error ? err.message : err
   const stack = err instanceof Error ? `\nStack:\n${err.stack}` : ''
-  console.log(`${chalk.red('✖')}  ${chalk.bgRed(chalk.white(msg))}${stack}`)
+  console.log(`${red`✖`}  ${white.bgRed(msg)}${stack}`)
 }
 
 /**
@@ -37,8 +37,11 @@ export async function spinWhile<T>(
   text: string,
   fn: () => Promise<T>,
 ): Promise<T> {
-  return await oraPromise(fn(), {
-    text: ` ${chalk.gray(text)}`,
+  const spinner = new Spinner({ text: gray` ${text}`, symbolFormatter: blue })
+  spinner.start()
+
+  return await fn().finally(() => {
+    spinner.stop()
   })
 }
 
