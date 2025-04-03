@@ -1,6 +1,6 @@
 {
   "name": "typesync",
-  "version": "0.14.2",
+  "version": "0.14.3",
   "type": "module",
   "description": "Install missing TypeScript typings for your dependencies.",
   "engines": {
