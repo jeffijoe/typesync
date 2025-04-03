@@ -1,3 +1,7 @@
+# v0.14.3
+
+- [#146](https://github.com/jeffijoe/typesync/pull/146): Ecosystem performance updates [@lishaduck](https://github.com/lishaduck)
+
 # v0.14.2
 
 - [#144](https://github.com/jeffijoe/typesync/pull/144): Update packages, [@lishaduck](https://github.com/lishaduck)
