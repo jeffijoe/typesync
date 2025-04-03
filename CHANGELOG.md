@@ -1,3 +1,7 @@
+# v0.14.2
+
+- [#144](https://github.com/jeffijoe/typesync/pull/144): Update packages, [@lishaduck](https://github.com/lishaduck)
+
 # v0.14.1
 
 - [#138](https://github.com/jeffijoe/typesync/pull/138): Update packages, [@lishaduck](https://github.com/lishaduck)
