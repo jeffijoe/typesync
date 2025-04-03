@@ -1,11 +1,12 @@
 import * as path from 'node:path'
-import { cosmiconfig } from 'cosmiconfig'
+import { defaultLoaders, lilconfig } from 'lilconfig'
 import {
   type ICLIArguments,
   IDependencySection,
   type ISyncOptions,
 } from './types'
 import { shrinkObject } from './util'
+import * as yaml from 'yaml'
 
 /**
  * Config Service.
@@ -21,7 +22,41 @@ export interface IConfigService {
   ): Promise<ISyncOptions>
 }
 
-const explorer = cosmiconfig('typesync')
+async function loadYaml(_filepath: string, content: string): Promise<unknown> {
+  return await yaml.parse(content)
+}
+
+// Based on Cosmiconfig readme.
+function searchPlaces(moduleName: string) {
+  const rcs = [
+    `.${moduleName}rc`,
+    `.${moduleName}rc.json`,
+    `.${moduleName}rc.yaml`,
+    `.${moduleName}rc.yml`,
+    `.${moduleName}rc.js`,
+    `.${moduleName}rc.mjs`,
+    `.${moduleName}rc.cjs`,
+  ]
+
+  return [
+    'package.json',
+    ...rcs,
+    ...rcs.map((rc) => `.config/${rc}`),
+    `${moduleName}.config.js`,
+    `${moduleName}.config.mjs`,
+    `${moduleName}.config.cjs`,
+  ]
+}
+
+const explorer = lilconfig('typesync', {
+  searchPlaces: searchPlaces('typesync'),
+  loaders: {
+    ...defaultLoaders,
+    '.yml': loadYaml,
+    '.yaml': loadYaml,
+    noExt: loadYaml,
+  },
+})
 
 export function createConfigService(): IConfigService {
   return {

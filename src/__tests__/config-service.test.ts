@@ -3,7 +3,7 @@ import * as path from 'node:path'
 import { createConfigService } from '../config-service'
 import { IDependencySection } from '../types'
 
-const testDirectory = path.resolve(__dirname, 'fixtures')
+const testDirectory = path.resolve(import.meta.dirname, 'fixtures')
 
 describe('config service', () => {
   const subject = createConfigService()
