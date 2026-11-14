@@ -276,6 +276,26 @@ type WritePackageFileMock = Mock<
 >
 
 describe('type syncer', () => {
+  it('ignores packages matching glob patterns', async ({ expect }) => {
+    const { syncer, configService, packageSource } = buildSyncer()
+    configService.readConfig = async () => ({
+      ignorePackages: ['package[13]', '@myorg/*'],
+    })
+    const fetch = vi.spyOn(packageSource, 'fetch')
+
+    const result = await syncer.sync('package.json', { dry: true })
+
+    expect(
+      result.syncedFiles[0].newTypings.map((t) => t.codePackageName).sort(),
+    ).toEqual(['package5', 'package8', 'package9', 'packageWithOldTypings'])
+    for (const name of ['package1', 'package3', '@myorg/package7']) {
+      expect(fetch).not.toHaveBeenCalledWith(name)
+    }
+    expect(
+      result.syncedFiles.slice(1).every((file) => file.newTypings.length === 0),
+    ).toBe(true)
+  })
+
   it('skips code packages with no published typings package', async ({
     expect,
   }) => {
