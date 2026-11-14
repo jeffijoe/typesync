@@ -1,3 +1,9 @@
+# v0.15.0
+
+- **[BREAKING CHANGE]** Bump minimum supported Node version to 22.
+- [#162](https://github.com/jeffijoe/typesync/issues/162): Check deprecation per version so deprecated stubs for newer majors no longer prevent installing typings for older dependencies.
+- Upgrade packages and modernize the build and lint setup.
+
 # v0.14.3
 
 - [#146](https://github.com/jeffijoe/typesync/pull/146): Ecosystem performance updates [@lishaduck](https://github.com/lishaduck)

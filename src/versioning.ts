@@ -5,6 +5,7 @@ import { parse } from 'semver'
  */
 export interface IPackageVersionInfo {
   version: string
+  deprecated: boolean
   containsInternalTypings: boolean
 }
 

@@ -20,7 +20,6 @@ export interface IPackageSource {
 export interface IPackageInfo {
   name: string
   latestVersion: string
-  deprecated: boolean
   versions: Array<IPackageVersionInfo>
 }
 
@@ -34,13 +33,12 @@ export function createPackageSource(): IPackageSource {
      */
     fetch: async (name) => {
       const response = await fetch(encodeURI(name)).catch((err) => {
+        /* v8 ignore else -- @preserve */
         if (err.statusCode === 404) {
           return null
-          /* v8 ignore next */
+        } else {
+          throw err
         }
-
-        /* v8 ignore next */
-        throw err
       })
 
       const data = await response?.json()
@@ -56,13 +54,13 @@ export function createPackageSource(): IPackageSource {
         const item = data.versions[v]
         return {
           version: item.version,
+          deprecated: Boolean(item.deprecated),
           containsInternalTypings: !!item.types || !!item.typings,
         }
       })
 
       return {
         name: data.name,
-        deprecated: Boolean(data.versions[versionIdentifiers[0]].deprecated),
         latestVersion: data['dist-tags'].latest,
         // Sort by version, highest version first.
         versions: versions,

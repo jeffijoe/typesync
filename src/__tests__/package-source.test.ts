@@ -7,7 +7,6 @@ test('package source', async ({ expect }) => {
 
   expect(result).not.toBeNull()
   expect(result.name).toBe('awilix')
-  expect(result.deprecated).toBe(false)
   expect(result.latestVersion).toBeDefined()
 
   // I wrote Awilix, and I know v2 didn't have typings while v3 did,
@@ -15,12 +14,14 @@ test('package source', async ({ expect }) => {
   const v2 = result.versions.find((x) => x.version === '2.0.0')!
   expect(v2).toEqual({
     version: '2.0.0',
+    deprecated: false,
     containsInternalTypings: false,
   })
 
   const v3 = result.versions.find((x) => x.version === '3.0.0')!
   expect(v3).toEqual({
     version: '3.0.0',
+    deprecated: false,
     containsInternalTypings: true,
   })
 })
@@ -35,5 +36,5 @@ test('deprecated', async ({ expect }) => {
   const source = createPackageSource()
   const result = await source.fetch(`@types/escape-goat`)
   expect(result).not.toBeNull()
-  expect(result!.deprecated).toBe(true)
+  expect(result!.versions[0].deprecated).toBe(true)
 })
