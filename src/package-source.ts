@@ -20,7 +20,6 @@ export interface IPackageSource {
 export interface IPackageInfo {
   name: string
   latestVersion: string
-  deprecated: boolean
   versions: Array<IPackageVersionInfo>
 }
 
@@ -55,13 +54,13 @@ export function createPackageSource(): IPackageSource {
         const item = data.versions[v]
         return {
           version: item.version,
+          deprecated: Boolean(item.deprecated),
           containsInternalTypings: !!item.types || !!item.typings,
         }
       })
 
       return {
         name: data.name,
-        deprecated: Boolean(data.versions[versionIdentifiers[0]].deprecated),
         latestVersion: data['dist-tags'].latest,
         // Sort by version, highest version first.
         versions: versions,

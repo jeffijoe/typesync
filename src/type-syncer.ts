@@ -164,8 +164,8 @@ export function createTypeSyncer(
         // Look for the closest matching typings package.
         const typePackageInfo = await typePackageInfoPromise
 
-        // If the types package was not found, or if it was deprecated, there's nothing else to do.
-        if (!typePackageInfo || typePackageInfo.deprecated) {
+        // If the types package was not found, there's nothing else to do.
+        if (!typePackageInfo) {
           return {}
         }
 
@@ -174,6 +174,10 @@ export function createTypeSyncer(
           typePackageInfo.versions,
           localCodePackage.version,
         )
+
+        if (closestMatchingTypingsVersion.deprecated) {
+          return {}
+        }
 
         const version = closestMatchingTypingsVersion.version
         const semverRangeSpecifier = '~'

@@ -9,34 +9,42 @@ describe('getClosestMatchingVersion', () => {
     const inputVersions: Array<IPackageVersionInfo> = [
       {
         containsInternalTypings: false,
+        deprecated: false,
         version: '1.16.0',
       },
       {
         containsInternalTypings: false,
+        deprecated: false,
         version: '1.15.2',
       },
       {
         containsInternalTypings: false,
+        deprecated: false,
         version: '1.15.1',
       },
       {
         containsInternalTypings: false,
+        deprecated: false,
         version: '1.15.0',
       },
       {
         containsInternalTypings: false,
+        deprecated: false,
         version: '1.14.2',
       },
       {
         containsInternalTypings: false,
+        deprecated: false,
         version: '1.14.1',
       },
       {
         containsInternalTypings: false,
+        deprecated: false,
         version: '1.14.0',
       },
       {
         containsInternalTypings: false,
+        deprecated: false,
         version: '1.13.0',
       },
     ]
@@ -73,10 +81,12 @@ describe('getClosestMatchingVersion', () => {
     const notVersions = [
       {
         containsInternalTypings: false,
+        deprecated: false,
         version: 'not a version',
       },
       {
         containsInternalTypings: false,
+        deprecated: false,
         version: 'same',
       },
     ]

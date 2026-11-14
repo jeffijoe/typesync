@@ -71,6 +71,11 @@ const descriptors: Array<IPackageTypingDescriptor> = [
     codePackageName: 'packageWithOldTypings',
     typesPackageName: '@types/packageWithOldTypings',
   },
+  {
+    typingsName: 'packageWithoutTypings',
+    codePackageName: 'packageWithoutTypings',
+    typesPackageName: '@types/packageWithoutTypings',
+  },
 ]
 
 interface ITestPackageFile extends IPackageFile {
@@ -86,6 +91,7 @@ function buildSyncer() {
       packageWithInternalTypings: '^1.0.0',
       packageWithOldTypings: '^1.0.0',
       packageWithDeprecatedTypings: '^2.0.0',
+      packageWithoutTypings: '^1.0.0',
     },
     devDependencies: {
       '@types/package4': '^1.0.0',
@@ -209,23 +215,24 @@ function buildSyncer() {
       const found = descriptors.find(
         (t) => t.codePackageName === name || t.typesPackageName === name,
       )
-      if (!found) {
+      if (!found || name === '@types/packageWithoutTypings') {
         return null
       }
 
       const info: IPackageInfo = {
         name,
         latestVersion: '2.0.0',
-        deprecated: name === '@types/packageWithDeprecatedTypings',
         versions: [
           {
             version: '2.0.0',
+            deprecated: name === '@types/packageWithDeprecatedTypings',
             containsInternalTypings: false,
           },
           {
             version:
               name === '@types/packageWithOldTypings' ? '0.0.1' : '1.0.0',
             containsInternalTypings: name === 'packageWithInternalTypings',
+            deprecated: false,
           },
         ],
       }
@@ -269,6 +276,50 @@ type WritePackageFileMock = Mock<
 >
 
 describe('type syncer', () => {
+  it('skips code packages with no published typings package', async ({
+    expect,
+  }) => {
+    const { syncer, packageService } = buildSyncer()
+
+    const result = await syncer.sync('package.json', {})
+    const writtenPackage = (
+      packageService.writePackageFile as WritePackageFileMock
+    ).mock.calls.find((c) => c[0] === 'package.json')![1]
+
+    expect(writtenPackage.devDependencies).not.toHaveProperty(
+      '@types/packageWithoutTypings',
+    )
+    expect(
+      result.syncedFiles[0].newTypings.map((t) => t.typesPackageName),
+    ).not.toContain('@types/packageWithoutTypings')
+  })
+
+  it.for([
+    { codeVersion: '^1.0.0', expectedTypings: '~1.0.0' },
+    { codeVersion: '^2.0.0', expectedTypings: undefined },
+    { codeVersion: '^3.0.0', expectedTypings: undefined },
+  ])(
+    'checks deprecation of the selected typings for $codeVersion',
+    async ({ codeVersion, expectedTypings }, { expect }) => {
+      const { syncer, packageService, rootPackageFile } = buildSyncer()
+      rootPackageFile.dependencies!.packageWithDeprecatedTypings = codeVersion
+
+      const result = await syncer.sync('package.json', {})
+      const writtenPackage = (
+        packageService.writePackageFile as WritePackageFileMock
+      ).mock.calls.find((c) => c[0] === 'package.json')![1]
+
+      expect(
+        writtenPackage.devDependencies!['@types/packageWithDeprecatedTypings'],
+      ).toBe(expectedTypings)
+      expect(
+        result.syncedFiles[0].newTypings.some(
+          (t) => t.typesPackageName === '@types/packageWithDeprecatedTypings',
+        ),
+      ).toBe(expectedTypings !== undefined)
+    },
+  )
+
   it('adds new packages to package.json', async ({ expect }) => {
     const { syncer, packageService } = buildSyncer()
     const result = await syncer.sync('package.json', {})
