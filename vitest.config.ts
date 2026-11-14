@@ -6,7 +6,7 @@ export default defineConfig({
       enabled: true,
       provider: 'v8',
       include: ['src/**', '!src/cli-util.ts', '!src/index.ts', '!src/cli.ts'],
-      exclude: ['**/.typesyncrc', 'src/cli-util.ts'],
+      exclude: ['**/.typesyncrc', 'src/cli-util.ts', '**/__tests__/support/**'],
     },
     sequence: {
       concurrent: true,
