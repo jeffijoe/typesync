@@ -21,7 +21,7 @@ export interface ISyncOptions {
   ignoreDeps?: Array<IDependencySection>
 
   /**
-   * Ignore certain packages.
+   * Ignore packages whose names match any of these glob patterns.
    */
   ignorePackages?: Array<string>
 

@@ -1,298 +1,185 @@
-import { vi, type Mock, describe, it } from 'vitest'
-import type { IConfigService } from '../config-service'
-import type { IGlobber } from '../globber'
-import type { IPackageJSONService } from '../package-json-file-service'
-import type { IPackageSource, IPackageInfo } from '../package-source'
-import { createTypeSyncer } from '../type-syncer'
-import {
-  IDependencySection,
-  type IPackageFile,
-  type IPackageTypingDescriptor,
-} from '../types'
-import type {
-  IWorkspacesArray,
-  IWorkspaceResolverService,
-} from '../workspace-resolver'
-
-const descriptors: Array<IPackageTypingDescriptor> = [
-  {
-    typingsName: 'package1',
-    codePackageName: 'package1',
-    typesPackageName: '@types/package1',
-  },
-  {
-    typingsName: 'package2',
-    codePackageName: 'package2',
-    typesPackageName: '@types/package2',
-  },
-  {
-    typingsName: 'package3',
-    codePackageName: 'package3',
-    typesPackageName: '@types/package3',
-  },
-  {
-    typingsName: 'packageWithInternalTypings',
-    codePackageName: 'packageWithInternalTypings',
-    typesPackageName: '@types/packageWithInternalTypings',
-  },
-  {
-    typingsName: 'packageWithDeprecatedTypings',
-    codePackageName: 'packageWithDeprecatedTypings',
-    typesPackageName: '@types/packageWithDeprecatedTypings',
-  },
-  {
-    typingsName: 'package4',
-    codePackageName: 'package4',
-    typesPackageName: '@types/package4',
-  },
-  {
-    typingsName: 'package5',
-    codePackageName: 'package5',
-    typesPackageName: '@types/package5',
-  },
-  // None for package6
-  {
-    typingsName: 'myorg__package7',
-    codePackageName: '@myorg/package7',
-    typesPackageName: '@types/myorg__package7',
-  },
-  {
-    typingsName: 'package8',
-    codePackageName: 'package8',
-    typesPackageName: '@types/package8',
-  },
-  {
-    typingsName: 'package9',
-    codePackageName: 'package9',
-    typesPackageName: '@types/package9',
-  },
-  {
-    typingsName: 'packageWithOldTypings',
-    codePackageName: 'packageWithOldTypings',
-    typesPackageName: '@types/packageWithOldTypings',
-  },
-  {
-    typingsName: 'packageWithoutTypings',
-    codePackageName: 'packageWithoutTypings',
-    typesPackageName: '@types/packageWithoutTypings',
-  },
-]
-
-interface ITestPackageFile extends IPackageFile {
-  workspaces?: IWorkspacesArray
-}
-
-function buildSyncer() {
-  const rootPackageFile: ITestPackageFile = {
-    name: 'consumer',
-    dependencies: {
-      package1: '^1.0.0',
-      package3: '^1.0.0',
-      packageWithInternalTypings: '^1.0.0',
-      packageWithOldTypings: '^1.0.0',
-      packageWithDeprecatedTypings: '^2.0.0',
-      packageWithoutTypings: '^1.0.0',
-    },
-    devDependencies: {
-      '@types/package4': '^1.0.0',
-      package4: '^1.0.0',
-      package5: '^1.0.0',
-    },
-    optionalDependencies: {
-      package6: '^1.0.0',
-    },
-    peerDependencies: {
-      '@myorg/package7': '^1.0.0',
-      package8: '~1.0.0',
-      package9: '1.0.0',
-    },
-    packages: ['packages/*'],
-    workspaces: ['packages/*'],
-  }
-
-  // synced package file with ignoreDeps: dev
-  const syncedPackageFile: ITestPackageFile = {
-    ...rootPackageFile,
-    devDependencies: {
-      '@types/package1': '^1.0.0',
-      '@types/package3': '^1.0.0',
-      '@types/myorg__package7': '^1.0.0',
-      '@types/package8': '~1.0.0',
-      '@types/package9': '1.0.0',
-      '@types/packageWithOldTypings': '^2.0.0',
-      package4: '^1.0.0',
-      package5: '^1.0.0',
-    },
-  }
-
-  const package1File: ITestPackageFile = {
-    name: 'package-1',
-    dependencies: {
-      package1: '^1.0.0',
-    },
-  }
-
-  const package2File: ITestPackageFile = {
-    name: 'package-2',
-    dependencies: {
-      package3: '^1.0.0',
-    },
-  }
-
-  const package3File: ITestPackageFile = {
-    name: 'package-3',
-    dependencies: {},
-  }
-
-  const packageService: IPackageJSONService = {
-    readPackageFile: async (filepath: string) => {
-      switch (filepath) {
-        case 'package.json':
-        case 'package-ignore-dev.json':
-        case 'package-ignore-package1.json':
-          return rootPackageFile
-        case 'package-ignore-dev-synced.json':
-          return syncedPackageFile
-        case 'packages/package-1/package.json':
-          return package1File
-        case 'packages/package-2/package.json':
-          return package2File
-        case 'packages/package-3/package.json':
-          return package3File
-        default:
-          throw new Error(`Who?! ${filepath}`)
-      }
-    },
-    writePackageFile: vi.fn<IPackageJSONService['writePackageFile']>(
-      async () => {},
-    ),
-  }
-
-  const workspaceResolverService: IWorkspaceResolverService = {
-    getWorkspaces: async (
-      _packageJson: IPackageFile,
-      root: string,
-      globber: IGlobber,
-      _ignored: IWorkspacesArray,
-    ) => {
-      let workspaces: IWorkspacesArray | undefined
-
-      switch (root) {
-        case '.': {
-          workspaces = rootPackageFile.workspaces
-          break
-        }
-        default:
-          throw new Error('What?!')
-      }
-
-      const globPromises = workspaces!.map(
-        async (w) => await globber.globDirs(w, ['package.json']),
-      )
-      const globbed = await Promise.all(globPromises)
-
-      return globbed.flat()
-    },
-  }
-
-  const globber: IGlobber = {
-    globDirs: async (pattern, _filename) => {
-      switch (pattern) {
-        case 'packages/*':
-          return [
-            'packages/package-1/',
-            'packages/package-2/',
-            'packages/package-3/',
-          ]
-        default:
-          return []
-      }
-    },
-  }
-
-  const packageSource: IPackageSource = {
-    fetch: async (name) => {
-      const found = descriptors.find(
-        (t) => t.codePackageName === name || t.typesPackageName === name,
-      )
-      if (!found || name === '@types/packageWithoutTypings') {
-        return null
-      }
-
-      const info: IPackageInfo = {
-        name,
-        latestVersion: '2.0.0',
-        versions: [
-          {
-            version: '2.0.0',
-            deprecated: name === '@types/packageWithDeprecatedTypings',
-            containsInternalTypings: false,
-          },
-          {
-            version:
-              name === '@types/packageWithOldTypings' ? '0.0.1' : '1.0.0',
-            containsInternalTypings: name === 'packageWithInternalTypings',
-            deprecated: false,
-          },
-        ],
-      }
-      return info
-    },
-  }
-
-  const configService: IConfigService = {
-    readConfig: async (filePath: string) => {
-      switch (filePath) {
-        case 'package.json':
-          return {}
-        case 'package-ignore-dev.json':
-        case 'package-ignore-dev-synced.json':
-          return { ignoreDeps: [IDependencySection.dev] }
-        case 'package-ignore-package1.json':
-          return { ignorePackages: ['package1'] }
-        default:
-          return {}
-      }
-    },
-  }
-
-  return {
-    packageService,
-    rootPackageFile,
-    packageSource,
-    configService,
-    syncer: createTypeSyncer(
-      packageService,
-      workspaceResolverService,
-      packageSource,
-      configService,
-      globber,
-    ),
-  }
-}
-
-type WritePackageFileMock = Mock<
-  (filePath: string, fileContents: IPackageFile) => Promise<void>
->
+import { describe, it } from 'vitest'
+import { IDependencySection } from '../types'
+import { syncFixture } from './support/sync-fixture'
 
 describe('type syncer', () => {
+  it('adds missing typings for multiple packages', async ({ expect }) => {
+    const fixture = syncFixture()
+      .manifest('package.json', {
+        dependencies: { awilix: '^4.0.0', koa: '^1.0.0' },
+      })
+      .registryPackage('awilix', { versions: [{ version: '4.0.0' }] })
+      .registryPackage('@types/awilix', { versions: [{ version: '4.0.1' }] })
+      .registryPackage('koa', { versions: [{ version: '1.0.0' }] })
+      .registryPackage('@types/koa', { versions: [{ version: '1.0.1' }] })
+      .build()
+
+    const result = await fixture.sync()
+
+    expect(fixture.files.writes).toEqual([
+      {
+        path: 'package.json',
+        contents: {
+          dependencies: { awilix: '^4.0.0', koa: '^1.0.0' },
+          devDependencies: {
+            '@types/awilix': '~4.0.1',
+            '@types/koa': '~1.0.1',
+          },
+        },
+      },
+    ])
+    expect(result.syncedFiles[0].newTypings).toEqual([
+      {
+        codePackageName: 'awilix',
+        typingsName: 'awilix',
+        typesPackageName: '@types/awilix',
+      },
+      {
+        codePackageName: 'koa',
+        typingsName: 'koa',
+        typesPackageName: '@types/koa',
+      },
+    ])
+  })
+
+  it('syncs the root and workspace packages', async ({ expect }) => {
+    const fixture = syncFixture()
+      // Manifests
+      .manifest('project/package.json', {
+        workspaces: ['packages/*'],
+        dependencies: { awilix: '^4.0.0' },
+      })
+      .manifest('project/packages/server/package.json', {
+        dependencies: { '@myorg/logger': '^1.0.0' },
+      })
+      .manifest('project/packages/empty/package.json', {})
+      // Registry packages
+      .registryPackage('awilix', { versions: [{ version: '4.0.0' }] })
+      .registryPackage('@types/awilix', { versions: [{ version: '4.0.1' }] })
+      .registryPackage('@myorg/logger', { versions: [{ version: '1.0.0' }] })
+      .registryPackage('@types/myorg__logger', {
+        versions: [{ version: '1.0.1' }],
+      })
+      .build()
+
+    const result = await fixture.sync({}, 'project/package.json')
+
+    expect(result.syncedFiles.map((file) => file.filePath)).toEqual([
+      'project/package.json',
+      'project/packages/server/package.json',
+      'project/packages/empty/package.json',
+    ])
+    expect(fixture.files.writes).toEqual([
+      {
+        path: 'project/package.json',
+        contents: {
+          workspaces: ['packages/*'],
+          dependencies: { awilix: '^4.0.0' },
+          devDependencies: { '@types/awilix': '~4.0.1' },
+        },
+      },
+      {
+        path: 'project/packages/server/package.json',
+        contents: {
+          dependencies: { '@myorg/logger': '^1.0.0' },
+          devDependencies: { '@types/myorg__logger': '~1.0.1' },
+        },
+      },
+    ])
+  })
+
+  it.for([
+    { ignorePackages: ['awilix', '@myorg/logger'] },
+    { ignorePackages: ['awilix*', '@myorg/*'] },
+  ])(
+    'ignores packages matching $ignorePackages',
+    async (config, { expect }) => {
+      const fixture = syncFixture()
+        .manifest('package.json', {
+          dependencies: { awilix: '^4.0.0' },
+          workspaces: ['packages/*'],
+        })
+        .manifest('packages/server/package.json', {
+          dependencies: { '@myorg/logger': '^1.0.0', koa: '^1.0.0' },
+        })
+        .registryPackage('koa', { versions: [{ version: '1.0.0' }] })
+        .registryPackage('@types/koa', {
+          versions: [{ version: '1.0.1' }],
+        })
+        .config(config)
+        .build()
+
+      await fixture.sync()
+
+      expect(fixture.registry.requests.toSorted()).toEqual([
+        '@types/koa',
+        'koa',
+      ])
+      expect(fixture.files.writes).toEqual([
+        {
+          path: 'packages/server/package.json',
+          contents: {
+            dependencies: { '@myorg/logger': '^1.0.0', koa: '^1.0.0' },
+            devDependencies: { '@types/koa': '~1.0.1' },
+          },
+        },
+      ])
+    },
+  )
+
   it('skips code packages with no published typings package', async ({
     expect,
   }) => {
-    const { syncer, packageService } = buildSyncer()
+    const fixture = syncFixture()
+      .manifest('package.json', { dependencies: { awilix: '^4.0.0' } })
+      .registryPackage('awilix', { versions: [{ version: '4.0.0' }] })
+      .build()
 
-    const result = await syncer.sync('package.json', {})
-    const writtenPackage = (
-      packageService.writePackageFile as WritePackageFileMock
-    ).mock.calls.find((c) => c[0] === 'package.json')![1]
+    const result = await fixture.sync()
 
-    expect(writtenPackage.devDependencies).not.toHaveProperty(
-      '@types/packageWithoutTypings',
-    )
-    expect(
-      result.syncedFiles[0].newTypings.map((t) => t.typesPackageName),
-    ).not.toContain('@types/packageWithoutTypings')
+    expect(result.syncedFiles[0].newTypings).toEqual([])
+    expect(fixture.files.writes).toEqual([])
   })
+
+  it('skips code packages missing from the registry', async ({ expect }) => {
+    const fixture = syncFixture()
+      .manifest('package.json', { dependencies: { unpublished: '^1.0.0' } })
+      .build()
+
+    const result = await fixture.sync()
+
+    expect(result.syncedFiles[0].newTypings).toEqual([])
+    expect(fixture.files.writes).toEqual([])
+  })
+
+  it.for([
+    { version: '^2.0.0', expectedTypings: '~2.0.1' },
+    { version: '^3.0.0', expectedTypings: undefined },
+  ])(
+    'uses external typings for versions that ship no internal typings ($version)',
+    async ({ version, expectedTypings }, { expect }) => {
+      const fixture = syncFixture()
+        .manifest('package.json', { dependencies: { awilix: version } })
+        .registryPackage('awilix', {
+          versions: [
+            { version: '2.0.0' },
+            { version: '3.0.0', containsInternalTypings: true },
+          ],
+        })
+        .registryPackage('@types/awilix', { versions: [{ version: '2.0.1' }] })
+        .build()
+
+      const result = await fixture.sync()
+
+      expect(
+        fixture.files.writes[0]?.contents.devDependencies?.['@types/awilix'],
+      ).toBe(expectedTypings)
+      expect(fixture.files.writes).toHaveLength(expectedTypings ? 1 : 0)
+      expect(result.syncedFiles[0].newTypings).toHaveLength(
+        expectedTypings ? 1 : 0,
+      )
+    },
+  )
 
   it.for([
     { codeVersion: '^1.0.0', expectedTypings: '~1.0.0' },
@@ -301,140 +188,108 @@ describe('type syncer', () => {
   ])(
     'checks deprecation of the selected typings for $codeVersion',
     async ({ codeVersion, expectedTypings }, { expect }) => {
-      const { syncer, packageService, rootPackageFile } = buildSyncer()
-      rootPackageFile.dependencies!.packageWithDeprecatedTypings = codeVersion
+      const fixture = syncFixture()
+        .manifest('package.json', { dependencies: { awilix: codeVersion } })
+        // Leave out v3 so that case falls back to v2 and its deprecated typings.
+        .registryPackage('awilix', {
+          versions: [{ version: '1.0.0' }, { version: '2.0.0' }],
+        })
+        .registryPackage('@types/awilix', {
+          versions: [
+            { version: '1.0.0' },
+            { version: '2.0.0', deprecated: true },
+          ],
+        })
+        .build()
 
-      const result = await syncer.sync('package.json', {})
-      const writtenPackage = (
-        packageService.writePackageFile as WritePackageFileMock
-      ).mock.calls.find((c) => c[0] === 'package.json')![1]
+      const result = await fixture.sync()
 
       expect(
-        writtenPackage.devDependencies!['@types/packageWithDeprecatedTypings'],
+        fixture.files.writes[0]?.contents.devDependencies?.['@types/awilix'],
       ).toBe(expectedTypings)
-      expect(
-        result.syncedFiles[0].newTypings.some(
-          (t) => t.typesPackageName === '@types/packageWithDeprecatedTypings',
-        ),
-      ).toBe(expectedTypings !== undefined)
+      expect(result.syncedFiles[0].newTypings).toHaveLength(
+        expectedTypings ? 1 : 0,
+      )
     },
   )
 
-  it('adds new packages to package.json', async ({ expect }) => {
-    const { syncer, packageService } = buildSyncer()
-    const result = await syncer.sync('package.json', {})
-    const writtenPackage = (
-      packageService.writePackageFile as WritePackageFileMock
-    ).mock.calls.find((c) => c[0] === 'package.json')![1] satisfies IPackageFile
-    expect(writtenPackage.devDependencies).toEqual({
-      '@types/package1': '~1.0.0',
-      '@types/package3': '~1.0.0',
-      '@types/package4': '^1.0.0',
-      '@types/package5': '~1.0.0',
-      '@types/myorg__package7': '~1.0.0',
-      '@types/package8': '~1.0.0',
-      '@types/package9': '~1.0.0',
-      '@types/packageWithOldTypings': '~2.0.0',
-      package4: '^1.0.0',
-      package5: '^1.0.0',
-    })
-
-    expect(result.syncedFiles).toHaveLength(4)
-
-    expect(result.syncedFiles[0].filePath).toEqual('package.json')
-    expect(
-      result.syncedFiles[0].newTypings.map((x) => x.typingsName).sort(),
-    ).toEqual([
-      'myorg__package7',
-      'package1',
-      'package3',
-      'package5',
-      'package8',
-      'package9',
-      'packageWithOldTypings',
-    ])
-
-    expect(result.syncedFiles[1].filePath).toEqual(
-      'packages/package-1/package.json',
-    )
-    expect(
-      result.syncedFiles[1].newTypings.map((x) => x.typingsName).sort(),
-    ).toEqual(['package1'])
-
-    expect(result.syncedFiles[2].filePath).toEqual(
-      'packages/package-2/package.json',
-    )
-    expect(
-      result.syncedFiles[2].newTypings.map((x) => x.typingsName).sort(),
-    ).toEqual(['package3'])
-    expect(result.syncedFiles[3].package.devDependencies).toStrictEqual(
-      undefined,
-    )
-  })
-
-  it('ignores deps when asked to', async ({ expect }) => {
-    const { syncer, packageService } = buildSyncer()
-    await syncer.sync('package-ignore-dev.json', {})
-    const writtenPackage = (
-      packageService.writePackageFile as WritePackageFileMock
-    ).mock.calls.find(
-      (c) => c[0] === 'package-ignore-dev.json',
-    )![1] satisfies IPackageFile
-    expect(writtenPackage.devDependencies).toEqual({
-      '@types/package1': '~1.0.0',
-      '@types/package3': '~1.0.0',
-      // Package 4's typings were already in the root package's `devDependencies`,
-      // but package 5's were not, that's why we still write package4's typings but not
-      // package 5's.
-      '@types/package4': '^1.0.0',
-      '@types/myorg__package7': '~1.0.0',
-      '@types/package8': '~1.0.0',
-      '@types/package9': '~1.0.0',
-      '@types/packageWithOldTypings': '~2.0.0',
-      package4: '^1.0.0',
-      package5: '^1.0.0',
-    })
-  })
-
-  it('ignores packages when asked to', async ({ expect }) => {
-    const { syncer, packageService } = buildSyncer()
-    await syncer.sync('package-ignore-package1.json', {})
-    const writtenPackage = (
-      packageService.writePackageFile as WritePackageFileMock
-    ).mock.calls.find(
-      (c) => c[0] === 'package-ignore-package1.json',
-    )![1] satisfies IPackageFile
-
-    expect(writtenPackage.devDependencies).toEqual({
-      '@types/package3': '~1.0.0',
-      '@types/package4': '^1.0.0',
-      '@types/package5': '~1.0.0',
-      '@types/myorg__package7': '~1.0.0',
-      '@types/package8': '~1.0.0',
-      '@types/package9': '~1.0.0',
-      '@types/packageWithOldTypings': '~2.0.0',
-      package4: '^1.0.0',
-      package5: '^1.0.0',
-    })
-  })
-
-  it('does not write packages if options.dry is specified', async ({
+  it('falls back to the latest typings when no version matches', async ({
     expect,
   }) => {
-    const { syncer, packageService } = buildSyncer()
-    await syncer.sync('package.json', { dry: true })
-    expect(
-      packageService.writePackageFile as WritePackageFileMock,
-    ).not.toHaveBeenCalled()
+    const fixture = syncFixture()
+      .manifest('package.json', { dependencies: { awilix: '^4.0.0' } })
+      .registryPackage('awilix', { versions: [{ version: '4.0.0' }] })
+      .registryPackage('@types/awilix', {
+        versions: [{ version: '0.0.1' }, { version: '2.0.0' }],
+      })
+      .build()
+
+    await fixture.sync()
+
+    expect(fixture.files.writes[0].contents.devDependencies).toEqual({
+      '@types/awilix': '~2.0.0',
+    })
   })
 
-  it('does not detect diff when already synced', async ({ expect }) => {
-    const { syncer } = buildSyncer()
-    const { syncedFiles } = await syncer.sync(
-      'package-ignore-dev-synced.json',
-      {},
-    )
-    const root = syncedFiles[0]
-    expect(root.newTypings).toEqual([])
+  it('ignores dependency sections when asked to', async ({ expect }) => {
+    const fixture = syncFixture()
+      // Ignore `devDependencies`
+      .config({ ignoreDeps: [IDependencySection.dev] })
+      .manifest('package.json', {
+        dependencies: { awilix: '^4.0.0' },
+        // Awilix typings already installed.
+        devDependencies: { nodemon: '^1.0.0', '@types/awilix': '^4.0.0' },
+        optionalDependencies: { koa: '^1.0.0' },
+        peerDependencies: { lodash: '^1.0.0' },
+      })
+      .registryPackage('koa', { versions: [{ version: '1.0.0' }] })
+      .registryPackage('@types/koa', { versions: [{ version: '1.0.1' }] })
+      .registryPackage('lodash', { versions: [{ version: '1.0.0' }] })
+      .registryPackage('@types/lodash', { versions: [{ version: '1.0.1' }] })
+      .build()
+
+    await fixture.sync()
+
+    // `devDependencies` were skipped, so `nodemon` was never requested.
+    expect(fixture.registry.requests.toSorted()).toEqual([
+      '@types/koa',
+      '@types/lodash',
+      'koa',
+      'lodash',
+    ])
+    expect(fixture.files.writes[0].contents.devDependencies).toEqual({
+      nodemon: '^1.0.0',
+      '@types/awilix': '^4.0.0',
+      '@types/lodash': '~1.0.1',
+      '@types/koa': '~1.0.1',
+    })
+  })
+
+  it('does not write packages during a dry run', async ({ expect }) => {
+    const fixture = syncFixture()
+      .manifest('package.json', { dependencies: { awilix: '^4.0.0' } })
+      .registryPackage('awilix', { versions: [{ version: '4.0.0' }] })
+      .registryPackage('@types/awilix', { versions: [{ version: '4.0.1' }] })
+      .build()
+
+    const result = await fixture.sync({ dry: true })
+
+    expect(result.syncedFiles[0].newTypings).toHaveLength(1)
+    expect(fixture.files.writes).toEqual([])
+  })
+
+  it('does not detect changes when already synced', async ({ expect }) => {
+    const fixture = syncFixture()
+      .manifest('package.json', {
+        dependencies: { awilix: '^4.0.0' },
+        devDependencies: { '@types/awilix': '^4.0.0' },
+      })
+      .build()
+
+    const result = await fixture.sync()
+
+    expect(result.syncedFiles[0].newTypings).toEqual([])
+    expect(fixture.files.writes).toEqual([])
+    expect(fixture.registry.requests).toEqual([])
   })
 })

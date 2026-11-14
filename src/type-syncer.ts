@@ -1,4 +1,5 @@
 import * as path from 'node:path'
+import picomatch from 'picomatch'
 import type { IConfigService } from './config-service'
 import type { IGlobber } from './globber'
 import type { IPackageJSONService } from './package-json-file-service'
@@ -118,6 +119,7 @@ export function createTypeSyncer(
     dryRun: boolean,
   ): Promise<ISyncedFile> {
     const { ignoreDeps, ignorePackages } = opts
+    const isIgnoredPackage = picomatch(ignorePackages ?? [])
 
     const allLocalPackages = Object.values(IDependencySection)
       .map((dep) => {
@@ -125,7 +127,7 @@ export function createTypeSyncer(
         if (!section) return []
 
         const ignoredSection = ignoreDeps?.includes(dep)
-        return getPackagesFromSection(section, ignoredSection, ignorePackages)
+        return getPackagesFromSection(section, ignoredSection, isIgnoredPackage)
       })
       .flat()
     const allPackageNames = uniq(allLocalPackages.map((p) => p.name))
@@ -277,12 +279,12 @@ function getPackageScope(packageName: string): [string, string] | null {
  *
  * @param section
  * @param ignoredSection
- * @param ignorePackages
+ * @param isIgnoredPackage
  */
 function getPackagesFromSection(
   section: IDependenciesSection,
-  ignoredSection?: boolean,
-  ignorePackages?: Array<string>,
+  ignoredSection: boolean | undefined,
+  isIgnoredPackage: (name: string) => boolean,
 ): Array<IPackageVersion> {
   return Object.keys(section).flatMap((name) => {
     const isTyping = name.startsWith('@types/')
@@ -291,7 +293,7 @@ function getPackagesFromSection(
     if (!isTyping) {
       // If it's not a `@types` package, check whether the section or package is ignored.
       // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- We want to check for false as well.
-      if (ignoredSection || ignorePackages?.includes(name)) {
+      if (ignoredSection || isIgnoredPackage(name)) {
         return []
       }
     }

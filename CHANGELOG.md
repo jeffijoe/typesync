@@ -2,6 +2,7 @@
 
 - **[BREAKING CHANGE]** Bump minimum supported Node version to 22.
 - [#162](https://github.com/jeffijoe/typesync/issues/162): Check deprecation per version so deprecated stubs for newer majors no longer prevent installing typings for older dependencies.
+- [#164](https://github.com/jeffijoe/typesync/pull/164): Fix workspace directories being expanded to include subdirectories, and support glob patterns in `ignorePackages`.
 - Upgrade packages and modernize the build and lint setup.
 
 # v0.14.3

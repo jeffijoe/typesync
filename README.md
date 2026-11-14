@@ -54,6 +54,10 @@ To ignore certain sections, you can use the `--ignoredeps=` flag. For example, t
 To ignore certain packages, you can use the `--ignorepackages=` flag. For example, to ignore `nodemon`, use `--ignorepackages=nodemon`.
 To ignore multiple, comma-separate them, like this: `--ignorepackages=nodemon,whatever` (ignores `nodemon` and `whatever`).
 
+You can also use [glob patterns](https://github.com/micromatch/picomatch#globbing-features). For example, to ignore all packages in the `@myorg` scope, use `--ignorepackages='@myorg/*'`. To also ignore packages starting with `eslint-`, use `--ignorepackages='@myorg/*,eslint-*'`. Keep the quotes so your shell doesn't expand the patterns.
+
+Patterns are case-sensitive and match the full package name. `*` doesn't match `/`, so `*foo` matches `somefoo` but not `@myorg/somefoo`. Use `**/*foo` to match both.
+
 ### Using a config file
 
 Alternatively, you can use a TypeSync config file: `.typesyncrc` or a `"typesync"` section in your `package.json`. TypeSync will **automatically** search for configuration files. See [cosmiconfig][cosmiconfig] for details.

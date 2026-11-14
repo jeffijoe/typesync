@@ -28,6 +28,7 @@ export function createGlobber(): IGlobber {
         cwd: root,
         ignore: ['**/node_modules/**', ...ignore],
         onlyDirectories: true,
+        expandDirectories: false,
       })
 
       return uniq(source)
