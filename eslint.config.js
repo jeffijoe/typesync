@@ -1,37 +1,32 @@
 // @ts-check
-import * as path from 'node:path'
-import { fileURLToPath } from 'node:url'
+/// <reference types="node" />
+
+import { defineConfig, globalIgnores } from 'eslint/config'
 import pluginJs from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
-const dirname = path.dirname(fileURLToPath(import.meta.url))
-
-const extensions = '{js,mjs,cjs,ts}'
-
-export default tseslint.config(
+export default defineConfig(
+  globalIgnores(['dist/', 'coverage/']),
   {
-    files: [`src/*.${extensions}`, `bin/*`, `*.${extensions}`],
-  },
-  {
-    ignores: [`dist/`, 'coverage/'],
-  },
-  {
+    files: ['**/*.{js,mjs,cjs,ts}', 'bin/*'],
+    extends: [pluginJs.configs.recommended],
     languageOptions: {
       globals: globals.node,
-      parserOptions: {
-        projectService: {
-          allowDefaultProject: [`*.config.${extensions}`],
-        },
-        tsconfigRootDir: dirname,
-      },
     },
     linterOptions: { reportUnusedDisableDirectives: 'error' },
   },
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
   {
+    files: ['**/*.ts'],
+    extends: [tseslint.configs.recommendedTypeChecked],
+    languageOptions: {
+      parserOptions: {
+        projectService: {
+          allowDefaultProject: ['*.config.ts'],
+        },
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
       // Only disabling these because this code is very old but also battle-tested,
       // and coming up with clever typings may break for consumers.
@@ -40,6 +35,11 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
+
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { fixStyle: 'inline-type-imports' },
+      ],
 
       '@typescript-eslint/return-await': ['error', 'always'],
       '@typescript-eslint/promise-function-async': 'error',
@@ -68,7 +68,7 @@ export default tseslint.config(
     },
   },
   {
-    files: [`src/__tests__/**/*.${extensions}`],
+    files: ['src/__tests__/**/*.ts'],
     rules: {
       // In tests, sometimes we need to make things asynchronous.
       '@typescript-eslint/require-await': 'off',

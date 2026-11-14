@@ -63,7 +63,9 @@ export function createConfigService(): IConfigService {
     readConfig: async (filePath: string, flags: ICLIArguments['flags']) => {
       const fileConfig: ISyncOptions = await explorer
         .search(path.dirname(filePath))
-        .then((result) => /* v8 ignore next */ result?.config ?? {})
+        .then(
+          /* v8 ignore next -- @preserve */ (result) => result?.config ?? {},
+        )
 
       const cliConfig = readCliConfig(flags)
 

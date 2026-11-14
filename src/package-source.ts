@@ -34,13 +34,12 @@ export function createPackageSource(): IPackageSource {
      */
     fetch: async (name) => {
       const response = await fetch(encodeURI(name)).catch((err) => {
+        /* v8 ignore else -- @preserve */
         if (err.statusCode === 404) {
           return null
-          /* v8 ignore next */
+        } else {
+          throw err
         }
-
-        /* v8 ignore next */
-        throw err
       })
 
       const data = await response?.json()

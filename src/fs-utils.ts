@@ -7,7 +7,7 @@ export async function readFileContents(filePath: string): Promise<string> {
   } catch (err) {
     /* v8 ignore next 3 */
     if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-      throw new Error(`${filePath} does not exist.`)
+      throw new Error(`${filePath} does not exist.`, { cause: err })
     }
 
     /* v8 ignore next 2 */

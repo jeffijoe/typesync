@@ -1,4 +1,4 @@
 #!/usr/bin/env node
-import { startCli } from '../dist/cli.js'
+import { startCli } from '../dist/cli.mjs'
 
 await startCli()

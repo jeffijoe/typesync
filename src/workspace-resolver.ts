@@ -67,8 +67,7 @@ export type NpmWorkspacesConfig = IWorkspacesArray
  * ```
  */
 export type YarnWorkspacesConfig =
-  | IWorkspacesArray
-  | (IWorkspacesObject & { nohoist?: Array<string> })
+  IWorkspacesArray | (IWorkspacesObject & { nohoist?: Array<string> })
 
 /**
  * The contents of a `pnpm-workspace.yaml` file.
